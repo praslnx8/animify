@@ -14,7 +14,7 @@ import {
   FormControlLabel,
   Switch
 } from "@mui/material";
-import { generatePhoto } from "./generatePhoto";
+import { generatePhoto } from "../api/generatePhoto";
 
 interface PhotoTransformDialogProps {
   open: boolean;
@@ -40,7 +40,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
     setLoading(true);
     setError(null);
     try {
-      const apiToken = process.env.EXH_AI_API_TOKEN;
+      const apiToken = process.env.NEXT_PUBLIC_EXH_AI_API_TOKEN;
       if (!apiToken) {
         setError("API token not set");
         setLoading(false);

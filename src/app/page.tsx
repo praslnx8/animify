@@ -10,17 +10,16 @@ import {
   IconButton,
   List,
   Toolbar,
-  Typography,
-  useTheme,
+  Typography
 } from "@mui/material";
 import React, { useRef, useState } from "react";
-import PhotoItem from "./PhotoItem";
-import PhotoTransformDialog from "./PhotoTransformDialog";
+import MediaItemComponent from "./components/MediaItemComponent";
+import { MediaItem } from "./models/MediaItem";
+import { fileToBase64 } from "./utils/base64-utils";
 
 export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [photos, setPhotos] = useState<string[]>([]);
-  const theme = useTheme();
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
 
   const handleAddPhotoClick = () => {
     if (fileInputRef.current) {
@@ -31,12 +30,11 @@ export default function HomePage() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setPhotos((prev) => [...prev, base64]);
-      };
-      reader.readAsDataURL(file);
+      fileToBase64(file).then((base64) => {
+        setMediaItems((prev) => [...prev, { type: "image", base64 }]);
+      }).catch((error) => {
+        console.error("Error converting file to base64:", error);
+      });
     }
   };
 
@@ -85,12 +83,12 @@ export default function HomePage() {
             p: 0,
           }}
         >
-          {photos.map((photo, index) => (
-            <PhotoItem
+          {mediaItems.map((photo, index) => (
+            <MediaItemComponent
               key={index}
-              base64={photo}
+              mediaItem={photo}
               onTransform={(newBase64) =>
-                setPhotos((prev) => [...prev, newBase64])
+                setMediaItems((prev) => [...prev, { ...photo, base64: newBase64 }])
               }
             />
           ))}
