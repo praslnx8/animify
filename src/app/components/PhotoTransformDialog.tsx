@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Button,
-  TextField,
   CircularProgress,
-  Stack,
-  MenuItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControlLabel,
-  Switch
+  MenuItem,
+  Stack,
+  Switch,
+  TextField
 } from "@mui/material";
+import React, { useState } from "react";
 import { generatePhoto } from "../api/generatePhoto";
 
 interface PhotoTransformDialogProps {

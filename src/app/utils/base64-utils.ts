@@ -31,7 +31,7 @@ export const base64ToFile = (base64: string, filename: string, type: string = 'i
   for (let i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i);
   }
-  
+
   // Create Blob and then File from the binary data
   const blob = new Blob([bytes], { type });
   return new File([blob], filename, { type });

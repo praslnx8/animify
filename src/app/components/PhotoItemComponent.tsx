@@ -11,9 +11,9 @@ import {
 } from "@mui/material";
 import React from "react";
 import { MediaItem } from "../models/MediaItem";
-import PhotoTransformDialog from "./PhotoTransformDialog";
-import PhotoAnimateDialog from "./PhotoAnimateDialog";
 import { base64ToDataUrl } from "../utils/base64-utils";
+import PhotoAnimateDialog from "./PhotoAnimateDialog";
+import PhotoTransformDialog from "./PhotoTransformDialog";
 
 export interface PhotoItemProps {
   mediaItem: MediaItem
