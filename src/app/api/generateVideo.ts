@@ -23,8 +23,8 @@ export async function generateVideo(
             body: JSON.stringify({ ...params, user_id: "1121", bot_id: "1121" })
         });
         const data = await res.json();
-        if (res.ok && data.videoUrl) {
-            return { videoUrl: data.videoUrl };
+        if (res.ok && data.media_url) {
+            return { videoUrl: data.media_url };
         } else {
             return { error: data.error || "Failed to generate video" };
         }
