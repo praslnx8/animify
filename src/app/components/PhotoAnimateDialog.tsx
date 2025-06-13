@@ -32,6 +32,12 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, 
         setLoading(true);
         setError(null);
         try {
+            const apiToken = process.env.NEXT_PUBLIC_EXH_AI_API_TOKEN;
+            if (!apiToken) {
+                setError("API token not set");
+                setLoading(false);
+                return;
+            }
             if (!mediaItem.imageUrl && mediaItem.base64) {
                 const uploadedUrl = await uploadBase64Image(mediaItem.base64);
                 if (!uploadedUrl) {
@@ -46,7 +52,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, 
                 setLoading(false);
                 return;
             }
-            const result = await generateVideo({ imageUrl: mediaItem.imageUrl, prompt });
+            const result = await generateVideo({ imageUrl: mediaItem.imageUrl, prompt }, apiToken);
             if (result.videoUrl) {
                 onSuccess(result.videoUrl);
                 setPrompt("");

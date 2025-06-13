@@ -9,12 +9,16 @@ export interface GenerateVideoResult {
 }
 
 export async function generateVideo(
-    params: GenerateVideoParams
+    params: GenerateVideoParams,
+    apiToken: string
 ): Promise<GenerateVideoResult> {
     try {
         const res = await fetch("https://api.exh.ai/chat_media_manager/v2/submit_video_generation_task", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "authorization": `Bearer ${apiToken}`,
+             },
             body: JSON.stringify(params)
         });
         const data = await res.json();
