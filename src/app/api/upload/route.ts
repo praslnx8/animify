@@ -13,21 +13,21 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'No image uploaded' }, { status: 400 });
         }
 
-        // Ensure uploads directory exists
         const uploadDir = path.join(process.cwd(), 'public', 'uploads');
         await fs.mkdir(uploadDir, { recursive: true });
 
-        // Generate unique filename
         const ext = (file as File).type.split('/').pop() || 'png';
         const filename = `${uuidv4()}.${ext}`;
         const filepath = path.join(uploadDir, filename);
 
-        // Save file to disk
         const arrayBuffer = await (file as File).arrayBuffer();
         await fs.writeFile(filepath, Buffer.from(arrayBuffer));
 
-        // Public URL
-        const imageUrl = `/uploads/${filename}`;
+        const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
+        const protocol = req.headers.get('x-forwarded-proto') || 'http';
+        const imageUrl = host
+            ? `${protocol}://${host}/uploads/${filename}`
+            : `/uploads/${filename}`;
         return NextResponse.json({ imageUrl });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 });
