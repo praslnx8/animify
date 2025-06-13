@@ -12,15 +12,18 @@ import {
 import React from "react";
 import { MediaItem } from "../models/MediaItem";
 import PhotoTransformDialog from "./PhotoTransformDialog";
+import PhotoAnimateDialog from "./PhotoAnimateDialog";
 import { base64ToDataUrl } from "../utils/base64-utils";
 
 export interface PhotoItemProps {
   mediaItem: MediaItem
   onTransform: (newBase64: string) => void;
+  onAnimate: (videoUrl: string) => void;
 }
 
-const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, onTransform }) => {
+const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, onTransform, onAnimate }) => {
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [animateDialogOpen, setAnimateDialogOpen] = React.useState(false);
 
   return (
     <>
@@ -44,6 +47,7 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, onTransform }
             <IconButton
               color="secondary"
               aria-label="animate"
+              onClick={() => setAnimateDialogOpen(true)}
             >
               <AnimationIcon />
             </IconButton>
@@ -56,7 +60,16 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, onTransform }
         onClose={() => setDialogOpen(false)}
         onSuccess={(newBase64) => {
           setDialogOpen(false);
-          onTransform && onTransform(newBase64);
+          onTransform(newBase64);
+        }}
+      />
+      <PhotoAnimateDialog
+        open={animateDialogOpen}
+        mediaItem={mediaItem}
+        onClose={() => setAnimateDialogOpen(false)}
+        onSuccess={(url) => {
+          setAnimateDialogOpen(false);
+          onAnimate(url);
         }}
       />
     </>

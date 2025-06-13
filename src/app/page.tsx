@@ -83,12 +83,15 @@ export default function HomePage() {
             p: 0,
           }}
         >
-          {mediaItems.map((photo, index) => (
+          {mediaItems.map((mediaItem, index) => (
             <MediaItemComponent
               key={index}
-              mediaItem={photo}
+              mediaItem={mediaItem}
               onTransform={(newBase64) =>
-                setMediaItems((prev) => [...prev, { ...photo, base64: newBase64 }])
+                setMediaItems((prev) => [...prev, { type: 'image', base64: newBase64 }])
+              }
+              onAnimate={(videoUrl) =>
+                setMediaItems((prev) => [...prev, { type: 'video', videoUrl }])
               }
             />
           ))}
