@@ -1,5 +1,5 @@
 export interface GenerateVideoParams {
-    imageUrl: string;
+    image_url: string;
     prompt: string;
 }
 

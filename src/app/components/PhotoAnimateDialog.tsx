@@ -52,7 +52,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, 
                 setLoading(false);
                 return;
             }
-            const result = await generateVideo({ imageUrl: mediaItem.imageUrl, prompt }, apiToken);
+            const result = await generateVideo({ image_url: mediaItem.imageUrl, prompt }, apiToken);
             if (result.videoUrl) {
                 onSuccess(result.videoUrl);
                 setPrompt("");
