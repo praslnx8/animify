@@ -3,6 +3,7 @@
 import React from "react";
 import { MediaItem } from "../models/MediaItem";
 import PhotoItemComponent from "./PhotoItemComponent";
+import VideoItemComponent from "./VideoItemComponent";
 
 export interface MediaItemProps {
   mediaItem: MediaItem,
@@ -17,8 +18,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, onTransform, 
       {mediaItem.type === "image" ? (
         <PhotoItemComponent mediaItem={mediaItem} onTransform={onTransform} onAnimate={onAnimate} />
       ) : (
-        // Handle video items
-        <p>Video support is not implemented yet.</p>
+        <VideoItemComponent mediaItem={mediaItem} />
       )}
     </>
   );
