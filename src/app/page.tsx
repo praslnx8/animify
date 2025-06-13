@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import React, { useRef, useState } from "react";
 import PhotoItem from "./PhotoItem";
+import PhotoTransformDialog from "./PhotoTransformDialog";
 
 export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -38,7 +39,6 @@ export default function HomePage() {
       reader.readAsDataURL(file);
     }
   };
-
 
   return (
     <Box
@@ -86,7 +86,13 @@ export default function HomePage() {
           }}
         >
           {photos.map((photo, index) => (
-            <PhotoItem key={index} base64={photo} />
+            <PhotoItem
+              key={index}
+              base64={photo}
+              onTransform={(newBase64) =>
+                setPhotos((prev) => [...prev, newBase64])
+              }
+            />
           ))}
         </List>
       </Container>
