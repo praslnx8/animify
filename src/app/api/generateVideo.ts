@@ -20,7 +20,7 @@ export async function generateVideo(
                 "Content-Type": "application/json",
                 "authorization": `Bearer ${apiToken}`,
             },
-            body: JSON.stringify({ ...params, user_id: "user1121", bot_id: "bot1121" })
+            body: JSON.stringify({ ...params, user_id: "1121", bot_id: "1121" })
         });
         const data = await res.json();
         if (res.ok && data.videoUrl) {
