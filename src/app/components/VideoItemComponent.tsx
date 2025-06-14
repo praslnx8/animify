@@ -2,6 +2,7 @@
 
 
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
@@ -15,9 +16,10 @@ import { MediaItem } from "../models/MediaItem";
 
 export interface VideoItemProps {
   mediaItem: MediaItem
+  onDelete: (mediaItem: MediaItem) => void;
 }
 
-const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem }) => {
+const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) => {
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -42,6 +44,18 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem }) => {
 
   return (
     <Card sx={{ mb: 2, position: 'relative', overflow: 'hidden' }}>
+      <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 3 }}>
+        <Button
+          variant="outlined"
+          color="error"
+          size="small"
+          onClick={() => onDelete(mediaItem)}
+          sx={{ minWidth: 0, p: 1, borderRadius: '50%' }}
+          aria-label="Delete video"
+        >
+          <DeleteIcon />
+        </Button>
+      </Box>
       {!isPlaying && (
         <Box sx={{ position: 'relative' }}>
           <CardMedia

@@ -92,10 +92,15 @@ export default function HomePage() {
               }
               updateMediaItem={(updatedItem) =>
                 setMediaItems((prev) =>
-                  prev.map((item, idx) =>
-                    idx === index ? updatedItem : item
+                  prev.map((item) =>
+                    item.id === updatedItem.id ? updatedItem : item
                   )
                 )}
+              onDelete={(deletedItem) =>
+                setMediaItems((prev) =>
+                  prev.filter((item) => item !== deletedItem)
+                )
+              }
             />
           ))}
         </List>

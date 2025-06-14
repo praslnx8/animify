@@ -2,6 +2,7 @@
 
 import AnimationIcon from "@mui/icons-material/Animation";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Card,
   CardActions,
@@ -19,9 +20,10 @@ export interface PhotoItemProps {
   mediaItem: MediaItem
   addMediaItem: (mediaItem: MediaItem) => void;
   updateMediaItem: (mediaItem: MediaItem) => void;
+  onDelete: (mediaItem: MediaItem) => void;
 }
 
-const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem, updateMediaItem }) => {
+const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem, updateMediaItem, onDelete }) => {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [animateDialogOpen, setAnimateDialogOpen] = React.useState(false);
 
@@ -50,6 +52,14 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
               onClick={() => setAnimateDialogOpen(true)}
             >
               <AnimationIcon />
+            </IconButton>
+
+            <IconButton
+              color="error"
+              aria-label="delete"
+              onClick={() => onDelete(mediaItem)}
+            >
+              <DeleteIcon />
             </IconButton>
           </Stack>
         </CardActions>

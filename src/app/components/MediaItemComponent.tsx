@@ -11,9 +11,10 @@ export interface MediaItemProps {
   mediaItem: MediaItem,
   addMediaItem: (mediaItem: MediaItem) => void;
   updateMediaItem: (mediaItem: MediaItem) => void;
+  onDelete: (mediaItem: MediaItem) => void;
 }
 
-const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem, updateMediaItem }) => {
+const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem, updateMediaItem, onDelete }) => {
   if (mediaItem.error) {
     return (
       <Box color="error.main" textAlign="center" py={2}>
@@ -31,9 +32,9 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
   return (
     <>
       {mediaItem.type === "image" ? (
-        <PhotoItemComponent mediaItem={mediaItem} addMediaItem={addMediaItem} updateMediaItem={updateMediaItem} />
+        <PhotoItemComponent mediaItem={mediaItem} addMediaItem={addMediaItem} updateMediaItem={updateMediaItem} onDelete={onDelete} />
       ) : (
-        <VideoItemComponent mediaItem={mediaItem} />
+        <VideoItemComponent mediaItem={mediaItem} onDelete={onDelete} />
       )}
     </>
   );
