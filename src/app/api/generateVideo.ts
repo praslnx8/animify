@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger';
+import { serverLogger } from './_lib/server-logger';
 
 export interface GenerateVideoParams {
     image_url: string;
@@ -14,7 +14,12 @@ export async function generateVideo(
     params: GenerateVideoParams,
     apiToken: string
 ): Promise<GenerateVideoResult> {
-    try {        
+    try {
+        serverLogger.info('Generating video', { 
+            prompt: params.prompt,
+            imageUrl: params.image_url 
+        });
+        
         const res = await fetch("https://api.exh.ai/chat_media_manager/v2/submit_video_generation_task", {
             method: "POST",
             headers: {
@@ -25,10 +30,10 @@ export async function generateVideo(
         });
         const data = await res.json();
         if (res.ok && data.media_url) {
-            logger.info('Video generation successful');
+            serverLogger.info('Video generation successful');
             return { videoUrl: data.media_url };
         } else {
-            logger.error('Video generation failed', { 
+            serverLogger.error('Video generation failed', { 
                 status: res.status, 
                 statusText: res.statusText,
                 error: data.error
@@ -36,7 +41,7 @@ export async function generateVideo(
             return { error: data.error || "Failed to generate video" };
         }
     } catch (err: any) {
-        logger.error('Network error in video generation', err);
+        serverLogger.error('Network error in video generation', err);
         return { error: "Network error" };
     }
 }

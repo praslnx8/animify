@@ -1,6 +1,3 @@
-'use client';
-
-
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import {

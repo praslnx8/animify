@@ -1,10 +1,10 @@
 import { base64ToFile } from "../utils/base64-utils";
-import { logger } from "../utils/logger";
+import { clientLogger } from "../utils/client-logger";
 
 export async function uploadBase64Image(base64: string): Promise<string | null> {
     try {
+        clientLogger.info('Starting base64 image upload');
         const formData = new FormData();
-        // Use the utility to convert base64 to File
         const file = base64ToFile(base64, "upload.png", "image/png");
         formData.append("image", file);
         const res = await fetch("/api/upload", {
@@ -13,17 +13,17 @@ export async function uploadBase64Image(base64: string): Promise<string | null> 
         });
         const data = await res.json();
         if (data.imageUrl) {
-            logger.info('Base64 image upload successful', { url: data.imageUrl });
+            clientLogger.info('Base64 image upload successful');
             return data.imageUrl;
         } else {
-            logger.error('Base64 image upload failed', { 
+            clientLogger.error('Base64 image upload failed', { 
                 status: res.status, 
                 error: data.error 
             });
             return null;
         }
     } catch (err) {
-        logger.error('Error uploading base64 image', err);
+        clientLogger.error('Error uploading base64 image', err);
         return null;
     }
 }

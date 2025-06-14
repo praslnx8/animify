@@ -1,5 +1,3 @@
-'use client';
-
 import AnimationIcon from "@mui/icons-material/Animation";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import DeleteIcon from "@mui/icons-material/Delete";

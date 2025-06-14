@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger';
+import { serverLogger } from './_lib/server-logger';
 
 export interface GeneratePhotoParams {
   identity_image_b64: string;
@@ -22,6 +22,7 @@ export async function generatePhoto(
   apiToken: string
 ): Promise<GeneratePhotoResult> {
   try {
+    serverLogger.info('Generating photo', { prompt: params.prompt });
     const res = await fetch("https://api.exh.ai/image/v1/generate_gallery_image", {
       method: "POST",
       headers: {
@@ -42,10 +43,10 @@ export async function generatePhoto(
     });
     const data = await res.json();
     if (res.ok && data.image_b64) {
-      logger.info('Photo generation successful');
+      serverLogger.info('Photo generation successful');
       return { image_b64: data.image_b64 };
     } else {
-      logger.error('Photo generation failed', { 
+      serverLogger.error('Photo generation failed', { 
         status: res.status, 
         statusText: res.statusText,
         error: data.error
@@ -53,7 +54,7 @@ export async function generatePhoto(
       return { error: data.error || "Failed to generate image" };
     }
   } catch (err: any) {
-    logger.error('Network error in photo generation', err);
+    serverLogger.error('Network error in photo generation', err);
     return { error: "Network error" };
   }
 }
