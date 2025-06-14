@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger';
+
 export interface GeneratePhotoParams {
   identity_image_b64: string;
   prompt: string;
@@ -40,11 +42,18 @@ export async function generatePhoto(
     });
     const data = await res.json();
     if (res.ok && data.image_b64) {
+      logger.info('Photo generation successful');
       return { image_b64: data.image_b64 };
     } else {
+      logger.error('Photo generation failed', { 
+        status: res.status, 
+        statusText: res.statusText,
+        error: data.error
+      });
       return { error: data.error || "Failed to generate image" };
     }
   } catch (err: any) {
+    logger.error('Network error in photo generation', err);
     return { error: "Network error" };
   }
 }
