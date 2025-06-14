@@ -23,12 +23,17 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [videoHeight, setVideoHeight] = React.useState<number>(160);
+  const [videoWidth, setVideoWidth] = React.useState<number | string>("100%");
+  const [videoFetched, setVideoFetched] = React.useState(false);
   const videoRef = React.useRef<HTMLVideoElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const handlePlay = () => {
     setError(null);
     setIsLoading(true);
     setIsPlaying(true);
+    setVideoFetched(true);
   };
 
   const handleVideoError = () => {
@@ -39,11 +44,24 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
 
   const handleVideoLoaded = () => {
     setIsLoading(false);
-    videoRef.current?.play();
+    
+    if (videoRef.current) {
+      const video = videoRef.current;
+      
+      const containerWidth = containerRef.current?.clientWidth || video.clientWidth;
+      
+      const aspectRatio = video.videoWidth / video.videoHeight;
+      const calculatedHeight = containerWidth / aspectRatio;
+      
+      setVideoHeight(calculatedHeight);
+      setVideoWidth(containerWidth);
+      
+      video.play();
+    }
   };
 
   return (
-    <Card sx={{ mb: 2, position: 'relative', overflow: 'hidden' }}>
+    <Card sx={{ mb: 2, position: 'relative', overflow: 'hidden' }} ref={containerRef}>
       <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 3 }}>
         <Button
           variant="outlined"
@@ -61,7 +79,8 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           <CardMedia
             component="img"
             height="160"
-            image={mediaItem.imageUrl}
+            // Use base64 image if available, otherwise use imageUrl
+            image={mediaItem.base64 || mediaItem.imageUrl}
             alt="Video thumbnail"
           />
           <Box
@@ -107,16 +126,18 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
               <CircularProgress color="primary" />
             </Box>
           )}
-          <video
-            ref={videoRef}
-            width="100%"
-            height="160"
-            controls
-            style={{ display: isLoading ? 'none' : 'block' }}
-            src={mediaItem.videoUrl}
-            onLoadedData={handleVideoLoaded}
-            onError={handleVideoError}
-          />
+          {videoFetched && (
+            <video
+              ref={videoRef}
+              width={videoWidth}
+              height={videoHeight}
+              controls
+              style={{ display: isLoading ? 'none' : 'block' }}
+              src={mediaItem.videoUrl}
+              onLoadedData={handleVideoLoaded}
+              onError={handleVideoError}
+            />
+          )}
         </Box>
       )}
       {error && (

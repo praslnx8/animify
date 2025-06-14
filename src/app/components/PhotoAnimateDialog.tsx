@@ -19,7 +19,7 @@ interface PhotoAnimateDialogProps {
     onClose: () => void;
     mediaItem: MediaItem;
     addMediaItem: (mediaItem: MediaItem) => void;
-    updateMediaItem: (mediaItem: MediaItem) => void; 
+    updateMediaItem: (mediaItem: MediaItem) => void;
 }
 
 const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, mediaItem, addMediaItem, updateMediaItem }) => {
@@ -36,34 +36,30 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, 
         try {
             const apiToken = process.env.NEXT_PUBLIC_EXH_AI_API_TOKEN;
             if (!apiToken) {
-                videoMediaItem.loading = false;
-                videoMediaItem.error = "API token not set";
+                updateMediaItem({ ...videoMediaItem, loading: false, error: "API token not set" });
                 return;
             }
             if (!mediaItem.imageUrl && mediaItem.base64) {
                 const uploadedUrl = await uploadBase64Image(mediaItem.base64);
                 if (!uploadedUrl) {
-                    videoMediaItem.error = "Failed to upload image";
-                    videoMediaItem.loading = false;
+                    updateMediaItem({ ...videoMediaItem, loading: false, error: "Failed to upload image" });
                     return;
                 }
+                updateMediaItem({ ...mediaItem, imageUrl: uploadedUrl });
                 mediaItem.imageUrl = uploadedUrl;
             }
             if (!mediaItem.imageUrl) {
-                videoMediaItem.error = "Image URL is missing";
-                videoMediaItem.loading = false;
+                updateMediaItem({ ...videoMediaItem, loading: false, error: "Image URL is missing" });
                 return;
             }
             const result = await generateVideo({ image_url: mediaItem.imageUrl, prompt }, apiToken);
             if (result.videoUrl) {
-                videoMediaItem.videoUrl = result.videoUrl;
+                updateMediaItem({ ...videoMediaItem, loading: false, videoUrl: result.videoUrl });
             } else {
-                videoMediaItem.error = result.error || "Failed to generate video";
+                updateMediaItem({ ...videoMediaItem, loading: false, error: result.error || "Failed to generate video" });
             }
         } catch (err: any) {
-            videoMediaItem.error = "Network error";
-        } finally {
-            videoMediaItem.loading = false;
+            updateMediaItem({ ...videoMediaItem, loading: false, error: "Network error" });
         }
     };
 
