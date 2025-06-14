@@ -11,9 +11,9 @@ import {
   TextField
 } from "@mui/material";
 import React, { useState } from "react";
-import { generatePhoto } from "../api/generatePhoto";
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
+import { generatePhotoClient } from "../api/generatePhoto";
 
 interface PhotoTransformDialogProps {
   open: boolean;
@@ -43,16 +43,11 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
     addMediaItem(mediaItem);
 
     try {
-      const apiToken = process.env.NEXT_PUBLIC_EXH_AI_API_TOKEN;
-      if (!apiToken) {
-        updateMediaItem({ ...mediaItem, loading: false, error: "API token not set" });
-        return;
-      }
       if (!base64) {
         updateMediaItem({ ...mediaItem, loading: false, error: "Base64 image is missing" });
         return;
       }
-      const result = await generatePhoto({
+      const result = await generatePhotoClient({
         identity_image_b64: base64,
         prompt,
         model_name: modelName,
@@ -62,7 +57,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
         skin_color: skinColor,
         auto_detect_hair_color: autoDetectHairColor,
         nsfw_policy: nsfwPolicy
-      }, apiToken);
+      });
       if (result.image_b64) {
         updateMediaItem({ ...mediaItem, base64: result.image_b64, loading: false });
       } else {

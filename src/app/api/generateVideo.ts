@@ -8,24 +8,21 @@ export interface GenerateVideoResult {
     error?: string;
 }
 
-export async function generateVideo(
-    params: GenerateVideoParams,
-    apiToken: string
-): Promise<GenerateVideoResult> {
+export async function generateVideoClient(params: GenerateVideoParams): Promise<GenerateVideoResult> {
     try {
-        const res = await fetch("https://api.exh.ai/chat_media_manager/v2/submit_video_generation_task", {
+        const res = await fetch("/api/video", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "authorization": `Bearer ${apiToken}`,
             },
-            body: JSON.stringify({ ...params, user_id: "1121", bot_id: "1121" })
+            body: JSON.stringify(params),
         });
         const data = await res.json();
-        if (res.ok && data.media_url) {
-            return { videoUrl: data.media_url };
+
+        if (res.ok && data.videoUrl) {
+            return { videoUrl: data.videoUrl };
         } else {
-            return { error: data.error || "Response has error" };
+            return { error: data.error || `Error: ${res.status}` };
         }
     } catch (err: any) {
         return { error: err.message || "Exception occurred while generating video" };

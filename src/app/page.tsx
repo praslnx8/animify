@@ -12,23 +12,15 @@ import {
   Toolbar,
   Typography
 } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import MediaItemComponent from "./components/MediaItemComponent";
 import { MediaItem } from "./models/MediaItem";
 import { MediaType } from "./models/MediaType";
 import { fileToBase64 } from "./utils/base64-utils";
 
-const STORAGE_KEY = 'animify_media_items';
-
 export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>(localStorage.getItem(STORAGE_KEY) ? JSON.parse(localStorage.getItem(STORAGE_KEY)!) : []);
-
-  useEffect(() => {
-    if (mediaItems) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(mediaItems));
-    }
-  }, [mediaItems]);
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
 
   const handleAddPhotoClick = () => {
     if (fileInputRef.current) {

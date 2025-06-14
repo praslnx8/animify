@@ -8,10 +8,10 @@ import {
     TextField
 } from "@mui/material";
 import React, { useState } from "react";
-import { generateVideo } from "../api/generateVideo";
 import { uploadBase64Image } from "../api/uploadBase64Image";
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
+import { generateVideoClient } from "../api/generateVideo";
 
 interface PhotoAnimateDialogProps {
     open: boolean;
@@ -34,11 +34,6 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, 
         };
         addMediaItem(videoMediaItem);
         try {
-            const apiToken = process.env.NEXT_PUBLIC_EXH_AI_API_TOKEN;
-            if (!apiToken) {
-                updateMediaItem({ ...videoMediaItem, loading: false, error: "API token not set" });
-                return;
-            }
             if (!mediaItem.imageUrl && mediaItem.base64) {
                 const uploadedUrl = await uploadBase64Image(mediaItem.base64);
                 if (!uploadedUrl) {
@@ -52,7 +47,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, 
                 updateMediaItem({ ...videoMediaItem, loading: false, error: "Image URL is missing" });
                 return;
             }
-            const result = await generateVideo({ image_url: mediaItem.imageUrl, prompt }, apiToken);
+            const result = await generateVideoClient({ image_url: mediaItem.imageUrl, prompt });
             if (result.videoUrl) {
                 setTimeout(() => {
                     updateMediaItem({ ...videoMediaItem, loading: false, videoUrl: result.videoUrl });

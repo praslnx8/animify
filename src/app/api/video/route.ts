@@ -1,0 +1,48 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { GenerateVideoParams, GenerateVideoResult } from '../generateVideo';
+
+export const runtime = 'nodejs';
+
+export async function POST(req: NextRequest) {
+    try {
+        const body = await req.json();
+        const { image_url, prompt } = body;
+        
+        if (!image_url || !prompt) {
+            return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+        }
+
+        // Get API token from environment variable (server-side only)
+        const apiToken = process.env.EXH_AI_API_TOKEN;
+        if (!apiToken) {
+            console.error('Missing EXH_AI_API_TOKEN environment variable');
+            return NextResponse.json({ error: 'API token not configured on server' }, { status: 500 });
+        }
+
+        const params: GenerateVideoParams = {
+            image_url,
+            prompt
+        };
+
+        const res = await fetch("https://api.exh.ai/chat_media_manager/v2/submit_video_generation_task", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "authorization": `Bearer ${apiToken}`,
+            },
+            body: JSON.stringify({ ...params, user_id: "1121", bot_id: "1121" })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.media_url) {
+            return NextResponse.json({ videoUrl: data.media_url });
+        } else {
+            return NextResponse.json({ 
+                error: data.error || "Response has error" 
+            }, { status: res.status || 500 });
+        }
+    } catch (err: any) {
+        console.error('Error generating video:', err);
+        return NextResponse.json({ error: err.message || "Exception occurred while generating video" }, { status: 500 });
+    }
+}
