@@ -1,4 +1,3 @@
-
 export interface GeneratePhotoParams {
   identity_image_b64: string;
   prompt: string;
@@ -43,7 +42,9 @@ export async function generatePhoto(
     if (res.ok && data.image_b64) {
       return { image_b64: data.image_b64 };
     } else {
-      return { error: data.error || "Response has no content" };
+      return {
+        error: `Status: ${res.status} ${res.statusText}. Response: ${JSON.stringify(data)}`
+      };
     }
   } catch (err: any) {
     return { error: err.message || "Exception occurred while generating photo" };
