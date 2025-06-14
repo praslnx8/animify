@@ -22,24 +22,10 @@ const STORAGE_KEY = 'animify_media_items';
 
 export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>(localStorage.getItem(STORAGE_KEY) ? JSON.parse(localStorage.getItem(STORAGE_KEY)!) : []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedItems = localStorage.getItem(STORAGE_KEY);
-      if (savedItems) {
-        try {
-          const parsedItems = JSON.parse(savedItems) as MediaItem[];
-          setMediaItems(parsedItems);
-        } catch (error) {
-          console.error('Error parsing media items from localStorage:', error);
-        }
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && mediaItems) {
+    if (mediaItems) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(mediaItems));
     }
   }, [mediaItems]);
