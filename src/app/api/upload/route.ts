@@ -2,17 +2,14 @@ import fs from 'fs/promises';
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { serverLogger } from '../_lib/server-logger';
 
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
     try {
-        serverLogger.info('Processing image upload request');
         const formData = await req.formData();
         const file = formData.get('image');
         if (!file || typeof file === 'string') {
-            serverLogger.warn('No image uploaded or invalid file type');
             return NextResponse.json({ error: 'No image uploaded' }, { status: 400 });
         }
 
@@ -32,10 +29,8 @@ export async function POST(req: NextRequest) {
             ? `${protocol}://${host}/uploads/${filename}`
             : `/uploads/${filename}`;
             
-        serverLogger.info('Image upload successful', { filename });
         return NextResponse.json({ imageUrl });
     } catch (error) {
-        serverLogger.error('Failed to upload image', error);
         return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 });
     }
 }
