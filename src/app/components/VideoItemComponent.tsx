@@ -81,7 +81,6 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
         </Button>
       </Box>
       <Box sx={{ position: 'relative' }}>
-        {/* Always show the thumbnail until the video is loaded */}
         <CardMedia
           component="img"
           height="160"
@@ -89,12 +88,12 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           alt="Video thumbnail"
           sx={{
             objectFit: 'contain',
-            display: isPlaying && !isLoading ? 'none' : 'block'
+            display: isPlaying && !isLoading ? 'none' : 'block',
+            backgroundColor: '#f0f0f0'
           }}
         />
 
-        {/* Play button overlay */}
-        {!isPlaying && (
+        {(!isPlaying || error) && (
           <Box
             sx={{
               position: 'absolute',
@@ -118,7 +117,7 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
                 minHeight: { xs: 40, sm: 48 }, 
                 p: 0 
               }}
-              aria-label="Play video"
+              aria-label={error ? "Retry video" : "Play video"}
             >
               <PlayArrowIcon fontSize={window.innerWidth < 600 ? "medium" : "large"} />
             </Button>
@@ -161,20 +160,6 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
       {error && (
         <Box sx={{ p: 2, textAlign: 'center' }}>
           <Typography color="error" variant="body2">{error}</Typography>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<PlayArrowIcon />}
-            onClick={handlePlay}
-            sx={{ 
-              mt: 1,
-              py: { xs: 0.5, sm: 1 },
-              px: { xs: 1, sm: 2 },
-              fontSize: { xs: '0.8rem', sm: '0.875rem' }
-            }}
-          >
-            Retry
-          </Button>
         </Box>
       )}
     </Card>
