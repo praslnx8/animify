@@ -1,7 +1,7 @@
 import { MediaType } from "./MediaType";
 
 export interface MediaItem {
-    id?: string;
+    id: string;
     type: MediaType;
     base64?: string;
     imageUrl?: string;

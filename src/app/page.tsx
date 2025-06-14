@@ -15,6 +15,7 @@ import {
 import React, { useRef, useState } from "react";
 import MediaItemComponent from "./components/MediaItemComponent";
 import { MediaItem } from "./models/MediaItem";
+import { MediaType } from "./models/MediaType";
 import { fileToBase64 } from "./utils/base64-utils";
 
 export default function HomePage() {
@@ -31,7 +32,7 @@ export default function HomePage() {
     const file = event.target.files?.[0];
     if (file) {
       fileToBase64(file).then((base64) => {
-        setMediaItems(() => [...mediaItems, { type: "image", base64 }]);
+        setMediaItems((prev) => [...prev, { id: Date.now().toString(), type: MediaType.Image, base64 }]);
       }).catch((error) => {
         console.error("Error converting file to base64:", error);
       });
