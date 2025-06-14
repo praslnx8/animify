@@ -1,11 +1,12 @@
 'use client';
 
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import React from "react";
 import { MediaItem } from "../models/MediaItem";
+import { MediaType } from "../models/MediaType";
 import PhotoItemComponent from "./PhotoItemComponent";
 import VideoItemComponent from "./VideoItemComponent";
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
 
 export interface MediaItemProps {
   mediaItem: MediaItem,
@@ -31,7 +32,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
   }
   return (
     <>
-      {mediaItem.type === "image" ? (
+      {mediaItem.type === MediaType.Image ? (
         <PhotoItemComponent mediaItem={mediaItem} addMediaItem={addMediaItem} updateMediaItem={updateMediaItem} onDelete={onDelete} />
       ) : (
         <VideoItemComponent mediaItem={mediaItem} onDelete={onDelete} />

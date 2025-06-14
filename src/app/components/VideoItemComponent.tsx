@@ -1,8 +1,8 @@
 'use client';
 
 
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import {
   Box,
   Button,
@@ -44,18 +44,18 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
 
   const handleVideoLoaded = () => {
     setIsLoading(false);
-    
+
     if (videoRef.current) {
       const video = videoRef.current;
-      
+
       const containerWidth = containerRef.current?.clientWidth || video.clientWidth;
-      
+
       const aspectRatio = video.videoWidth / video.videoHeight;
       const calculatedHeight = containerWidth / aspectRatio;
-      
+
       setVideoHeight(calculatedHeight);
       setVideoWidth(containerWidth);
-      
+
       video.play();
     }
   };
@@ -74,15 +74,21 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           <DeleteIcon />
         </Button>
       </Box>
-      {!isPlaying && (
-        <Box sx={{ position: 'relative' }}>
-          <CardMedia
-            component="img"
-            height="160"
-            // Use base64 image if available, otherwise use imageUrl
-            image={mediaItem.base64 || mediaItem.imageUrl}
-            alt="Video thumbnail"
-          />
+      <Box sx={{ position: 'relative' }}>
+        {/* Always show the thumbnail until the video is loaded */}
+        <CardMedia
+          component="img"
+          height="160"
+          image={mediaItem.base64 || mediaItem.imageUrl}
+          alt="Video thumbnail"
+          sx={{
+            objectFit: 'contain',
+            display: isPlaying && !isLoading ? 'none' : 'block'
+          }}
+        />
+
+        {/* Play button overlay */}
+        {!isPlaying && (
           <Box
             sx={{
               position: 'absolute',
@@ -100,46 +106,47 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
               variant="contained"
               color="primary"
               onClick={handlePlay}
-              sx={{ borderRadius: '50%', minWidth: 56, minHeight: 56, p: 0 }}
+              sx={{ borderRadius: '50%', minWidth: 48, minHeight: 48, p: 0 }}
               aria-label="Play video"
             >
               <PlayArrowIcon fontSize="large" />
             </Button>
           </Box>
-        </Box>
-      )}
-      {isPlaying && (
-        <Box sx={{ position: 'relative' }}>
-          {isLoading && (
-            <Box sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 2,
-              background: 'rgba(0,0,0,0.3)'
-            }}>
-              <CircularProgress color="primary" />
-            </Box>
-          )}
-          {videoFetched && (
-            <video
-              ref={videoRef}
-              width={videoWidth}
-              height={videoHeight}
-              controls
-              style={{ display: isLoading ? 'none' : 'block' }}
-              src={mediaItem.videoUrl}
-              onLoadedData={handleVideoLoaded}
-              onError={handleVideoError}
-            />
-          )}
-        </Box>
-      )}
+        )}
+
+        {isLoading && (
+          <Box sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2,
+            background: 'rgba(0,0,0,0.3)'
+          }}>
+            <CircularProgress color="primary" />
+          </Box>
+        )}
+
+        {videoFetched && (
+          <video
+            ref={videoRef}
+            width={videoWidth}
+            height={videoHeight}
+            controls
+            style={{
+              display: isPlaying && !isLoading ? 'block' : 'none',
+              width: '100%'
+            }}
+            src={mediaItem.videoUrl}
+            onLoadedData={handleVideoLoaded}
+            onError={handleVideoError}
+          />
+        )}
+      </Box>
       {error && (
         <Box sx={{ p: 2, textAlign: 'center' }}>
           <Typography color="error" variant="body2">{error}</Typography>

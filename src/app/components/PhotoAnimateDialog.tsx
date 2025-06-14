@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import { generateVideo } from "../api/generateVideo";
 import { uploadBase64Image } from "../api/uploadBase64Image";
 import { MediaItem } from "../models/MediaItem";
+import { MediaType } from "../models/MediaType";
 
 interface PhotoAnimateDialogProps {
     open: boolean;
@@ -28,7 +29,8 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const videoMediaItem: MediaItem = {
-            type: "video",
+            id: Date.now().toString(),
+            type: MediaType.Video,
             loading: true,
             base64: mediaItem.base64
         };

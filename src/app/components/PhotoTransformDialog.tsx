@@ -15,6 +15,7 @@ import {
 import React, { useState } from "react";
 import { generatePhoto } from "../api/generatePhoto";
 import { MediaItem } from "../models/MediaItem";
+import { MediaType } from "../models/MediaType";
 
 interface PhotoTransformDialogProps {
   open: boolean;
@@ -38,7 +39,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
     e.preventDefault();
     const mediaItem: MediaItem = {
       id: Date.now().toString(),
-      type: "image",
+      type: MediaType.Image,
       loading: true,
     };
     addMediaItem(mediaItem);
