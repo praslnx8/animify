@@ -43,9 +43,9 @@ export async function generatePhoto(
     if (res.ok && data.image_b64) {
       return { image_b64: data.image_b64 };
     } else {
-      return { error: data || "Failed to generate image" };
+      return { error: data.message || "Response has no content" };
     }
   } catch (err: any) {
-    return { error: err };
+    return { error: err.message || "Exception occurred while generating photo" };
   }
 }

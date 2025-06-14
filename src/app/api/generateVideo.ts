@@ -25,9 +25,9 @@ export async function generateVideo(
         if (res.ok && data.media_url) {
             return { videoUrl: data.media_url };
         } else {
-            return { error: data || "Failed to generate video" };
+            return { error: data.error || "Response has error" };
         }
     } catch (err: any) {
-        return { error: err };
+        return { error: err.message || "Exception occurred while generating video" };
     }
 }
