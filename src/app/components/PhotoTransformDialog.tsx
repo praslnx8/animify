@@ -2,7 +2,6 @@
 
 import {
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -15,15 +14,17 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { generatePhoto } from "../api/generatePhoto";
+import { MediaItem } from "../models/MediaItem";
 
 interface PhotoTransformDialogProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: (base64: string) => void;
+  addMediaItem: (mediaItem: MediaItem) => void;
+  updateMediaItem: (mediaItem: MediaItem) => void;
   base64: string;
 }
 
-const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClose, onSuccess, base64 }) => {
+const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClose, addMediaItem, updateMediaItem, base64 }) => {
   const [prompt, setPrompt] = useState("");
   const [modelName, setModelName] = useState("base");
   const [style, setStyle] = useState("realistic");
@@ -32,18 +33,24 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
   const [skinColor, setSkinColor] = useState("pale");
   const [autoDetectHairColor, setAutoDetectHairColor] = useState(true);
   const [nsfwPolicy, setNsfwPolicy] = useState("allow");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
+    const mediaItem: MediaItem = {
+      id: Date.now().toString(),
+      type: "image",
+      loading: true,
+    };
+    addMediaItem(mediaItem);
+
     try {
       const apiToken = process.env.NEXT_PUBLIC_EXH_AI_API_TOKEN;
       if (!apiToken) {
-        setError("API token not set");
-        setLoading(false);
+        updateMediaItem({ ...mediaItem, loading: false, error: "API token not set" });
+        return;
+      }
+      if (!base64) {
+        updateMediaItem({ ...mediaItem, loading: false, error: "Base64 image is missing" });
         return;
       }
       const result = await generatePhoto({
@@ -58,15 +65,12 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
         nsfw_policy: nsfwPolicy
       }, apiToken);
       if (result.image_b64) {
-        onSuccess(result.image_b64);
-        setPrompt("");
+        updateMediaItem({ ...mediaItem, base64: result.image_b64, loading: false });
       } else {
-        setError(result.error || "Failed to generate image");
+        updateMediaItem({ ...mediaItem, loading: false, error: result.error || "Failed to generate image" });
       }
     } catch (err: any) {
-      setError("Network error");
-    } finally {
-      setLoading(false);
+      updateMediaItem({ ...mediaItem, loading: false, error: "Network error" });
     }
   };
 
@@ -83,7 +87,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
               fullWidth
               required
               autoFocus
-              disabled={loading}
             />
             <TextField
               select
@@ -91,7 +94,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
               value={modelName}
               onChange={e => setModelName(e.target.value)}
               fullWidth
-              disabled={loading}
             >
               <MenuItem value="base">base</MenuItem>
               <MenuItem value="large">large</MenuItem>
@@ -103,7 +105,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
               value={style}
               onChange={e => setStyle(e.target.value)}
               fullWidth
-              disabled={loading}
             >
               <MenuItem value="realistic">realistic</MenuItem>
               <MenuItem value="anime">anime</MenuItem>
@@ -115,7 +116,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
               value={gender}
               onChange={e => setGender(e.target.value)}
               fullWidth
-              disabled={loading}
             >
               <MenuItem value="man">man</MenuItem>
               <MenuItem value="woman">woman</MenuItem>
@@ -126,7 +126,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
               value={bodyType}
               onChange={e => setBodyType(e.target.value)}
               fullWidth
-              disabled={loading}
             >
               <MenuItem value="skinny">skinny</MenuItem>
               <MenuItem value="lean">lean</MenuItem>
@@ -140,7 +139,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
               value={skinColor}
               onChange={e => setSkinColor(e.target.value)}
               fullWidth
-              disabled={loading}
             >
               <MenuItem value="pale">pale</MenuItem>
               <MenuItem value="white">white</MenuItem>
@@ -151,7 +149,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
                 <Switch
                   checked={autoDetectHairColor}
                   onChange={e => setAutoDetectHairColor(e.target.checked)}
-                  disabled={loading}
                 />
               }
               label="Auto Detect Hair Color"
@@ -162,19 +159,17 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
               value={nsfwPolicy}
               onChange={e => setNsfwPolicy(e.target.value)}
               fullWidth
-              disabled={loading}
             >
               <MenuItem value="blur">blur</MenuItem>
               <MenuItem value="filter">filter</MenuItem>
               <MenuItem value="allow">allow</MenuItem>
             </TextField>
-            {error && <div style={{ color: 'red', fontSize: 14 }}>{error}</div>}
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} disabled={loading}>Cancel</Button>
-          <Button type="submit" variant="contained" disabled={loading || !prompt}>
-            {loading ? <CircularProgress size={22} /> : "Generate"}
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="submit" variant="contained" disabled={!prompt}>
+            {"Generate"}
           </Button>
         </DialogActions>
       </form>

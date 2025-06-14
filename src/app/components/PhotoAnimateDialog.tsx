@@ -2,7 +2,6 @@
 
 import {
     Button,
-    CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
@@ -19,49 +18,52 @@ interface PhotoAnimateDialogProps {
     open: boolean;
     onClose: () => void;
     mediaItem: MediaItem;
-    onSuccess: (videoUrl: string) => void;
+    addMediaItem: (mediaItem: MediaItem) => void;
+    updateMediaItem: (mediaItem: MediaItem) => void; 
 }
 
-const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, mediaItem, onSuccess }) => {
+const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, mediaItem, addMediaItem, updateMediaItem }) => {
     const [prompt, setPrompt] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        setError(null);
+        const videoMediaItem: MediaItem = {
+            type: "video",
+            loading: true,
+            base64: mediaItem.base64
+        };
+        addMediaItem(videoMediaItem);
         try {
             const apiToken = process.env.NEXT_PUBLIC_EXH_AI_API_TOKEN;
             if (!apiToken) {
-                setError("API token not set");
-                setLoading(false);
+                videoMediaItem.loading = false;
+                videoMediaItem.error = "API token not set";
                 return;
             }
             if (!mediaItem.imageUrl && mediaItem.base64) {
                 const uploadedUrl = await uploadBase64Image(mediaItem.base64);
                 if (!uploadedUrl) {
-                    setError("Failed to upload image");
-                    setLoading(false);
+                    videoMediaItem.error = "Failed to upload image";
+                    videoMediaItem.loading = false;
                     return;
                 }
                 mediaItem.imageUrl = uploadedUrl;
             }
             if (!mediaItem.imageUrl) {
-                setError("Image URL is missing");
-                setLoading(false);
+                videoMediaItem.error = "Image URL is missing";
+                videoMediaItem.loading = false;
                 return;
             }
             const result = await generateVideo({ image_url: mediaItem.imageUrl, prompt }, apiToken);
             if (result.videoUrl) {
-                onSuccess(result.videoUrl);
+                videoMediaItem.videoUrl = result.videoUrl;
             } else {
-                setError(result.error || "Failed to generate video");
+                videoMediaItem.error = result.error || "Failed to generate video";
             }
         } catch (err: any) {
-            setError("Network error");
+            videoMediaItem.error = "Network error";
         } finally {
-            setLoading(false);
+            videoMediaItem.loading = false;
         }
     };
 
@@ -78,15 +80,13 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, 
                             fullWidth
                             required
                             autoFocus
-                            disabled={loading}
                         />
-                        {error && <div style={{ color: 'red', fontSize: 14 }}>{error}</div>}
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose} disabled={loading}>Cancel</Button>
-                    <Button type="submit" variant="contained" disabled={loading || !prompt}>
-                        {loading ? <CircularProgress size={22} /> : "Animate"}
+                    <Button onClick={onClose}>Cancel</Button>
+                    <Button type="submit" variant="contained" disabled={!prompt}>
+                        {"Animate"}
                     </Button>
                 </DialogActions>
             </form>

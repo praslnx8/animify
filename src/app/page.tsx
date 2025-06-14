@@ -31,7 +31,7 @@ export default function HomePage() {
     const file = event.target.files?.[0];
     if (file) {
       fileToBase64(file).then((base64) => {
-        setMediaItems((prev) => [...prev, { type: "image", base64 }]);
+        setMediaItems(() => [...mediaItems, { type: "image", base64 }]);
       }).catch((error) => {
         console.error("Error converting file to base64:", error);
       });
@@ -87,12 +87,15 @@ export default function HomePage() {
             <MediaItemComponent
               key={index}
               mediaItem={mediaItem}
-              onTransform={(newBase64) =>
-                setMediaItems((prev) => [...prev, { type: 'image', base64: newBase64 }])
+              addMediaItem={(mediaItem) =>
+                setMediaItems((prev) => [...prev, mediaItem])
               }
-              onAnimate={(videoUrl) =>
-                setMediaItems((prev) => [...prev, { type: 'video', videoUrl }])
-              }
+              updateMediaItem={(updatedItem) =>
+                setMediaItems((prev) =>
+                  prev.map((item, idx) =>
+                    idx === index ? updatedItem : item
+                  )
+                )}
             />
           ))}
         </List>

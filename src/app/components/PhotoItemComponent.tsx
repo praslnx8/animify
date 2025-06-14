@@ -17,11 +17,11 @@ import PhotoTransformDialog from "./PhotoTransformDialog";
 
 export interface PhotoItemProps {
   mediaItem: MediaItem
-  onTransform: (newBase64: string) => void;
-  onAnimate: (videoUrl: string) => void;
+  addMediaItem: (mediaItem: MediaItem) => void;
+  updateMediaItem: (mediaItem: MediaItem) => void;
 }
 
-const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, onTransform, onAnimate }) => {
+const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem, updateMediaItem }) => {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [animateDialogOpen, setAnimateDialogOpen] = React.useState(false);
 
@@ -58,18 +58,26 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, onTransform, 
         open={dialogOpen}
         base64={mediaItem.base64!!}
         onClose={() => setDialogOpen(false)}
-        onSuccess={(newBase64) => {
+        addMediaItem={(mediaItem) => {
           setDialogOpen(false);
-          onTransform(newBase64);
+          addMediaItem(mediaItem);
+        }}
+        updateMediaItem={(mediaItem) => {
+          setDialogOpen(false);
+          updateMediaItem(mediaItem);
         }}
       />
       <PhotoAnimateDialog
         open={animateDialogOpen}
         mediaItem={mediaItem}
         onClose={() => setAnimateDialogOpen(false)}
-        onSuccess={(url) => {
+        addMediaItem={(mediaItem) => {
           setAnimateDialogOpen(false);
-          onAnimate(url);
+          addMediaItem(mediaItem);
+        }}
+        updateMediaItem={(mediaItem) => {
+          setAnimateDialogOpen(false);
+          updateMediaItem(mediaItem);
         }}
       />
     </>
