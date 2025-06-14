@@ -71,19 +71,31 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
               variant="contained"
               color="primary"
               onClick={() => setDialogOpen(true)}
-              sx={{ borderRadius: '50%', minWidth: 48, minHeight: 48, p: 0, mx: 1 }}
+              sx={{ 
+                borderRadius: '50%', 
+                minWidth: { xs: 40, sm: 48 }, 
+                minHeight: { xs: 40, sm: 48 }, 
+                p: 0, 
+                mx: 1 
+              }}
               aria-label="Transform photo"
             >
-              <AutoFixHighIcon />
+              <AutoFixHighIcon fontSize={window.innerWidth < 600 ? "small" : "medium"} />
             </Button>
             <Button
               variant="contained"
               color="secondary"
               onClick={() => setAnimateDialogOpen(true)}
-              sx={{ borderRadius: '50%', minWidth: 48, minHeight: 48, p: 0, mx: 1 }}
+              sx={{ 
+                borderRadius: '50%', 
+                minWidth: { xs: 40, sm: 48 }, 
+                minHeight: { xs: 40, sm: 48 }, 
+                p: 0, 
+                mx: 1 
+              }}
               aria-label="Animate photo"
             >
-              <AnimationIcon />
+              <AnimationIcon fontSize={window.innerWidth < 600 ? "small" : "medium"} />
             </Button>
           </Box>
         </Box>

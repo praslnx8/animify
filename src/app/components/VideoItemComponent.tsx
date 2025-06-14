@@ -68,10 +68,16 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           color="error"
           size="small"
           onClick={() => onDelete(mediaItem)}
-          sx={{ minWidth: 0, p: 1, borderRadius: '50%' }}
+          sx={{ 
+            minWidth: 0, 
+            p: { xs: 0.5, sm: 1 }, 
+            borderRadius: '50%',
+            width: { xs: '32px', sm: '40px' },
+            height: { xs: '32px', sm: '40px' }
+          }}
           aria-label="Delete video"
         >
-          <DeleteIcon />
+          <DeleteIcon fontSize={window.innerWidth < 600 ? "small" : "medium"} />
         </Button>
       </Box>
       <Box sx={{ position: 'relative' }}>
@@ -106,10 +112,15 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
               variant="contained"
               color="primary"
               onClick={handlePlay}
-              sx={{ borderRadius: '50%', minWidth: 48, minHeight: 48, p: 0 }}
+              sx={{ 
+                borderRadius: '50%', 
+                minWidth: { xs: 40, sm: 48 }, 
+                minHeight: { xs: 40, sm: 48 }, 
+                p: 0 
+              }}
               aria-label="Play video"
             >
-              <PlayArrowIcon fontSize="large" />
+              <PlayArrowIcon fontSize={window.innerWidth < 600 ? "medium" : "large"} />
             </Button>
           </Box>
         )}
@@ -155,7 +166,12 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
             color="primary"
             startIcon={<PlayArrowIcon />}
             onClick={handlePlay}
-            sx={{ mt: 1 }}
+            sx={{ 
+              mt: 1,
+              py: { xs: 0.5, sm: 1 },
+              px: { xs: 1, sm: 2 },
+              fontSize: { xs: '0.8rem', sm: '0.875rem' }
+            }}
           >
             Retry
           </Button>

@@ -63,7 +63,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, 
                 updateMediaItem({ ...videoMediaItem, loading: false, error: result.error || "Failed to generate video" });
             }
         } catch (err: any) {
-            updateMediaItem({ ...videoMediaItem, loading: false, error: "Network error" });
+            updateMediaItem({ ...videoMediaItem, loading: false, error: err.message || "An error occurred" });
         }
     };
 

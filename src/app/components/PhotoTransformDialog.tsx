@@ -71,7 +71,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
         updateMediaItem({ ...mediaItem, loading: false, error: result.error || "Failed to generate image" });
       }
     } catch (err: any) {
-      updateMediaItem({ ...mediaItem, loading: false, error: "Network error" });
+      updateMediaItem({ ...mediaItem, loading: false, error: err.message || "Network error" });
     }
   };
 
