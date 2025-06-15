@@ -20,7 +20,7 @@ enum VideoStatus {
 }
 
 export interface VideoItemProps {
-  mediaItem: MediaItem
+  mediaItem: MediaItem;
   onDelete: (mediaItem: MediaItem) => void;
 }
 
@@ -61,24 +61,6 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
 
   return (
     <Card sx={{ mb: 2, position: 'relative', overflow: 'hidden' }} ref={containerRef}>
-      <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 3 }}>
-        <Button
-          variant="outlined"
-          color="error"
-          size="small"
-          onClick={() => onDelete(mediaItem)}
-          sx={{
-            minWidth: 0,
-            p: { xs: 0.5, sm: 1 },
-            borderRadius: '50%',
-            width: { xs: '32px', sm: '40px' },
-            height: { xs: '32px', sm: '40px' }
-          }}
-          aria-label="Delete video"
-        >
-          <DeleteIcon fontSize={typeof window !== 'undefined' && window.innerWidth < 600 ? "small" : "medium"} />
-        </Button>
-      </Box>
       <Box sx={{ position: 'relative' }}>
         <CardMedia
           component="img"
@@ -156,7 +138,35 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
             onError={handleVideoError}
           />
         )}
+
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            padding: '8px',
+            background: 'rgba(0,0,0,0.3)',
+            display: 'flex',
+            justifyContent: 'flex-end'
+          }}
+        >
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => onDelete(mediaItem)}
+            sx={{
+              borderRadius: '50%',
+              minWidth: { xs: 40, sm: 48 },
+              minHeight: { xs: 40, sm: 48 },
+              p: 0
+            }}
+            aria-label="Delete video"
+          >
+            <DeleteIcon fontSize={typeof window !== 'undefined' && window.innerWidth < 600 ? "small" : "medium"} />
+          </Button>
+        </Box>
       </Box>
+
       {error && (
         <Box sx={{ p: 2, textAlign: 'center' }}>
           <Typography color="error" variant="body2">{error}</Typography>

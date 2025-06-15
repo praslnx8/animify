@@ -1,10 +1,11 @@
 'use client';
 
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
+import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
 import React from "react";
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
@@ -52,11 +53,29 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
       mx: 'auto',
       px: { xs: 1, sm: 0 }
     }}>
-      {mediaItem.type === MediaType.Image ? (
-        <PhotoItemComponent mediaItem={mediaItem} addMediaItem={addMediaItem} updateMediaItem={updateMediaItem} onDelete={onDelete} />
-      ) : (
-        <VideoItemComponent mediaItem={mediaItem} onDelete={onDelete} />
+      {mediaItem.prompt && (
+        <Card sx={{ mb: 0.5, p: 1 }}>
+          <Typography variant="body2" noWrap color="textSecondary" sx={{ fontStyle: 'italic' }}>
+            {mediaItem.prompt}
+          </Typography>
+        </Card>
       )}
+
+      <Box sx={{ position: 'relative' }}>
+        {mediaItem.type === MediaType.Image ? (
+          <PhotoItemComponent
+            mediaItem={mediaItem}
+            addMediaItem={addMediaItem}
+            updateMediaItem={updateMediaItem}
+            onDelete={onDelete}
+          />
+        ) : (
+          <VideoItemComponent
+            mediaItem={mediaItem}
+            onDelete={onDelete}
+          />
+        )}
+      </Box>
     </Box>
   );
 };

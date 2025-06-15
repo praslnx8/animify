@@ -30,18 +30,6 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
   return (
     <>
       <Card sx={{ mb: 2, position: 'relative', overflow: 'hidden' }}>
-        <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 3 }}>
-          <Button
-            variant="outlined"
-            color="error"
-            size="small"
-            onClick={() => onDelete(mediaItem)}
-            sx={{ minWidth: 0, p: 1, borderRadius: '50%' }}
-            aria-label="Delete photo"
-          >
-            <DeleteIcon />
-          </Button>
-        </Box>
         <Box sx={{ position: 'relative' }}>
           <CardMedia
             component="img"
@@ -60,40 +48,58 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
               left: 0,
               width: '100%',
               display: 'flex',
-              justifyContent: 'center',
+              justifyContent: 'space-between',
+              alignItems: 'center',
               padding: '8px',
               background: 'rgba(0,0,0,0.3)'
             }}
           >
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setDialogOpen(true)}
+                sx={{
+                  borderRadius: '50%',
+                  minWidth: { xs: 40, sm: 48 },
+                  minHeight: { xs: 40, sm: 48 },
+                  p: 0,
+                  mx: 1
+                }}
+                aria-label="Transform photo"
+              >
+                <AutoFixHighIcon fontSize={typeof window !== 'undefined' && window.innerWidth < 600 ? "small" : "medium"} />
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => setAnimateDialogOpen(true)}
+                sx={{
+                  borderRadius: '50%',
+                  minWidth: { xs: 40, sm: 48 },
+                  minHeight: { xs: 40, sm: 48 },
+                  p: 0,
+                  mx: 1
+                }}
+                aria-label="Animate photo"
+              >
+                <AnimationIcon fontSize={typeof window !== 'undefined' && window.innerWidth < 600 ? "small" : "medium"} />
+              </Button>
+            </Box>
+
             <Button
               variant="contained"
-              color="primary"
-              onClick={() => setDialogOpen(true)}
-              sx={{ 
-                borderRadius: '50%', 
-                minWidth: { xs: 40, sm: 48 }, 
-                minHeight: { xs: 40, sm: 48 }, 
-                p: 0, 
-                mx: 1 
+              color="error"
+              onClick={() => onDelete(mediaItem)}
+              sx={{
+                borderRadius: '50%',
+                minWidth: { xs: 40, sm: 48 },
+                minHeight: { xs: 40, sm: 48 },
+                p: 0
               }}
-              aria-label="Transform photo"
+              aria-label="Delete photo"
             >
-              <AutoFixHighIcon fontSize={window.innerWidth < 600 ? "small" : "medium"} />
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => setAnimateDialogOpen(true)}
-              sx={{ 
-                borderRadius: '50%', 
-                minWidth: { xs: 40, sm: 48 }, 
-                minHeight: { xs: 40, sm: 48 }, 
-                p: 0, 
-                mx: 1 
-              }}
-              aria-label="Animate photo"
-            >
-              <AnimationIcon fontSize={window.innerWidth < 600 ? "small" : "medium"} />
+              <DeleteIcon fontSize={typeof window !== 'undefined' && window.innerWidth < 600 ? "small" : "medium"} />
             </Button>
           </Box>
         </Box>

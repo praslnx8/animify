@@ -11,9 +11,9 @@ import {
   TextField
 } from "@mui/material";
 import React, { useState } from "react";
+import { generatePhoto } from "../api/generatePhoto";
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
-import { generatePhoto } from "../api/generatePhoto";
 
 interface PhotoTransformDialogProps {
   open: boolean;

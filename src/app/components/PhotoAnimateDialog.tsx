@@ -8,10 +8,10 @@ import {
     TextField
 } from "@mui/material";
 import React, { useState } from "react";
+import { generateVideo } from "../api/generateVideo";
 import { uploadBase64Image } from "../api/uploadBase64Image";
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
-import { generateVideo } from "../api/generateVideo";
 
 interface PhotoAnimateDialogProps {
     open: boolean;
