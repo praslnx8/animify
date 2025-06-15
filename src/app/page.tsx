@@ -1,26 +1,128 @@
 'use client';
 
 import AddIcon from "@mui/icons-material/Add";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ImageIcon from "@mui/icons-material/Image";
 import {
   AppBar,
   Avatar,
   Box,
   Container,
+  Fab,
   IconButton,
-  List,
+  MobileStepper,
   Toolbar,
-  Typography
+  Typography,
+  useMediaQuery,
+  useTheme
 } from "@mui/material";
-import React, { useRef, useState } from "react";
+import { styled } from "@mui/material/styles";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import MediaItemComponent from "./components/MediaItemComponent";
 import { MediaItem } from "./models/MediaItem";
 import { MediaType } from "./models/MediaType";
 import { fileToBase64 } from "./utils/base64-utils";
 
+// Styled component for the swipeable container
+const SwipeableContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  overflowX: 'hidden',
+  width: '100%',
+  position: 'relative',
+  touchAction: 'pan-y',
+}));
+
 export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [activeStep, setActiveStep] = useState(0);
+  const swiperRef = useRef<HTMLDivElement>(null);
+  const startXRef = useRef(0);
+  const currentXRef = useRef(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const [swipeDelta, setSwipeDelta] = useState(0);
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const maxSteps = mediaItems.length;
+
+  // Handle navigation
+  const handleNext = useCallback(() => {
+    setActiveStep((prevActiveStep) => Math.min(prevActiveStep + 1, maxSteps - 1));
+  }, [maxSteps]);
+
+  const handleBack = useCallback(() => {
+    setActiveStep((prevActiveStep) => Math.max(prevActiveStep - 1, 0));
+  }, []);
+
+  // Update active item when activeStep changes
+  useEffect(() => {
+    if (swiperRef.current && !isSwiping) {
+      // Use smooth scrolling behavior to navigate to active item
+      const container = swiperRef.current;
+      const scrollAmount = container.clientWidth * activeStep;
+      container.scrollTo({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  }, [activeStep, isSwiping]);
+
+  // Handle swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    startXRef.current = e.touches[0].clientX;
+    currentXRef.current = e.touches[0].clientX;
+    setIsSwiping(true);
+    setSwipeDelta(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isSwiping) {
+      currentXRef.current = e.touches[0].clientX;
+      const delta = currentXRef.current - startXRef.current;
+      setSwipeDelta(delta);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (isSwiping) {
+      const delta = currentXRef.current - startXRef.current;
+      // If swipe distance is significant, navigate accordingly
+      if (Math.abs(delta) > 50) {
+        if (delta > 0) {
+          handleBack();
+        } else {
+          handleNext();
+        }
+      }
+      setIsSwiping(false);
+      setSwipeDelta(0);
+    }
+  };
+
+  // Sync active step with scroll position
+  const handleScroll = useCallback(() => {
+    if (!isSwiping && swiperRef.current) {
+      const container = swiperRef.current;
+      const scrollLeft = container.scrollLeft;
+      const itemWidth = container.clientWidth;
+      const newActiveStep = Math.round(scrollLeft / itemWidth);
+      
+      // Only update if it's different to avoid infinite loops
+      if (newActiveStep !== activeStep) {
+        setActiveStep(newActiveStep);
+      }
+    }
+  }, [activeStep, isSwiping]);
+
+  useEffect(() => {
+    const container = swiperRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, [handleScroll]);
 
   const handleAddPhotoClick = () => {
     if (fileInputRef.current) {
@@ -32,7 +134,12 @@ export default function HomePage() {
     const file = event.target.files?.[0];
     if (file) {
       fileToBase64(file).then((base64) => {
-        setMediaItems((prev) => [...prev, { id: Date.now().toString(), type: MediaType.Image, base64 }]);
+        setMediaItems((prev) => {
+          const newItems = [...prev, { id: Date.now().toString(), type: MediaType.Image, base64 }];
+          // Set active step to the newest photo
+          setTimeout(() => setActiveStep(newItems.length - 1), 100);
+          return newItems;
+        });
       }).catch((error) => {
         console.error("Error converting file to base64:", error);
       });
@@ -46,16 +153,19 @@ export default function HomePage() {
     <Box
       sx={{
         minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <AppBar position="sticky" elevation={2} color="default">
-        <Toolbar>
-          <Avatar sx={{ bgcolor: "background.paper", mr: 2 }}>
+        <Toolbar sx={{ px: { xs: 1, sm: 2 } }}>
+          <Avatar sx={{ bgcolor: "background.paper", mr: 1 }}>
             <ImageIcon color="primary" />
           </Avatar>
           <Typography
-            variant="h5"
-            sx={{ flexGrow: 1, fontWeight: 700, letterSpacing: 1 }}
+            variant={isMobile ? "h6" : "h5"}
+            sx={{ flexGrow: 1, fontWeight: 700, letterSpacing: 0.5 }}
+            noWrap
           >
             Animify Photos
           </Typography>
@@ -63,9 +173,9 @@ export default function HomePage() {
             color="inherit"
             onClick={handleAddPhotoClick}
             aria-label="add photo"
-            size="large"
+            size={isMobile ? "medium" : "large"}
           >
-            <AddIcon fontSize="large" />
+            <AddIcon fontSize={isMobile ? "medium" : "large"} />
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -77,38 +187,162 @@ export default function HomePage() {
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
-      <Container maxWidth="sm" sx={{ py: 6 }}>
-        <List
-          sx={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            p: 0,
+      
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', py: 2 }}>
+        {mediaItems.length === 0 ? (
+          <Box 
+            sx={{
+              display: 'flex', 
+              flexDirection: 'column',
+              alignItems: 'center', 
+              justifyContent: 'center',
+              textAlign: 'center',
+              height: '60vh',
+              mt: 2
+            }}
+          >
+            <Typography variant="h6" color="textSecondary" gutterBottom>
+              No photos yet
+            </Typography>
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+              Add a photo to get started with transformations and animations
+            </Typography>
+            <Fab 
+              color="primary" 
+              aria-label="add photo"
+              onClick={handleAddPhotoClick}
+            >
+              <AddIcon />
+            </Fab>
+          </Box>
+        ) : (
+          <Box sx={{ width: '100%', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+            {/* Carousel container */}
+            <SwipeableContainer
+              ref={swiperRef}
+              sx={{
+                overflowX: 'auto',
+                scrollSnapType: 'x mandatory',
+                scrollbarWidth: 'none', // Hide scrollbar for Firefox
+                '&::-webkit-scrollbar': {
+                  display: 'none', // Hide scrollbar for Chrome/Safari
+                },
+                transform: isSwiping ? `translateX(${swipeDelta * 0.3}px)` : 'translateX(0)',
+                transition: isSwiping ? 'none' : 'transform 0.3s ease',
+                flex: 1,
+              }}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              {mediaItems.map((mediaItem, index) => (
+                <Box 
+                  key={index}
+                  sx={{
+                    minWidth: '100%',
+                    flexShrink: 0,
+                    scrollSnapAlign: 'start',
+                    px: 2,
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <MediaItemComponent
+                    mediaItem={mediaItem}
+                    addMediaItem={(mediaItem) =>
+                      setMediaItems((prev) => [...prev, mediaItem])
+                    }
+                    updateMediaItem={(updatedItem) =>
+                      setMediaItems((prev) =>
+                        prev.map((item) =>
+                          item.id === updatedItem.id ? updatedItem : item
+                        )
+                      )
+                    }
+                    onDelete={(deletedItem) =>
+                      setMediaItems((prev) => {
+                        const newItems = prev.filter((item) => item !== deletedItem);
+                        // Adjust active step if needed
+                        if (activeStep >= newItems.length && newItems.length > 0) {
+                          setActiveStep(newItems.length - 1);
+                        }
+                        return newItems;
+                      })
+                    }
+                  />
+                </Box>
+              ))}
+            </SwipeableContainer>
+            
+            {/* Navigation dots and controls */}
+            {mediaItems.length > 0 && (
+              <Box sx={{ mt: 2, mb: 2, px: 2 }}>
+                <MobileStepper
+                  steps={maxSteps}
+                  position="static"
+                  activeStep={activeStep}
+                  sx={{
+                    backgroundColor: 'transparent',
+                    '& .MuiMobileStepper-dot': {
+                      width: 8,
+                      height: 8,
+                      mx: 0.5
+                    },
+                    '& .MuiMobileStepper-dotActive': {
+                      backgroundColor: theme.palette.primary.main,
+                    }
+                  }}
+                  nextButton={
+                    <IconButton 
+                      size="small" 
+                      onClick={handleNext} 
+                      disabled={activeStep === maxSteps - 1}
+                      sx={{ 
+                        backgroundColor: activeStep < maxSteps - 1 ? 'rgba(0,0,0,0.04)' : 'transparent',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0,0,0,0.08)'
+                        }
+                      }}
+                    >
+                      <ChevronRightIcon />
+                    </IconButton>
+                  }
+                  backButton={
+                    <IconButton 
+                      size="small" 
+                      onClick={handleBack} 
+                      disabled={activeStep === 0}
+                      sx={{ 
+                        backgroundColor: activeStep > 0 ? 'rgba(0,0,0,0.04)' : 'transparent',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0,0,0,0.08)'
+                        }
+                      }}
+                    >
+                      <ChevronLeftIcon />
+                    </IconButton>
+                  }
+                />
+              </Box>
+            )}
+          </Box>
+        )}
+      </Box>
+      
+      {mediaItems.length > 0 && (
+        <Fab 
+          color="primary"
+          aria-label="add new photo"
+          onClick={handleAddPhotoClick}
+          sx={{ 
+            position: 'fixed', 
+            bottom: 16, 
+            right: 16,
+            display: { sm: 'none' }  // Only show on mobile
           }}
         >
-          {mediaItems.map((mediaItem, index) => (
-            <MediaItemComponent
-              key={index}
-              mediaItem={mediaItem}
-              addMediaItem={(mediaItem) =>
-                setMediaItems((prev) => [...prev, mediaItem])
-              }
-              updateMediaItem={(updatedItem) =>
-                setMediaItems((prev) =>
-                  prev.map((item) =>
-                    item.id === updatedItem.id ? updatedItem : item
-                  )
-                )}
-              onDelete={(deletedItem) =>
-                setMediaItems((prev) =>
-                  prev.filter((item) => item !== deletedItem)
-                )
-              }
-            />
-          ))}
-        </List>
-      </Container>
+          <AddIcon />
+        </Fab>
+      )}
     </Box>
   );
 }

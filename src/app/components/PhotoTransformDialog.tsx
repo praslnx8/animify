@@ -8,7 +8,11 @@ import {
   MenuItem,
   Stack,
   Switch,
-  TextField
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
+  Box
 } from "@mui/material";
 import React, { useState } from "react";
 import { generatePhoto } from "../api/generatePhoto";
@@ -32,9 +36,15 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
   const [skinColor, setSkinColor] = useState("pale");
   const [autoDetectHairColor, setAutoDetectHairColor] = useState(true);
   const [nsfwPolicy, setNsfwPolicy] = useState("allow");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const mediaItem: MediaItem = {
       id: Date.now().toString(),
       type: MediaType.Image,
@@ -46,6 +56,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
     try {
       if (!base64) {
         updateMediaItem({ ...mediaItem, loading: false, error: "Base64 image is missing" });
+        setIsSubmitting(false);
         return;
       }
       const result = await generatePhoto({
@@ -66,105 +77,176 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
       }
     } catch (err: any) {
       updateMediaItem({ ...mediaItem, loading: false, error: err.message || "Network error" });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Transform Photo</DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth 
+      fullScreen={fullScreen}
+      PaperProps={{
+        sx: {
+          borderRadius: fullScreen ? 0 : 2,
+          maxHeight: '100%',
+        }
+      }}
+    >
+      <DialogTitle sx={{ 
+        pb: 1, 
+        display: 'flex', 
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        Transform Photo
+      </DialogTitle>
       <form onSubmit={handleSubmit}>
-        <DialogContent>
-          <Stack spacing={2}>
+        <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
+          <Stack spacing={2.5}>
             <TextField
-              label="Prompt"
+              label="Transformation Description"
+              placeholder="Describe how you want to transform this photo"
               value={prompt}
               onChange={e => setPrompt(e.target.value)}
               fullWidth
               required
               autoFocus
+              multiline
+              rows={2}
+              variant="outlined"
+              helperText="Be specific about the style, setting, outfit, etc."
+              InputProps={{
+                sx: {
+                  borderRadius: 1.5
+                }
+              }}
             />
-            <TextField
-              select
-              label="Model Name"
-              value={modelName}
-              onChange={e => setModelName(e.target.value)}
-              fullWidth
-            >
-              <MenuItem value="base">base</MenuItem>
-              <MenuItem value="large">large</MenuItem>
-              {/* Add more model options if available */}
-            </TextField>
-            <TextField
-              select
-              label="Style"
-              value={style}
-              onChange={e => setStyle(e.target.value)}
-              fullWidth
-            >
-              <MenuItem value="realistic">realistic</MenuItem>
-              <MenuItem value="anime">anime</MenuItem>
-              {/* Add more styles if available */}
-            </TextField>
-            <TextField
-              select
-              label="Gender"
-              value={gender}
-              onChange={e => setGender(e.target.value)}
-              fullWidth
-            >
-              <MenuItem value="man">man</MenuItem>
-              <MenuItem value="woman">woman</MenuItem>
-            </TextField>
-            <TextField
-              select
-              label="Body Type"
-              value={bodyType}
-              onChange={e => setBodyType(e.target.value)}
-              fullWidth
-            >
-              <MenuItem value="skinny">skinny</MenuItem>
-              <MenuItem value="lean">lean</MenuItem>
-              <MenuItem value="muscular">muscular</MenuItem>
-              <MenuItem value="curvy">curvy</MenuItem>
-              <MenuItem value="heavyset">heavyset</MenuItem>
-            </TextField>
-            <TextField
-              select
-              label="Skin Color"
-              value={skinColor}
-              onChange={e => setSkinColor(e.target.value)}
-              fullWidth
-            >
-              <MenuItem value="pale">pale</MenuItem>
-              <MenuItem value="white">white</MenuItem>
-              <MenuItem value="tanned">tanned</MenuItem>
-            </TextField>
+
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
+              Model Settings
+            </Typography>
+
+            <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
+              <Box sx={{ flex: 1, width: '100%' }}>
+                <TextField
+                  select
+                  label="Model Name"
+                  value={modelName}
+                  onChange={e => setModelName(e.target.value)}
+                  fullWidth
+                >
+                  <MenuItem value="base">Base Model</MenuItem>
+                  <MenuItem value="large">Large Model</MenuItem>
+                </TextField>
+              </Box>
+              <Box sx={{ flex: 1, width: '100%' }}>
+                <TextField
+                  select
+                  label="Style"
+                  value={style}
+                  onChange={e => setStyle(e.target.value)}
+                  fullWidth
+                >
+                  <MenuItem value="realistic">Realistic</MenuItem>
+                  <MenuItem value="anime">Anime</MenuItem>
+                </TextField>
+              </Box>
+            </Box>
+
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
+              Person Settings
+            </Typography>
+
+            <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
+              <Box sx={{ flex: 1, width: '100%' }}>
+                <TextField
+                  select
+                  label="Gender"
+                  value={gender}
+                  onChange={e => setGender(e.target.value)}
+                  fullWidth
+                >
+                  <MenuItem value="man">Man</MenuItem>
+                  <MenuItem value="woman">Woman</MenuItem>
+                </TextField>
+              </Box>
+              <Box sx={{ flex: 1, width: '100%' }}>
+                <TextField
+                  select
+                  label="Body Type"
+                  value={bodyType}
+                  onChange={e => setBodyType(e.target.value)}
+                  fullWidth
+                >
+                  <MenuItem value="skinny">Skinny</MenuItem>
+                  <MenuItem value="lean">Lean</MenuItem>
+                  <MenuItem value="muscular">Muscular</MenuItem>
+                  <MenuItem value="curvy">Curvy</MenuItem>
+                  <MenuItem value="heavyset">Heavyset</MenuItem>
+                </TextField>
+              </Box>
+            </Box>
+
+            <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
+              <Box sx={{ flex: 1, width: '100%' }}>
+                <TextField
+                  select
+                  label="Skin Color"
+                  value={skinColor}
+                  onChange={e => setSkinColor(e.target.value)}
+                  fullWidth
+                >
+                  <MenuItem value="pale">Pale</MenuItem>
+                  <MenuItem value="white">White</MenuItem>
+                  <MenuItem value="tanned">Tanned</MenuItem>
+                </TextField>
+              </Box>
+              <Box sx={{ flex: 1, width: '100%' }}>
+                <TextField
+                  select
+                  label="NSFW Policy"
+                  value={nsfwPolicy}
+                  onChange={e => setNsfwPolicy(e.target.value)}
+                  fullWidth
+                >
+                  <MenuItem value="blur">Blur</MenuItem>
+                  <MenuItem value="filter">Filter</MenuItem>
+                  <MenuItem value="allow">Allow</MenuItem>
+                </TextField>
+              </Box>
+            </Box>
+
             <FormControlLabel
               control={
                 <Switch
                   checked={autoDetectHairColor}
                   onChange={e => setAutoDetectHairColor(e.target.checked)}
+                  color="primary"
                 />
               }
-              label="Auto Detect Hair Color"
+              label="Auto-detect hair color from photo"
             />
-            <TextField
-              select
-              label="NSFW Policy"
-              value={nsfwPolicy}
-              onChange={e => setNsfwPolicy(e.target.value)}
-              fullWidth
-            >
-              <MenuItem value="blur">blur</MenuItem>
-              <MenuItem value="filter">filter</MenuItem>
-              <MenuItem value="allow">allow</MenuItem>
-            </TextField>
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button type="submit" variant="contained" disabled={!prompt}>
-            {"Generate"}
+        <DialogActions sx={{ px: { xs: 2, sm: 3 }, py: 2, justifyContent: 'space-between' }}>
+          <Button 
+            onClick={onClose} 
+            variant="outlined"
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            variant="contained" 
+            disabled={!prompt || isSubmitting}
+            color="primary"
+          >
+            {isSubmitting ? "Generating..." : "Generate Image"}
           </Button>
         </DialogActions>
       </form>
