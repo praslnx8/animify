@@ -293,9 +293,9 @@ export default function HomePage() {
         overflow: "hidden"
       }}
     >
-      <AppBar position="sticky" elevation={2} color="default">
+      <AppBar position="sticky" elevation={4} color="default">
         <Toolbar sx={{ px: { xs: 1, sm: 2 } }}>
-          <Avatar sx={{ bgcolor: "background.paper", mr: 1 }}>
+          <Avatar sx={{ bgcolor: "rgba(144, 202, 249, 0.2)", mr: 1 }}>
             <ImageIcon color="primary" />
           </Avatar>
           <Typography
@@ -306,7 +306,7 @@ export default function HomePage() {
             Animify Photos
           </Typography>
           <IconButton
-            color="inherit"
+            color="primary"
             onClick={handleAddPhotoClick}
             aria-label="add photo"
             size={isMobile ? "medium" : "large"}
@@ -339,13 +339,14 @@ export default function HomePage() {
               justifyContent: 'center',
               textAlign: 'center',
               height: '100%',
-              p: 3
+              p: 3,
+              background: 'radial-gradient(circle at center, rgba(144, 202, 249, 0.1) 0%, rgba(18, 18, 18, 0) 70%)'
             }}
           >
-            <Typography variant="h6" color="textSecondary" gutterBottom>
+            <Typography variant="h6" color="primary" gutterBottom>
               No photos yet
             </Typography>
-            <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 4, maxWidth: 300 }}>
               Add a photo to get started with transformations and animations
             </Typography>
             <IconButton
@@ -353,9 +354,15 @@ export default function HomePage() {
               aria-label="add photo"
               onClick={handleAddPhotoClick}
               sx={{ 
-                p: 2,
+                p: 2.5,
                 border: `2px dashed ${theme.palette.primary.main}`,
-                borderRadius: 2
+                borderRadius: 2,
+                bgcolor: 'rgba(144, 202, 249, 0.1)',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  bgcolor: 'rgba(144, 202, 249, 0.2)',
+                  transform: 'scale(1.05)'
+                }
               }}
             >
               <AddIcon fontSize="large" />
@@ -451,7 +458,8 @@ export default function HomePage() {
                     '& .MuiMobileStepper-dot': {
                       width: 8,
                       height: 8,
-                      mx: 0.5
+                      mx: 0.5,
+                      backgroundColor: 'rgba(255, 255, 255, 0.3)'
                     },
                     '& .MuiMobileStepper-dotActive': {
                       backgroundColor: theme.palette.primary.main,
@@ -463,9 +471,13 @@ export default function HomePage() {
                       onClick={handleNext}
                       disabled={activeStep === maxSteps - 1}
                       sx={{
-                        backgroundColor: activeStep < maxSteps - 1 ? 'rgba(0,0,0,0.04)' : 'transparent',
+                        backgroundColor: activeStep < maxSteps - 1 ? 'rgba(144, 202, 249, 0.15)' : 'transparent',
+                        color: 'primary.main',
                         '&:hover': {
-                          backgroundColor: 'rgba(0,0,0,0.08)'
+                          backgroundColor: 'rgba(144, 202, 249, 0.25)'
+                        },
+                        '&.Mui-disabled': {
+                          opacity: 0.3
                         }
                       }}
                     >
@@ -478,9 +490,13 @@ export default function HomePage() {
                       onClick={handleBack}
                       disabled={activeStep === 0}
                       sx={{
-                        backgroundColor: activeStep > 0 ? 'rgba(0,0,0,0.04)' : 'transparent',
+                        backgroundColor: activeStep > 0 ? 'rgba(144, 202, 249, 0.15)' : 'transparent',
+                        color: 'primary.main',
                         '&:hover': {
-                          backgroundColor: 'rgba(0,0,0,0.08)'
+                          backgroundColor: 'rgba(144, 202, 249, 0.25)'
+                        },
+                        '&.Mui-disabled': {
+                          opacity: 0.3
                         }
                       }}
                     >
