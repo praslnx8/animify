@@ -8,8 +8,15 @@ import {
   CircularProgress,
   Typography
 } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { MediaItem } from "../models/MediaItem";
+
+enum VideoStatus {
+  IDLE = 'idle',
+  LOADING = 'loading',
+  PLAYING = 'playing',
+  ERROR = 'error'
+}
 
 export interface VideoItemProps {
   mediaItem: MediaItem
@@ -17,24 +24,38 @@ export interface VideoItemProps {
 }
 
 const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) => {
-  const [status, setStatus] = React.useState<'idle' | 'loading' | 'playing' | 'error'>('idle');
+  const [status, setStatus] = React.useState<VideoStatus>(VideoStatus.IDLE);
   const [error, setError] = React.useState<string | null>(null);
+  const [videoKey, setVideoKey] = React.useState<number>(0); // Add a key to force remounting the video element
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    setStatus(VideoStatus.IDLE);
+    setError(null);
+  }, [mediaItem.id]);
+
   const handlePlay = () => {
     setError(null);
-    setStatus('loading');
+    setStatus(VideoStatus.LOADING);
+    setVideoKey(prevKey => prevKey + 1);
   };
 
   const handleVideoError = () => {
-    setStatus('error');
+    setStatus(VideoStatus.ERROR);
     setError("Video is not available yet. Please try again.");
   };
 
   const handleVideoLoaded = () => {
-    setStatus('playing');
+    setStatus(VideoStatus.PLAYING);
     videoRef.current?.play();
+  };
+
+  const getVideoUrlWithCacheBuster = () => {
+    if (!mediaItem.videoUrl) return '';
+    
+    const separator = mediaItem.videoUrl.includes('?') ? '&' : '?';
+    return `${mediaItem.videoUrl}${separator}t=${Date.now()}`;
   };
 
   return (
@@ -65,12 +86,12 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           alt="Video thumbnail"
           sx={{
             objectFit: 'contain',
-            display: status === 'playing' ? 'none' : 'block',
+            display: status === VideoStatus.PLAYING ? 'none' : 'block',
             backgroundColor: '#f0f0f0'
           }}
         />
 
-        {status !== 'playing' && (
+        {status !== VideoStatus.PLAYING && (
           <Box
             sx={{
               position: 'absolute',
@@ -101,7 +122,7 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           </Box>
         )}
 
-        {status === 'loading' && (
+        {status === VideoStatus.LOADING && (
           <Box sx={{
             position: 'absolute',
             top: 0,
@@ -118,17 +139,18 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           </Box>
         )}
 
-        {status !== 'idle' && status !== 'error' && (
+        {status !== VideoStatus.IDLE && (
           <video
+            key={videoKey} // Key prop forces remounting when changed
             ref={videoRef}
             width="100%"
             height={160}
             controls
             style={{
-              display: status === 'playing' ? 'block' : 'none',
+              display: status === VideoStatus.PLAYING ? 'block' : 'none',
               width: '100%'
             }}
-            src={mediaItem.videoUrl}
+            src={getVideoUrlWithCacheBuster()}
             onLoadedData={handleVideoLoaded}
             onError={handleVideoError}
           />
