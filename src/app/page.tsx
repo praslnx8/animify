@@ -23,7 +23,7 @@ import MediaItemComponent from "./components/MediaItemComponent";
 import { MediaItem } from "./models/MediaItem";
 import { MediaType } from "./models/MediaType";
 import { fileToBase64 } from "./utils/base64-utils";
-import { loadMediaItemsFromLocalStorage, saveMediaItemsToLocalStorage, StoredMediaItem } from "./utils/localStorage-utils";
+import { loadMediaItemsFromLocalStorage, saveMediaItemsToLocalStorage } from "./utils/localStorage-utils";
 
 // Styled components for the carousel
 const CarouselContainer = styled(Box)(({ theme }) => ({
@@ -119,11 +119,11 @@ export default function HomePage() {
     if (activeStep < maxSteps - 1 && !isAnimating) {
       setIsAnimating(true);
       setSwipeDirection('left');
-      
+
       // Set animation timeout to change slide
       setTimeout(() => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
-        
+
         // Reset animation flags after a short delay
         setTimeout(() => {
           setSwipeDirection(null);
@@ -137,11 +137,11 @@ export default function HomePage() {
     if (activeStep > 0 && !isAnimating) {
       setIsAnimating(true);
       setSwipeDirection('right');
-      
+
       // Set animation timeout to change slide
       setTimeout(() => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
-        
+
         // Reset animation flags after a short delay
         setTimeout(() => {
           setSwipeDirection(null);
@@ -150,7 +150,7 @@ export default function HomePage() {
       }, 300);
     }
   }, [activeStep, isAnimating]);
-  
+
   // Configure swipe handlers
   const swipeHandlers = useSwipeable({
     onSwipeStart: () => {
@@ -254,10 +254,10 @@ export default function HomePage() {
         onChange={handleFileChange}
       />
 
-      <Box sx={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <Box sx={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
         overflow: 'hidden',
         justifyContent: 'center',
         alignItems: 'stretch'
@@ -285,7 +285,7 @@ export default function HomePage() {
               color="primary"
               aria-label="add photo"
               onClick={handleAddPhotoClick}
-              sx={{ 
+              sx={{
                 p: 2.5,
                 border: `2px dashed ${theme.palette.primary.main}`,
                 borderRadius: 2,
@@ -301,14 +301,14 @@ export default function HomePage() {
             </IconButton>
           </Box>
         ) : (
-          <Box 
+          <Box
             {...swipeHandlers}
-            sx={{ 
+            sx={{
               width: '100%',
-              flex: 1, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              justifyContent: 'center', 
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
               position: 'relative',
               overflow: 'hidden',
               touchAction: 'pan-y',  // Allow vertical scrolling
@@ -323,7 +323,7 @@ export default function HomePage() {
             >
               <ChevronLeftIcon />
             </SwipeIndicator>
-            
+
             {/* Right swipe indicator */}
             <SwipeIndicator
               sx={{
@@ -333,7 +333,7 @@ export default function HomePage() {
             >
               <ChevronRightIcon />
             </SwipeIndicator>
-            
+
             <CarouselContainer>
               {mediaItems.map((mediaItem, index) => (
                 <CarouselItem
@@ -343,9 +343,9 @@ export default function HomePage() {
                     opacity: activeStep === index ? 1 : 0,
                     pointerEvents: activeStep === index ? 'auto' : 'none',
                     zIndex: activeStep === index ? 1 : 0,
-                    transform: activeStep === index && swipeDirection === 'left' ? 'translateX(-10%)' : 
-                              activeStep === index && swipeDirection === 'right' ? 'translateX(10%)' : 
-                              'translateX(0)',
+                    transform: activeStep === index && swipeDirection === 'left' ? 'translateX(-10%)' :
+                      activeStep === index && swipeDirection === 'right' ? 'translateX(10%)' :
+                        'translateX(0)',
                   }}
                 >
                   <Box
