@@ -221,6 +221,7 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
       </Dialog>
 
       <PhotoTransformDialog
+        prompt={mediaItem.prompt || ""}
         open={dialogOpen}
         base64={mediaItem.base64!!}
         onClose={() => setDialogOpen(false)}

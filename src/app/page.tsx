@@ -371,7 +371,7 @@ export default function HomePage() {
             </IconButton>
           </Box>
         ) : (
-          <Box sx={{ width: '100%', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Box sx={{ width: '100%', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             {/* Carousel container */}
             <SwipeableContainer
               ref={swiperRef}
