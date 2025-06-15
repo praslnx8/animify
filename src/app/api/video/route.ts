@@ -21,8 +21,11 @@ export async function POST(req: NextRequest) {
             image_url,
             prompt
         };
-
-        const apiPayload = { ...params, user_id: "1121", bot_id: "1121" };
+        
+        const randomUserID = Math.floor(1000 + Math.random() * 9000).toString();
+        const randomBotID = Math.floor(1000 + Math.random() * 9000).toString();
+        
+        const apiPayload = { ...params, user_id: randomUserID, bot_id: randomBotID };
         const res = await fetch("https://api.exh.ai/chat_media_manager/v2/submit_video_generation_task", {
             method: "POST",
             headers: {

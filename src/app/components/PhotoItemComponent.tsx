@@ -36,7 +36,7 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const imageUrl = mediaItem.base64 ? base64ToDataUrl(mediaItem.base64) : undefined;
+  const imageUrl = mediaItem.imageUrl ? mediaItem.imageUrl : (mediaItem.base64 ? base64ToDataUrl(mediaItem.base64) : undefined);
 
   const handleCardHover = () => {
     if (!isMobile) {
@@ -137,6 +137,7 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
                   <Button
                     variant="contained"
                     color="primary"
+                    disabled={!mediaItem.base64}
                     onClick={() => setDialogOpen(true)}
                     sx={{
                       borderRadius: '50%',
@@ -235,6 +236,7 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
         }}
       />
       <PhotoAnimateDialog
+        initialPrompt={mediaItem.prompt || ""}
         open={animateDialogOpen}
         mediaItem={mediaItem}
         onClose={() => setAnimateDialogOpen(false)}
