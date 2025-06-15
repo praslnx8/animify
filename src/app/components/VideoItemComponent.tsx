@@ -17,44 +17,24 @@ export interface VideoItemProps {
 }
 
 const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) => {
-  const [isPlaying, setIsPlaying] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [status, setStatus] = React.useState<'idle' | 'loading' | 'playing' | 'error'>('idle');
   const [error, setError] = React.useState<string | null>(null);
-  const [videoHeight, setVideoHeight] = React.useState<number>(160);
-  const [videoWidth, setVideoWidth] = React.useState<number | string>("100%");
-  const [videoFetched, setVideoFetched] = React.useState(false);
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const handlePlay = () => {
     setError(null);
-    setIsLoading(true);
-    setIsPlaying(true);
-    setVideoFetched(true);
+    setStatus('loading');
   };
 
   const handleVideoError = () => {
-    setIsLoading(false);
-    setIsPlaying(false);
+    setStatus('error');
     setError("Video is not available yet. Please try again.");
   };
 
   const handleVideoLoaded = () => {
-    setIsLoading(false);
-
-    if (videoRef.current) {
-      const video = videoRef.current;
-
-      const containerWidth = containerRef.current?.clientWidth || video.clientWidth;
-
-      const aspectRatio = video.videoWidth / video.videoHeight;
-      const calculatedHeight = containerWidth / aspectRatio;
-
-      setVideoHeight(calculatedHeight);
-      setVideoWidth(containerWidth);
-
-      video.play();
-    }
+    setStatus('playing');
+    videoRef.current?.play();
   };
 
   return (
@@ -74,23 +54,23 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           }}
           aria-label="Delete video"
         >
-          <DeleteIcon fontSize={window.innerWidth < 600 ? "small" : "medium"} />
+          <DeleteIcon fontSize={typeof window !== 'undefined' && window.innerWidth < 600 ? "small" : "medium"} />
         </Button>
       </Box>
       <Box sx={{ position: 'relative' }}>
         <CardMedia
           component="img"
           height="160"
-          image={mediaItem.base64 || mediaItem.imageUrl}
+          image={mediaItem.base64}
           alt="Video thumbnail"
           sx={{
             objectFit: 'contain',
-            display: isPlaying && !isLoading ? 'none' : 'block',
+            display: status === 'playing' ? 'none' : 'block',
             backgroundColor: '#f0f0f0'
           }}
         />
 
-        {(!isPlaying || error) && (
+        {status !== 'playing' && (
           <Box
             sx={{
               position: 'absolute',
@@ -116,12 +96,12 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
               }}
               aria-label={error ? "Retry video" : "Play video"}
             >
-              <PlayArrowIcon fontSize={window.innerWidth < 600 ? "medium" : "large"} />
+              <PlayArrowIcon fontSize={typeof window !== 'undefined' && window.innerWidth < 600 ? "medium" : "large"} />
             </Button>
           </Box>
         )}
 
-        {isLoading && (
+        {status === 'loading' && (
           <Box sx={{
             position: 'absolute',
             top: 0,
@@ -138,14 +118,14 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           </Box>
         )}
 
-        {videoFetched && (
+        {status !== 'idle' && status !== 'error' && (
           <video
             ref={videoRef}
-            width={videoWidth}
-            height={videoHeight}
+            width="100%"
+            height={160}
             controls
             style={{
-              display: isPlaying && !isLoading ? 'block' : 'none',
+              display: status === 'playing' ? 'block' : 'none',
               width: '100%'
             }}
             src={mediaItem.videoUrl}

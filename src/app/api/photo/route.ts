@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
                 "Content-Type": "application/json",
                 "accept": "application/json",
                 "authorization": `Bearer ${apiToken}`,
-                
+
             },
             body: JSON.stringify(apiPayload),
         });
@@ -55,11 +55,13 @@ export async function POST(req: NextRequest) {
         if (res.ok && data.image_b64) {
             return NextResponse.json({ image_b64: data.image_b64 });
         } else {
+            console.error('Error response from API:', data);
             return NextResponse.json({ 
                 error: `Status: ${res.status} ${res.statusText}. Response: ${JSON.stringify(data)}` 
             }, { status: res.status || 500 });
         }
     } catch (err: any) {
+        console.error('Error occurred while generating photo:', err);
         return NextResponse.json({ error: err.message || "Exception occurred while generating photo" }, { status: 500 });
     }
 }
