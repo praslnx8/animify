@@ -42,6 +42,8 @@ export default function HomePage() {
   const currentXRef = useRef(0);
   const [isSwiping, setIsSwiping] = useState(false);
   const [swipeDelta, setSwipeDelta] = useState(0);
+  const touchStartTimeRef = useRef(0);
+  const isScrollingRef = useRef(false);
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -49,72 +51,204 @@ export default function HomePage() {
 
   // Handle navigation
   const handleNext = useCallback(() => {
-    setActiveStep((prevActiveStep) => Math.min(prevActiveStep + 1, maxSteps - 1));
-  }, [maxSteps]);
+    if (activeStep < maxSteps - 1) {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      scrollToItem(activeStep + 1);
+    }
+  }, [activeStep, maxSteps]);
 
   const handleBack = useCallback(() => {
-    setActiveStep((prevActiveStep) => Math.max(prevActiveStep - 1, 0));
-  }, []);
+    if (activeStep > 0) {
+      setActiveStep((prevActiveStep) => prevActiveStep - 1);
+      scrollToItem(activeStep - 1);
+    }
+  }, [activeStep]);
 
-  // Update active item when activeStep changes
-  useEffect(() => {
-    if (swiperRef.current && !isSwiping) {
-      // Use smooth scrolling behavior to navigate to active item
+  // Scroll to specific item with smooth animation
+  const scrollToItem = useCallback((index: number) => {
+    if (swiperRef.current) {
+      isScrollingRef.current = true;
       const container = swiperRef.current;
-      const scrollAmount = container.clientWidth * activeStep;
+      const scrollAmount = container.clientWidth * index;
+      
       container.scrollTo({
         left: scrollAmount,
         behavior: 'smooth'
       });
+      
+      // Reset scrolling flag after animation completes
+      setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 300);
     }
-  }, [activeStep, isSwiping]);
+  }, []);
+
+  // Update active item when activeStep changes
+  useEffect(() => {
+    if (swiperRef.current && !isSwiping && !isScrollingRef.current) {
+      scrollToItem(activeStep);
+    }
+  }, [activeStep, isSwiping, scrollToItem]);
 
   // Handle swipe gestures
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Prevent swiping if already scrolling from a button press
+    if (isScrollingRef.current) return;
+    
     startXRef.current = e.touches[0].clientX;
     currentXRef.current = e.touches[0].clientX;
+    touchStartTimeRef.current = Date.now();
     setIsSwiping(true);
     setSwipeDelta(0);
+    
+    // Prevent default to avoid any conflict with other touch handlers
+    if (mediaItems.length > 1) {
+      e.stopPropagation();
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (isSwiping) {
       currentXRef.current = e.touches[0].clientX;
       const delta = currentXRef.current - startXRef.current;
-      setSwipeDelta(delta);
+      
+      // Limit swipe in edge cases
+      if ((activeStep === 0 && delta > 0) || 
+          (activeStep === maxSteps - 1 && delta < 0)) {
+        setSwipeDelta(delta * 0.2); // Reduced effect for "rubber band" feeling
+      } else {
+        setSwipeDelta(delta);
+      }
+      
+      // Prevent default to stop page scrolling
+      if (Math.abs(delta) > 10) { // Small threshold to avoid stopping tiny movements
+        e.preventDefault();
+        e.stopPropagation();
+      }
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
     if (isSwiping) {
       const delta = currentXRef.current - startXRef.current;
-      // If swipe distance is significant, navigate accordingly
-      if (Math.abs(delta) > 50) {
-        if (delta > 0) {
+      const timeDelta = Date.now() - touchStartTimeRef.current;
+      const velocity = Math.abs(delta) / timeDelta;
+      
+      // Navigate based on swipe distance or velocity
+      if (Math.abs(delta) > 50 || velocity > 0.15) {
+        if (delta > 0 && activeStep > 0) {
           handleBack();
-        } else {
+        } else if (delta < 0 && activeStep < maxSteps - 1) {
           handleNext();
+        } else {
+          // If we can't navigate (at the end), snap back
+          scrollToItem(activeStep);
         }
+      } else {
+        // For small movements, snap back to current item
+        scrollToItem(activeStep);
       }
+      
+      // If this was a significant swipe, prevent it from triggering other events
+      if (Math.abs(delta) > 10) {
+        e.stopPropagation();
+      }
+      
+      setIsSwiping(false);
+      setSwipeDelta(0);
+    }
+  };
+  
+  // Also handle touch cancel event (e.g., when system UI appears)
+  const handleTouchCancel = () => {
+    if (isSwiping) {
+      // Just snap back to current position on cancel
+      scrollToItem(activeStep);
       setIsSwiping(false);
       setSwipeDelta(0);
     }
   };
 
+  // Mouse-based swiping for desktop 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Prevent swiping if already scrolling from a button press
+    if (isScrollingRef.current) return;
+    
+    startXRef.current = e.clientX;
+    currentXRef.current = e.clientX;
+    touchStartTimeRef.current = Date.now();
+    setIsSwiping(true);
+    setSwipeDelta(0);
+    
+    // Add window-level event listeners
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  };
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (isSwiping) {
+      currentXRef.current = e.clientX;
+      const delta = currentXRef.current - startXRef.current;
+      
+      // Limit swipe in edge cases
+      if ((activeStep === 0 && delta > 0) || 
+          (activeStep === maxSteps - 1 && delta < 0)) {
+        setSwipeDelta(delta * 0.2);
+      } else {
+        setSwipeDelta(delta);
+      }
+    }
+  }, [isSwiping, activeStep, maxSteps]);
+
+  const handleMouseUp = useCallback(() => {
+    if (isSwiping) {
+      const delta = currentXRef.current - startXRef.current;
+      const timeDelta = Date.now() - touchStartTimeRef.current;
+      const velocity = Math.abs(delta) / timeDelta;
+      
+      if (Math.abs(delta) > 100 || velocity > 0.15) {
+        if (delta > 0 && activeStep > 0) {
+          handleBack();
+        } else if (delta < 0 && activeStep < maxSteps - 1) {
+          handleNext();
+        } else {
+          scrollToItem(activeStep);
+        }
+      } else {
+        scrollToItem(activeStep);
+      }
+      
+      setIsSwiping(false);
+      setSwipeDelta(0);
+      
+      // Remove window-level event listeners
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    }
+  }, [isSwiping, activeStep, maxSteps, handleBack, handleNext, scrollToItem, handleMouseMove]);
+
+  // Cleanup event listeners on unmount
+  useEffect(() => {
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
+
   // Sync active step with scroll position
   const handleScroll = useCallback(() => {
-    if (!isSwiping && swiperRef.current) {
+    if (!isSwiping && !isScrollingRef.current && swiperRef.current) {
       const container = swiperRef.current;
       const scrollLeft = container.scrollLeft;
       const itemWidth = container.clientWidth;
       const newActiveStep = Math.round(scrollLeft / itemWidth);
       
       // Only update if it's different to avoid infinite loops
-      if (newActiveStep !== activeStep) {
+      if (newActiveStep !== activeStep && newActiveStep >= 0 && newActiveStep < maxSteps) {
         setActiveStep(newActiveStep);
       }
     }
-  }, [activeStep, isSwiping]);
+  }, [activeStep, isSwiping, maxSteps]);
 
   useEffect(() => {
     const container = swiperRef.current;
@@ -136,8 +270,11 @@ export default function HomePage() {
       fileToBase64(file).then((base64) => {
         setMediaItems((prev) => {
           const newItems = [...prev, { id: Date.now().toString(), type: MediaType.Image, base64 }];
-          // Set active step to the newest photo
-          setTimeout(() => setActiveStep(newItems.length - 1), 100);
+          // Set active step to the newest photo with a slight delay to ensure DOM updates
+          setTimeout(() => {
+            setActiveStep(newItems.length - 1);
+            scrollToItem(newItems.length - 1);
+          }, 100);
           return newItems;
         });
       }).catch((error) => {
@@ -219,38 +356,54 @@ export default function HomePage() {
           <Box sx={{ width: '100%', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
             {/* Carousel container */}
             <SwipeableContainer
-              ref={swiperRef}
-              sx={{
-                overflowX: 'auto',
-                scrollSnapType: 'x mandatory',
-                scrollbarWidth: 'none', // Hide scrollbar for Firefox
-                '&::-webkit-scrollbar': {
-                  display: 'none', // Hide scrollbar for Chrome/Safari
-                },
-                transform: isSwiping ? `translateX(${swipeDelta * 0.3}px)` : 'translateX(0)',
-                transition: isSwiping ? 'none' : 'transform 0.3s ease',
-                flex: 1,
-              }}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
+                ref={swiperRef}
+                sx={{
+                  overflowX: 'auto',
+                  overflowY: 'hidden',
+                  scrollSnapType: 'x mandatory',
+                  scrollBehavior: 'smooth',
+                  scrollbarWidth: 'none', // Hide scrollbar for Firefox
+                  '&::-webkit-scrollbar': {
+                    display: 'none', // Hide scrollbar for Chrome/Safari
+                  },
+                  transform: isSwiping ? `translateX(${swipeDelta}px)` : 'translateX(0)',
+                  transition: isSwiping ? 'none' : 'transform 0.3s ease',
+                  flex: 1,
+                  width: '100%',
+                  WebkitOverflowScrolling: 'touch', // Smoother scrolling on iOS
+                }}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onTouchCancel={handleTouchCancel}
+                onMouseDown={handleMouseDown}
             >
               {mediaItems.map((mediaItem, index) => (
                 <Box 
                   key={index}
                   sx={{
                     minWidth: '100%',
+                    width: '100%',
                     flexShrink: 0,
                     scrollSnapAlign: 'start',
+                    scrollSnapStop: 'always', // Force snap points
                     px: 2,
                     boxSizing: 'border-box'
                   }}
                 >
                   <MediaItemComponent
                     mediaItem={mediaItem}
-                    addMediaItem={(mediaItem) =>
-                      setMediaItems((prev) => [...prev, mediaItem])
-                    }
+                    addMediaItem={(mediaItem) => {
+                      setMediaItems((prev) => {
+                        const newItems = [...prev, mediaItem];
+                        // Navigate to the new item with a slight delay
+                        setTimeout(() => {
+                          setActiveStep(newItems.length - 1);
+                          scrollToItem(newItems.length - 1);
+                        }, 100);
+                        return newItems;
+                      });
+                    }}
                     updateMediaItem={(updatedItem) =>
                       setMediaItems((prev) =>
                         prev.map((item) =>
@@ -263,7 +416,9 @@ export default function HomePage() {
                         const newItems = prev.filter((item) => item !== deletedItem);
                         // Adjust active step if needed
                         if (activeStep >= newItems.length && newItems.length > 0) {
-                          setActiveStep(newItems.length - 1);
+                          const newStep = newItems.length - 1;
+                          setActiveStep(newStep);
+                          scrollToItem(newStep);
                         }
                         return newItems;
                       })
