@@ -326,11 +326,12 @@ export default function HomePage() {
       />
 
       <Box sx={{ 
-        flexGrow: 1, 
+        flex: 1, 
         display: 'flex', 
         flexDirection: 'column', 
         overflow: 'hidden',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        alignItems: 'stretch'
       }}>
         {mediaItems.length === 0 ? (
           <Box
