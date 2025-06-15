@@ -71,6 +71,7 @@ export default function HomePage() {
   const [activeStep, setActiveStep] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<null | 'left' | 'right'>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showSwipeIndicator, setShowSwipeIndicator] = useState(false);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
