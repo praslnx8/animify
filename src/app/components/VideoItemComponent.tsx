@@ -1,5 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import PauseIcon from '@mui/icons-material/Pause';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -89,6 +90,18 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
 
   const handleVideoEnded = () => {
     setStatus(VideoStatus.ENDED);
+  };
+
+  const handleDownload = () => {
+    if (mediaItem.videoUrl) {
+      // Create an anchor element and use it to download the video
+      const a = document.createElement('a');
+      a.href = mediaItem.videoUrl;
+      a.download = `video-${mediaItem.id}.mp4`; // Default filename
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   };
 
   const handleCardHover = () => {
@@ -242,6 +255,28 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
                 <FullscreenIcon />
               </IconButton>
             </Tooltip>
+
+            {/* Download button */}
+            {hasVideoUrl && (
+              <Tooltip title="Download video">
+                <IconButton
+                  size={isMobile ? "small" : "medium"}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload();
+                  }}
+                  sx={{
+                    bgcolor: alpha(theme.palette.background.paper, 0.5),
+                    '&:hover': {
+                      bgcolor: alpha(theme.palette.background.paper, 0.7),
+                    },
+                    color: theme.palette.primary.main
+                  }}
+                >
+                  <DownloadIcon />
+                </IconButton>
+              </Tooltip>
+            )}
 
             {/* Delete button */}
             <Tooltip title="Delete video">
@@ -448,6 +483,24 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           >
             <CloseIcon />
           </IconButton>
+
+          {hasVideoUrl && (
+            <IconButton
+              onClick={handleDownload}
+              sx={{
+                position: 'absolute',
+                top: 16,
+                right: 70,
+                backgroundColor: alpha(theme.palette.common.black, 0.5),
+                color: theme.palette.common.white,
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.common.black, 0.7),
+                }
+              }}
+            >
+              <DownloadIcon />
+            </IconButton>
+          )}
         </Box>
       </Dialog>
     </>

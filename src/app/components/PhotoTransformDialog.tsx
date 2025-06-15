@@ -24,6 +24,7 @@ import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
 
 interface PhotoTransformDialogProps {
+  initialPrompt?: string;
   open: boolean;
   onClose: () => void;
   addMediaItem: (mediaItem: MediaItem) => void;
@@ -31,8 +32,8 @@ interface PhotoTransformDialogProps {
   base64: string;
 }
 
-const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClose, addMediaItem, updateMediaItem, base64 }) => {
-  const [prompt, setPrompt] = useState("");
+const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ initialPrompt, open, onClose, addMediaItem, updateMediaItem, base64 }) => {
+  const [prompt, setPrompt] = useState(initialPrompt || "");
   const [modelName, setModelName] = useState("base");
   const [style, setStyle] = useState("realistic");
   const [gender, setGender] = useState("man");
