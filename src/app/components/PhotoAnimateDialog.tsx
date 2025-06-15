@@ -30,6 +30,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, 
             id: Date.now().toString(),
             type: MediaType.Video,
             loading: true,
+            prompt,
             base64: mediaItem.base64
         };
         addMediaItem(videoMediaItem);

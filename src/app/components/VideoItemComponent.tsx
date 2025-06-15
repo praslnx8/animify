@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { MediaItem } from "../models/MediaItem";
+import { base64ToDataUrl } from '../utils/base64-utils';
 
 enum VideoStatus {
   IDLE = 'idle',
@@ -53,7 +54,7 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
 
   const getVideoUrlWithCacheBuster = () => {
     if (!mediaItem.videoUrl) return '';
-    
+
     const separator = mediaItem.videoUrl.includes('?') ? '&' : '?';
     return `${mediaItem.videoUrl}${separator}t=${Date.now()}`;
   };
@@ -66,9 +67,9 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           color="error"
           size="small"
           onClick={() => onDelete(mediaItem)}
-          sx={{ 
-            minWidth: 0, 
-            p: { xs: 0.5, sm: 1 }, 
+          sx={{
+            minWidth: 0,
+            p: { xs: 0.5, sm: 1 },
             borderRadius: '50%',
             width: { xs: '32px', sm: '40px' },
             height: { xs: '32px', sm: '40px' }
@@ -82,7 +83,7 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
         <CardMedia
           component="img"
           height="160"
-          image={mediaItem.base64}
+          image={base64ToDataUrl(mediaItem.base64!)}
           alt="Video thumbnail"
           sx={{
             objectFit: 'contain',
@@ -109,11 +110,11 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
               variant="contained"
               color="primary"
               onClick={handlePlay}
-              sx={{ 
-                borderRadius: '50%', 
-                minWidth: { xs: 40, sm: 48 }, 
-                minHeight: { xs: 40, sm: 48 }, 
-                p: 0 
+              sx={{
+                borderRadius: '50%',
+                minWidth: { xs: 40, sm: 48 },
+                minHeight: { xs: 40, sm: 48 },
+                p: 0
               }}
               aria-label={error ? "Retry video" : "Play video"}
             >

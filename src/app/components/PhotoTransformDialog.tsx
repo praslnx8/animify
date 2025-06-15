@@ -39,6 +39,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
       id: Date.now().toString(),
       type: MediaType.Image,
       loading: true,
+      prompt,
     };
     addMediaItem(mediaItem);
 
