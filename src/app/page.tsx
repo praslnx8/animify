@@ -53,8 +53,8 @@ const SwipeIndicator = styled(Box)(({ theme }) => ({
   position: 'absolute',
   top: '50%',
   transform: 'translateY(-50%)',
-  width: 40,
-  height: 40,
+  width: theme.breakpoints.down('sm') ? 32 : 40,
+  height: theme.breakpoints.down('sm') ? 32 : 40,
   borderRadius: '50%',
   display: 'flex',
   justifyContent: 'center',
@@ -64,6 +64,7 @@ const SwipeIndicator = styled(Box)(({ theme }) => ({
   zIndex: 10,
   opacity: 0,
   transition: 'opacity 200ms ease',
+  touchAction: 'none', // Prevents touch events from being absorbed
 }));
 
 export default function HomePage() {
@@ -213,14 +214,38 @@ export default function HomePage() {
     }
   };
 
+  // Use useEffect to set dynamic viewport height to handle mobile browsers
+  const [viewportHeight, setViewportHeight] = useState('100vh');
+  
+  useEffect(() => {
+    // Function to update viewport height
+    const updateViewportHeight = () => {
+      // Set CSS custom property for viewport height
+      setViewportHeight(`${window.innerHeight}px`);
+    };
+    
+    // Set initial height
+    updateViewportHeight();
+    
+    // Update on resize and orientation change
+    window.addEventListener('resize', updateViewportHeight);
+    window.addEventListener('orientationchange', updateViewportHeight);
+    
+    // Clean up listeners
+    return () => {
+      window.removeEventListener('resize', updateViewportHeight);
+      window.removeEventListener('orientationchange', updateViewportHeight);
+    };
+  }, []);
+  
   return (
     <Box
       sx={{
-        height: "100vh",
+        height: viewportHeight,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        maxHeight: "100vh"
+        maxHeight: viewportHeight
       }}
     >
       <AppBar position="sticky" elevation={4} color="default">
@@ -260,7 +285,11 @@ export default function HomePage() {
         flexDirection: 'column',
         overflow: 'hidden',
         justifyContent: 'center',
-        alignItems: 'stretch'
+        alignItems: 'stretch',
+        // Safe area inset padding for notched devices
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingLeft: 'env(safe-area-inset-left, 0px)',
+        paddingRight: 'env(safe-area-inset-right, 0px)'
       }}>
         {mediaItems.length === 0 ? (
           <Box

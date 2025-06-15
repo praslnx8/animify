@@ -36,7 +36,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ initialPrompt, 
         };
         addMediaItem(videoMediaItem);
         try {
-            if (!mediaItem.imageUrl && mediaItem.base64) {
+            if (mediaItem.base64) {
                 const uploadedUrl = await uploadBase64Image(mediaItem.base64);
                 if (!uploadedUrl) {
                     updateMediaItem({ ...videoMediaItem, loading: false, error: "Failed to upload image" });
