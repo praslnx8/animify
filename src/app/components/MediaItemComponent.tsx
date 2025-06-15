@@ -113,7 +113,16 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
           </Card>
         )}
 
-        <Box sx={{ position: 'relative', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+        <Box sx={{ 
+          position: 'relative', 
+          flex: 1, 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          overflow: 'hidden',
+          width: '100%',
+          height: '100%'
+        }}>
           {mediaItem.type === MediaType.Image ? (
             <PhotoItemComponent
               mediaItem={mediaItem}

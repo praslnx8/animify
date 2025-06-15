@@ -392,6 +392,8 @@ export default function HomePage() {
                 display: 'flex',
                 alignItems: 'center',
                 WebkitOverflowScrolling: 'touch', // Smoother scrolling on iOS
+                height: '100%', // Ensure consistent height
+                maxHeight: '100%', // Prevent overflow
               }}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -415,7 +417,8 @@ export default function HomePage() {
                     boxSizing: 'border-box',
                     display: 'flex',
                     justifyContent: 'center',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    overflow: 'hidden' // Prevent content overflow
                   }}
                 >
                   <MediaItemComponent

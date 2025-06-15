@@ -120,7 +120,7 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
   }, [fullscreenOpen, status]);
 
   const hasVideoUrl = !!mediaItem.videoUrl;
-  const thumbnailImage = mediaItem.base64 ? base64ToDataUrl(mediaItem.base64) : undefined;
+  const thumbnailImage = mediaItem.base64 ? base64ToDataUrl(mediaItem.base64, 'image/jpeg') : undefined;
 
   const renderVideoControls = () => (
     <Fade in={controlsVisible || status === VideoStatus.IDLE || status === VideoStatus.ENDED || status === VideoStatus.ERROR || !hasVideoUrl}>
