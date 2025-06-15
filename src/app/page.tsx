@@ -8,7 +8,6 @@ import {
   AppBar,
   Avatar,
   Box,
-  Fab,
   IconButton,
   MobileStepper,
   Toolbar,
@@ -288,9 +287,10 @@ export default function HomePage() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        height: "100vh",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden"
       }}
     >
       <AppBar position="sticky" elevation={2} color="default">
@@ -324,7 +324,12 @@ export default function HomePage() {
         onChange={handleFileChange}
       />
 
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', py: 2 }}>
+      <Box sx={{ 
+        flexGrow: 1, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        overflow: 'hidden'
+      }}>
         {mediaItems.length === 0 ? (
           <Box
             sx={{
@@ -333,8 +338,8 @@ export default function HomePage() {
               alignItems: 'center',
               justifyContent: 'center',
               textAlign: 'center',
-              height: '60vh',
-              mt: 2
+              height: '100%',
+              p: 3
             }}
           >
             <Typography variant="h6" color="textSecondary" gutterBottom>
@@ -343,13 +348,18 @@ export default function HomePage() {
             <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
               Add a photo to get started with transformations and animations
             </Typography>
-            <Fab
+            <IconButton
               color="primary"
               aria-label="add photo"
               onClick={handleAddPhotoClick}
+              sx={{ 
+                p: 2,
+                border: `2px dashed ${theme.palette.primary.main}`,
+                borderRadius: 2
+              }}
             >
-              <AddIcon />
-            </Fab>
+              <AddIcon fontSize="large" />
+            </IconButton>
           </Box>
         ) : (
           <Box sx={{ width: '100%', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
@@ -383,11 +393,13 @@ export default function HomePage() {
                   sx={{
                     minWidth: '100%',
                     width: '100%',
+                    height: '100%', // Full height
                     flexShrink: 0,
                     scrollSnapAlign: 'start',
                     scrollSnapStop: 'always', // Force snap points
                     px: 2,
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    display: 'flex'
                   }}
                 >
                   <MediaItemComponent
@@ -429,7 +441,7 @@ export default function HomePage() {
 
             {/* Navigation dots and controls */}
             {mediaItems.length > 0 && (
-              <Box sx={{ mt: 2, mb: 2, px: 2 }}>
+              <Box sx={{ mt: 'auto', py: 2, px: 2 }}>
                 <MobileStepper
                   steps={maxSteps}
                   position="static"
@@ -481,22 +493,6 @@ export default function HomePage() {
           </Box>
         )}
       </Box>
-
-      {mediaItems.length > 0 && (
-        <Fab
-          color="primary"
-          aria-label="add new photo"
-          onClick={handleAddPhotoClick}
-          sx={{
-            position: 'fixed',
-            bottom: 16,
-            right: 16,
-            display: { sm: 'none' }  // Only show on mobile
-          }}
-        >
-          <AddIcon />
-        </Fab>
-      )}
     </Box>
   );
 }
