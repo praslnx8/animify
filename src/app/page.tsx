@@ -290,7 +290,8 @@ export default function HomePage() {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden"
+        overflow: "hidden",
+        maxHeight: "100vh"
       }}
     >
       <AppBar position="sticky" elevation={4} color="default">
@@ -328,7 +329,8 @@ export default function HomePage() {
         flexGrow: 1, 
         display: 'flex', 
         flexDirection: 'column', 
-        overflow: 'hidden'
+        overflow: 'hidden',
+        justifyContent: 'center'
       }}>
         {mediaItems.length === 0 ? (
           <Box
@@ -369,7 +371,7 @@ export default function HomePage() {
             </IconButton>
           </Box>
         ) : (
-          <Box sx={{ width: '100%', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ width: '100%', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             {/* Carousel container */}
             <SwipeableContainer
               ref={swiperRef}
@@ -386,6 +388,8 @@ export default function HomePage() {
                 transition: isSwiping ? 'none' : 'transform 0.3s ease',
                 flex: 1,
                 width: '100%',
+                display: 'flex',
+                alignItems: 'center',
                 WebkitOverflowScrolling: 'touch', // Smoother scrolling on iOS
               }}
               onTouchStart={handleTouchStart}
@@ -405,8 +409,12 @@ export default function HomePage() {
                     scrollSnapAlign: 'start',
                     scrollSnapStop: 'always', // Force snap points
                     px: 2,
+                    pb: 0,
+                    pt: 0,
                     boxSizing: 'border-box',
-                    display: 'flex'
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
                   }}
                 >
                   <MediaItemComponent
@@ -448,13 +456,14 @@ export default function HomePage() {
 
             {/* Navigation dots and controls */}
             {mediaItems.length > 0 && (
-              <Box sx={{ mt: 'auto', py: 2, px: 2 }}>
+              <Box sx={{ px: 2, pb: 0, mt: 0 }}>
                 <MobileStepper
                   steps={maxSteps}
                   position="static"
                   activeStep={activeStep}
                   sx={{
                     backgroundColor: 'transparent',
+                    py: 0.5,
                     '& .MuiMobileStepper-dot': {
                       width: 8,
                       height: 8,

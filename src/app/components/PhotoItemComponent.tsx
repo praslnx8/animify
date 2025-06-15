@@ -65,10 +65,10 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
           borderRadius: 2,
           boxShadow: 2,
           flex: 1,
+          width: '100%',
           display: 'flex',
           flexDirection: 'column',
-          height: { xs: 'calc(70vh - 56px)', sm: 'calc(70vh - 64px)' }, // Adjust for prompt height if needed
-          maxHeight: { xs: '600px', sm: '700px' },
+          height: '100%',
           '&:hover': {
             boxShadow: 4,
           },
@@ -87,7 +87,8 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
               backgroundColor: alpha(theme.palette.common.black, 0.04),
               objectFit: 'contain',
               width: '100%',
-              height: '100%'
+              height: '100%',
+              display: 'block'
             }}
           />
 

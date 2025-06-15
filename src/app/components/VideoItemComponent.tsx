@@ -278,10 +278,10 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           borderRadius: 2,
           boxShadow: 2,
           flex: 1,
+          width: '100%',
           display: 'flex',
           flexDirection: 'column',
-          height: { xs: 'calc(70vh - 56px)', sm: 'calc(70vh - 64px)' }, // Adjust for prompt height if needed
-          maxHeight: { xs: '600px', sm: '700px' },
+          height: '100%',
         }}
         onMouseEnter={handleCardHover}
         onMouseLeave={handleCardLeave}

@@ -29,7 +29,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
   if (mediaItem.error || mediaItem.loading) {
     return (
       <Card sx={{
-        height: { xs: 'calc(70vh)', sm: 'auto' },
+        height: '100%',
         position: 'relative',
         overflow: 'hidden',
         p: 2,
@@ -51,7 +51,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
             <DeleteIcon fontSize={isMobile ? "small" : "medium"} />
           </Button>
         </Box>
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight={120}>
+        <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
           {mediaItem.loading ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <CircularProgress color="primary" size={isMobile ? 36 : 48} />
@@ -113,7 +113,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
           </Card>
         )}
 
-        <Box sx={{ position: 'relative', flex: 1, display: 'flex' }}>
+        <Box sx={{ position: 'relative', flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           {mediaItem.type === MediaType.Image ? (
             <PhotoItemComponent
               mediaItem={mediaItem}

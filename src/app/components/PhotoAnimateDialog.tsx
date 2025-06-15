@@ -14,6 +14,7 @@ import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
 
 interface PhotoAnimateDialogProps {
+    initialPrompt?: string;
     open: boolean;
     onClose: () => void;
     mediaItem: MediaItem;
@@ -21,8 +22,8 @@ interface PhotoAnimateDialogProps {
     updateMediaItem: (mediaItem: MediaItem) => void;
 }
 
-const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, mediaItem, addMediaItem, updateMediaItem }) => {
-    const [prompt, setPrompt] = useState("");
+const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ initialPrompt, open, onClose, mediaItem, addMediaItem, updateMediaItem }) => {
+    const [prompt, setPrompt] = useState(initialPrompt || "");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
