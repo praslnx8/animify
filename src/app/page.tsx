@@ -8,7 +8,6 @@ import {
   AppBar,
   Avatar,
   Box,
-  Container,
   Fab,
   IconButton,
   MobileStepper,
@@ -44,7 +43,7 @@ export default function HomePage() {
   const [swipeDelta, setSwipeDelta] = useState(0);
   const touchStartTimeRef = useRef(0);
   const isScrollingRef = useRef(false);
-  
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const maxSteps = mediaItems.length;
@@ -70,12 +69,12 @@ export default function HomePage() {
       isScrollingRef.current = true;
       const container = swiperRef.current;
       const scrollAmount = container.clientWidth * index;
-      
+
       container.scrollTo({
         left: scrollAmount,
         behavior: 'smooth'
       });
-      
+
       // Reset scrolling flag after animation completes
       setTimeout(() => {
         isScrollingRef.current = false;
@@ -94,13 +93,13 @@ export default function HomePage() {
   const handleTouchStart = (e: React.TouchEvent) => {
     // Prevent swiping if already scrolling from a button press
     if (isScrollingRef.current) return;
-    
+
     startXRef.current = e.touches[0].clientX;
     currentXRef.current = e.touches[0].clientX;
     touchStartTimeRef.current = Date.now();
     setIsSwiping(true);
     setSwipeDelta(0);
-    
+
     // Prevent default to avoid any conflict with other touch handlers
     if (mediaItems.length > 1) {
       e.stopPropagation();
@@ -111,15 +110,15 @@ export default function HomePage() {
     if (isSwiping) {
       currentXRef.current = e.touches[0].clientX;
       const delta = currentXRef.current - startXRef.current;
-      
+
       // Limit swipe in edge cases
-      if ((activeStep === 0 && delta > 0) || 
-          (activeStep === maxSteps - 1 && delta < 0)) {
+      if ((activeStep === 0 && delta > 0) ||
+        (activeStep === maxSteps - 1 && delta < 0)) {
         setSwipeDelta(delta * 0.2); // Reduced effect for "rubber band" feeling
       } else {
         setSwipeDelta(delta);
       }
-      
+
       // Prevent default to stop page scrolling
       if (Math.abs(delta) > 10) { // Small threshold to avoid stopping tiny movements
         e.preventDefault();
@@ -133,7 +132,7 @@ export default function HomePage() {
       const delta = currentXRef.current - startXRef.current;
       const timeDelta = Date.now() - touchStartTimeRef.current;
       const velocity = Math.abs(delta) / timeDelta;
-      
+
       // Navigate based on swipe distance or velocity
       if (Math.abs(delta) > 50 || velocity > 0.15) {
         if (delta > 0 && activeStep > 0) {
@@ -148,17 +147,17 @@ export default function HomePage() {
         // For small movements, snap back to current item
         scrollToItem(activeStep);
       }
-      
+
       // If this was a significant swipe, prevent it from triggering other events
       if (Math.abs(delta) > 10) {
         e.stopPropagation();
       }
-      
+
       setIsSwiping(false);
       setSwipeDelta(0);
     }
   };
-  
+
   // Also handle touch cancel event (e.g., when system UI appears)
   const handleTouchCancel = () => {
     if (isSwiping) {
@@ -173,13 +172,13 @@ export default function HomePage() {
   const handleMouseDown = (e: React.MouseEvent) => {
     // Prevent swiping if already scrolling from a button press
     if (isScrollingRef.current) return;
-    
+
     startXRef.current = e.clientX;
     currentXRef.current = e.clientX;
     touchStartTimeRef.current = Date.now();
     setIsSwiping(true);
     setSwipeDelta(0);
-    
+
     // Add window-level event listeners
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
@@ -189,10 +188,10 @@ export default function HomePage() {
     if (isSwiping) {
       currentXRef.current = e.clientX;
       const delta = currentXRef.current - startXRef.current;
-      
+
       // Limit swipe in edge cases
-      if ((activeStep === 0 && delta > 0) || 
-          (activeStep === maxSteps - 1 && delta < 0)) {
+      if ((activeStep === 0 && delta > 0) ||
+        (activeStep === maxSteps - 1 && delta < 0)) {
         setSwipeDelta(delta * 0.2);
       } else {
         setSwipeDelta(delta);
@@ -205,7 +204,7 @@ export default function HomePage() {
       const delta = currentXRef.current - startXRef.current;
       const timeDelta = Date.now() - touchStartTimeRef.current;
       const velocity = Math.abs(delta) / timeDelta;
-      
+
       if (Math.abs(delta) > 100 || velocity > 0.15) {
         if (delta > 0 && activeStep > 0) {
           handleBack();
@@ -217,10 +216,10 @@ export default function HomePage() {
       } else {
         scrollToItem(activeStep);
       }
-      
+
       setIsSwiping(false);
       setSwipeDelta(0);
-      
+
       // Remove window-level event listeners
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
@@ -242,7 +241,7 @@ export default function HomePage() {
       const scrollLeft = container.scrollLeft;
       const itemWidth = container.clientWidth;
       const newActiveStep = Math.round(scrollLeft / itemWidth);
-      
+
       // Only update if it's different to avoid infinite loops
       if (newActiveStep !== activeStep && newActiveStep >= 0 && newActiveStep < maxSteps) {
         setActiveStep(newActiveStep);
@@ -324,14 +323,14 @@ export default function HomePage() {
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
-      
+
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', py: 2 }}>
         {mediaItems.length === 0 ? (
-          <Box 
+          <Box
             sx={{
-              display: 'flex', 
+              display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center', 
+              alignItems: 'center',
               justifyContent: 'center',
               textAlign: 'center',
               height: '60vh',
@@ -344,8 +343,8 @@ export default function HomePage() {
             <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
               Add a photo to get started with transformations and animations
             </Typography>
-            <Fab 
-              color="primary" 
+            <Fab
+              color="primary"
               aria-label="add photo"
               onClick={handleAddPhotoClick}
             >
@@ -356,30 +355,30 @@ export default function HomePage() {
           <Box sx={{ width: '100%', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
             {/* Carousel container */}
             <SwipeableContainer
-                ref={swiperRef}
-                sx={{
-                  overflowX: 'auto',
-                  overflowY: 'hidden',
-                  scrollSnapType: 'x mandatory',
-                  scrollBehavior: 'smooth',
-                  scrollbarWidth: 'none', // Hide scrollbar for Firefox
-                  '&::-webkit-scrollbar': {
-                    display: 'none', // Hide scrollbar for Chrome/Safari
-                  },
-                  transform: isSwiping ? `translateX(${swipeDelta}px)` : 'translateX(0)',
-                  transition: isSwiping ? 'none' : 'transform 0.3s ease',
-                  flex: 1,
-                  width: '100%',
-                  WebkitOverflowScrolling: 'touch', // Smoother scrolling on iOS
-                }}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onTouchCancel={handleTouchCancel}
-                onMouseDown={handleMouseDown}
+              ref={swiperRef}
+              sx={{
+                overflowX: 'auto',
+                overflowY: 'hidden',
+                scrollSnapType: 'x mandatory',
+                scrollBehavior: 'smooth',
+                scrollbarWidth: 'none', // Hide scrollbar for Firefox
+                '&::-webkit-scrollbar': {
+                  display: 'none', // Hide scrollbar for Chrome/Safari
+                },
+                transform: isSwiping ? `translateX(${swipeDelta}px)` : 'translateX(0)',
+                transition: isSwiping ? 'none' : 'transform 0.3s ease',
+                flex: 1,
+                width: '100%',
+                WebkitOverflowScrolling: 'touch', // Smoother scrolling on iOS
+              }}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchCancel}
+              onMouseDown={handleMouseDown}
             >
               {mediaItems.map((mediaItem, index) => (
-                <Box 
+                <Box
                   key={index}
                   sx={{
                     minWidth: '100%',
@@ -427,7 +426,7 @@ export default function HomePage() {
                 </Box>
               ))}
             </SwipeableContainer>
-            
+
             {/* Navigation dots and controls */}
             {mediaItems.length > 0 && (
               <Box sx={{ mt: 2, mb: 2, px: 2 }}>
@@ -447,11 +446,11 @@ export default function HomePage() {
                     }
                   }}
                   nextButton={
-                    <IconButton 
-                      size="small" 
-                      onClick={handleNext} 
+                    <IconButton
+                      size="small"
+                      onClick={handleNext}
                       disabled={activeStep === maxSteps - 1}
-                      sx={{ 
+                      sx={{
                         backgroundColor: activeStep < maxSteps - 1 ? 'rgba(0,0,0,0.04)' : 'transparent',
                         '&:hover': {
                           backgroundColor: 'rgba(0,0,0,0.08)'
@@ -462,11 +461,11 @@ export default function HomePage() {
                     </IconButton>
                   }
                   backButton={
-                    <IconButton 
-                      size="small" 
-                      onClick={handleBack} 
+                    <IconButton
+                      size="small"
+                      onClick={handleBack}
                       disabled={activeStep === 0}
-                      sx={{ 
+                      sx={{
                         backgroundColor: activeStep > 0 ? 'rgba(0,0,0,0.04)' : 'transparent',
                         '&:hover': {
                           backgroundColor: 'rgba(0,0,0,0.08)'
@@ -482,15 +481,15 @@ export default function HomePage() {
           </Box>
         )}
       </Box>
-      
+
       {mediaItems.length > 0 && (
-        <Fab 
+        <Fab
           color="primary"
           aria-label="add new photo"
           onClick={handleAddPhotoClick}
-          sx={{ 
-            position: 'fixed', 
-            bottom: 16, 
+          sx={{
+            position: 'fixed',
+            bottom: 16,
             right: 16,
             display: { sm: 'none' }  // Only show on mobile
           }}

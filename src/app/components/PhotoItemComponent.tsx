@@ -35,7 +35,7 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
   const [controlsVisible, setControlsVisible] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const imageUrl = mediaItem.base64 ? base64ToDataUrl(mediaItem.base64) : undefined;
 
   const handleCardHover = () => {
@@ -58,9 +58,9 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
 
   return (
     <>
-      <Card 
-        sx={{ 
-          position: 'relative', 
+      <Card
+        sx={{
+          position: 'relative',
           overflow: 'hidden',
           borderRadius: 2,
           boxShadow: 2,
@@ -90,19 +90,19 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
               height: '100%'
             }}
           />
-          
+
           {/* Fullscreen button - always visible */}
           <Tooltip title="View fullscreen">
-            <IconButton 
+            <IconButton
               size="small"
               onClick={(e) => {
                 e.stopPropagation();
                 setFullscreenOpen(true);
               }}
               sx={{
-                position: 'absolute', 
-                top: 8, 
-                right: 8, 
+                position: 'absolute',
+                top: 8,
+                right: 8,
                 backgroundColor: alpha(theme.palette.background.paper, 0.7),
                 '&:hover': {
                   backgroundColor: alpha(theme.palette.background.paper, 0.9),
@@ -124,8 +124,8 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 padding: '12px',
-                background: isMobile 
-                  ? 'rgba(0,0,0,0.5)' 
+                background: isMobile
+                  ? 'rgba(0,0,0,0.5)'
                   : 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
                 transition: 'opacity 0.3s ease'
               }}
@@ -188,7 +188,7 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
           </Fade>
         </Box>
       </Card>
-      
+
       {/* Fullscreen image dialog */}
       <Dialog
         open={fullscreenOpen}
@@ -197,8 +197,8 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
         fullScreen={isMobile}
         onClick={() => setFullscreenOpen(false)}
       >
-        <Box sx={{ 
-          backgroundColor: 'black', 
+        <Box sx={{
+          backgroundColor: 'black',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -207,14 +207,14 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
           position: 'relative',
           overflow: 'auto'
         }}>
-          <img 
-            src={imageUrl} 
-            alt="Fullscreen view" 
-            style={{ 
-              maxHeight: '100%', 
-              maxWidth: '100%', 
-              objectFit: 'contain' 
-            }} 
+          <img
+            src={imageUrl}
+            alt="Fullscreen view"
+            style={{
+              maxHeight: '100%',
+              maxWidth: '100%',
+              objectFit: 'contain'
+            }}
           />
         </Box>
       </Dialog>

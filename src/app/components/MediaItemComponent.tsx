@@ -6,9 +6,9 @@ import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CircularProgress from '@mui/material/CircularProgress';
 import Fade from '@mui/material/Fade';
+import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
 import React from "react";
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
@@ -28,10 +28,10 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
 
   if (mediaItem.error || mediaItem.loading) {
     return (
-      <Card sx={{ 
+      <Card sx={{
         height: { xs: 'calc(70vh)', sm: 'auto' },
-        position: 'relative', 
-        overflow: 'hidden', 
+        position: 'relative',
+        overflow: 'hidden',
         p: 2,
         borderRadius: 2,
         boxShadow: 2,
@@ -65,7 +65,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
             </Box>
           ) : (
             <Fade in={!!mediaItem.error}>
-              <Box sx={{ 
+              <Box sx={{
                 color: "error.main",
                 p: 2,
                 borderRadius: 1,
@@ -90,16 +90,16 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
         flexDirection: 'column'
       }}>
         {mediaItem.prompt && (
-          <Card sx={{ 
+          <Card sx={{
             p: 1.5,
             borderRadius: '8px 8px 0 0',
             backgroundColor: theme.palette.background.paper,
             boxShadow: 1
           }}>
-            <Typography 
-              variant="body2" 
-              color="textSecondary" 
-              sx={{ 
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              sx={{
                 fontStyle: 'italic',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',

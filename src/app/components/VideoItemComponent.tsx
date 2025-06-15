@@ -1,9 +1,9 @@
+import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import PauseIcon from '@mui/icons-material/Pause';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ReplayIcon from '@mui/icons-material/Replay';
-import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
   Button,
@@ -46,7 +46,7 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const fullscreenVideoRef = React.useRef<HTMLVideoElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
-  
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -134,8 +134,8 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: status === VideoStatus.IDLE || status === VideoStatus.ENDED || status === VideoStatus.ERROR 
-            ? 'rgba(0,0,0,0.4)' 
+          background: status === VideoStatus.IDLE || status === VideoStatus.ENDED || status === VideoStatus.ERROR
+            ? 'rgba(0,0,0,0.4)'
             : 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0) 100%)',
         }}
         onClick={(e) => {
@@ -151,8 +151,8 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
       >
         {/* Center play/pause button */}
         {(status === VideoStatus.IDLE || status === VideoStatus.ENDED || status === VideoStatus.ERROR) && (
-          <Box 
-            sx={{ 
+          <Box
+            sx={{
               position: 'absolute',
               top: '50%',
               left: '50%',
@@ -270,10 +270,10 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
 
   return (
     <>
-      <Card 
-        ref={containerRef} 
-        sx={{ 
-          position: 'relative', 
+      <Card
+        ref={containerRef}
+        sx={{
+          position: 'relative',
           overflow: 'hidden',
           borderRadius: 2,
           boxShadow: 2,
@@ -354,14 +354,14 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
               }}
             >
               {error ? (
-                <Typography 
-                  variant="body1" 
-                  color="error" 
-                  sx={{ 
-                    p: 2, 
+                <Typography
+                  variant="body1"
+                  color="error"
+                  sx={{
+                    p: 2,
                     textAlign: 'center',
                     backgroundColor: alpha(theme.palette.background.paper, 0.7),
-                    borderRadius: 1 
+                    borderRadius: 1
                   }}
                 >
                   {error}
@@ -409,8 +409,8 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
         maxWidth="xl"
         fullScreen={isMobile}
       >
-        <Box sx={{ 
-          backgroundColor: 'black', 
+        <Box sx={{
+          backgroundColor: 'black',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
