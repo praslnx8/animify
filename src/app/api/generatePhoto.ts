@@ -15,7 +15,7 @@ export interface GeneratePhotoResult {
   error?: string;
 }
 
-export async function generatePhotoClient(params: GeneratePhotoParams): Promise<GeneratePhotoResult> {
+export async function generatePhoto(params: GeneratePhotoParams): Promise<GeneratePhotoResult> {
   try {
     const res = await fetch("/api/photo", {
       method: "POST",
@@ -25,13 +25,13 @@ export async function generatePhotoClient(params: GeneratePhotoParams): Promise<
       body: JSON.stringify(params),
     });
     const data = await res.json();
-    
+
     if (res.ok && data.image_b64) {
       return { image_b64: data.image_b64 };
     } else {
-      return { error: data.error || `Error: ${res.status}` };
+      throw new Error(data.error || `Status: ${res.status} ${res.statusText}. Response: ${JSON.stringify(data)}`);
     }
   } catch (err: any) {
-    return { error: err.message || "Exception occurred while generating photo" };
+    throw new Error(err.message || "Exception occurred while generating photo");
   }
 }

@@ -11,7 +11,7 @@ import React, { useState } from "react";
 import { uploadBase64Image } from "../api/uploadBase64Image";
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
-import { generateVideoClient } from "../api/generateVideo";
+import { generateVideo } from "../api/generateVideo";
 
 interface PhotoAnimateDialogProps {
     open: boolean;
@@ -47,7 +47,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ open, onClose, 
                 updateMediaItem({ ...videoMediaItem, loading: false, error: "Image URL is missing" });
                 return;
             }
-            const result = await generateVideoClient({ image_url: mediaItem.imageUrl, prompt });
+            const result = await generateVideo({ image_url: mediaItem.imageUrl, prompt });
             if (result.videoUrl) {
                 setTimeout(() => {
                     updateMediaItem({ ...videoMediaItem, loading: false, videoUrl: result.videoUrl });

@@ -1,8 +1,3 @@
-/**
- * Converts a File object to a base64 string
- * @param file - The file to convert
- * @returns A Promise that resolves with the base64 string
- */
 export const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -17,32 +12,33 @@ export const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
-/**
- * Converts a base64 string to a File object
- * @param base64 - The base64 string (without data URL prefix)
- * @param filename - The name for the new file
- * @param type - The mime type of the file
- * @returns A new File object
- */
-export const base64ToFile = (base64: string, filename: string, type: string = 'image/jpeg'): File => {
-  // Create binary data from base64 string
-  const binaryString = atob(base64);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
+export function base64ToBlob(base64: string): Blob {
+  // Remove data URL prefix if present
+  let mime = 'image/jpeg';
+  let b64 = base64;
+  if (b64.startsWith('data:')) {
+    const match = b64.match(/^data:(image\/png|image\/jpeg);base64,(.*)$/);
+    if (match) {
+      mime = match[1];
+      b64 = match[2];
+    }
+  } else {
+    // Try to detect PNG by signature (first 8 bytes)
+    try {
+      const pngHeader = atob(b64.slice(0, 16));
+      if (pngHeader.charCodeAt(0) === 0x89 && pngHeader.charCodeAt(1) === 0x50 && pngHeader.charCodeAt(2) === 0x4E && pngHeader.charCodeAt(3) === 0x47) {
+        mime = 'image/png';
+      }
+    } catch { }
   }
+  const byteString = atob(b64);
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+  return new Blob([ab], { type: mime });
+}
 
-  // Create Blob and then File from the binary data
-  const blob = new Blob([bytes], { type });
-  return new File([blob], filename, { type });
-};
 
-/**
- * Creates a Data URL from a base64 string
- * @param base64 - The base64 string (without data URL prefix)
- * @param type - The mime type of the data
- * @returns A complete data URL
- */
 export const base64ToDataUrl = (base64: string, type: string = 'image/jpeg'): string => {
   return `data:${type};base64,${base64}`;
 };

@@ -8,7 +8,7 @@ export interface GenerateVideoResult {
     error?: string;
 }
 
-export async function generateVideoClient(params: GenerateVideoParams): Promise<GenerateVideoResult> {
+export async function generateVideo(params: GenerateVideoParams): Promise<GenerateVideoResult> {
     try {
         const res = await fetch("/api/video", {
             method: "POST",
@@ -22,9 +22,9 @@ export async function generateVideoClient(params: GenerateVideoParams): Promise<
         if (res.ok && data.videoUrl) {
             return { videoUrl: data.videoUrl };
         } else {
-            return { error: data.error || `Error: ${res.status}` };
+            throw new Error(data.error || `Error: ${res.status}`);
         }
     } catch (err: any) {
-        return { error: err.message || "Exception occurred while generating video" };
+        throw new Error(err.message || "Exception occurred while generating video");
     }
 }

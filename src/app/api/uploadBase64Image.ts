@@ -1,29 +1,22 @@
-import { base64ToFile } from "../utils/base64-utils";
-import { clientLogger } from "../utils/client-logger";
+import { base64ToBlob } from "../utils/base64-utils";
 
-export async function uploadBase64Image(base64: string): Promise<string | null> {
+export async function uploadBase64Image(base64: string): Promise<string> {
     try {
-        clientLogger.info('Starting base64 image upload');
         const formData = new FormData();
-        const file = base64ToFile(base64, "upload.png", "image/png");
-        formData.append("image", file);
+        const blob = base64ToBlob(base64);
+        const fileExt = blob.type === 'image/png' ? 'png' : 'jpg';
+        formData.append('image', blob, `image.${fileExt}`);
         const res = await fetch("/api/upload", {
             method: "POST",
             body: formData,
         });
         const data = await res.json();
         if (data.imageUrl) {
-            clientLogger.info('Base64 image upload successful');
             return data.imageUrl;
         } else {
-            clientLogger.error('Base64 image upload failed', { 
-                status: res.status, 
-                error: data.error 
-            });
-            return null;
+            throw new Error(data.error || "Failed to upload image");
         }
-    } catch (err) {
-        clientLogger.error('Error uploading base64 image', err);
-        return null;
+    } catch (err: any) {
+        throw new Error(err.message || "Exception occurred while uploading image");
     }
 }

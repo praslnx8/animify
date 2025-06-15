@@ -13,7 +13,7 @@ import {
 import React, { useState } from "react";
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
-import { generatePhotoClient } from "../api/generatePhoto";
+import { generatePhoto } from "../api/generatePhoto";
 
 interface PhotoTransformDialogProps {
   open: boolean;
@@ -47,7 +47,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ open, onClo
         updateMediaItem({ ...mediaItem, loading: false, error: "Base64 image is missing" });
         return;
       }
-      const result = await generatePhotoClient({
+      const result = await generatePhoto({
         identity_image_b64: base64,
         prompt,
         model_name: modelName,
