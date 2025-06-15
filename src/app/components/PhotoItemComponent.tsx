@@ -221,20 +221,22 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
         </Box>
       </Dialog>
 
-      <PhotoTransformDialog
-        initialPrompt={mediaItem.prompt || ""}
-        open={dialogOpen}
-        base64={mediaItem.base64!!}
-        onClose={() => setDialogOpen(false)}
-        addMediaItem={(mediaItem) => {
-          setDialogOpen(false);
-          addMediaItem(mediaItem);
-        }}
-        updateMediaItem={(mediaItem) => {
-          setDialogOpen(false);
-          updateMediaItem(mediaItem);
-        }}
-      />
+      {mediaItem.base64 && (
+        <PhotoTransformDialog
+          initialPrompt={mediaItem.prompt || ""}
+          open={dialogOpen}
+          base64={mediaItem.base64}
+          onClose={() => setDialogOpen(false)}
+          addMediaItem={(mediaItem) => {
+            setDialogOpen(false);
+            addMediaItem(mediaItem);
+          }}
+          updateMediaItem={(mediaItem) => {
+            setDialogOpen(false);
+            updateMediaItem(mediaItem);
+          }}
+        />
+      )}
       <PhotoAnimateDialog
         initialPrompt={mediaItem.prompt || ""}
         open={animateDialogOpen}

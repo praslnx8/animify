@@ -22,7 +22,6 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { MediaItem } from "../models/MediaItem";
-import { base64ToDataUrl } from '../utils/base64-utils';
 
 enum VideoStatus {
   IDLE = 'idle',
@@ -133,7 +132,7 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
   }, [fullscreenOpen, status]);
 
   const hasVideoUrl = !!mediaItem.videoUrl;
-  const thumbnailImage = mediaItem.base64 ? base64ToDataUrl(mediaItem.base64, 'image/jpeg') : undefined;
+  const thumbnailImage = mediaItem.imageUrl;
 
   const renderVideoControls = () => (
     <Fade in={controlsVisible || status === VideoStatus.IDLE || status === VideoStatus.ENDED || status === VideoStatus.ERROR || !hasVideoUrl}>

@@ -17,12 +17,13 @@ import {
   useTheme
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import MediaItemComponent from "./components/MediaItemComponent";
 import { MediaItem } from "./models/MediaItem";
 import { MediaType } from "./models/MediaType";
 import { fileToBase64 } from "./utils/base64-utils";
+import { loadMediaItemsFromLocalStorage, saveMediaItemsToLocalStorage, StoredMediaItem } from "./utils/localStorage-utils";
 
 // Styled components for the carousel
 const CarouselContainer = styled(Box)(({ theme }) => ({
@@ -72,10 +73,46 @@ export default function HomePage() {
   const [swipeDirection, setSwipeDirection] = useState<null | 'left' | 'right'>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showSwipeIndicator, setShowSwipeIndicator] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const maxSteps = mediaItems.length;
+
+  // Load media items from localStorage on first render
+  useEffect(() => {
+    // Only load from localStorage once during initialization
+    if (!isInitialized) {
+      const loadedItems = loadMediaItemsFromLocalStorage();
+      if (loadedItems.length > 0) {
+        console.log('Loaded items from localStorage:', loadedItems.length);
+        setMediaItems(loadedItems);
+      }
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
+
+  // Save media items to localStorage whenever they change
+  useEffect(() => {
+    // Only save if already initialized (prevents saving empty array on first render)
+    if (isInitialized) {
+      saveMediaItemsToLocalStorage(mediaItems);
+    }
+  }, [mediaItems, isInitialized]);
+
+  // Load media items from localStorage on component mount
+  useEffect(() => {
+    const storedMediaItems = loadMediaItemsFromLocalStorage();
+    if (storedMediaItems.length > 0) {
+      setMediaItems(storedMediaItems);
+      setActiveStep(storedMediaItems.length - 1); // Set active step to the last item
+    }
+  }, []);
+
+  // Save media items to localStorage whenever they change
+  useEffect(() => {
+    saveMediaItemsToLocalStorage(mediaItems);
+  }, [mediaItems]);
 
   // Handle navigation with animation
   const handleNext = useCallback(() => {
