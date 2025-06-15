@@ -116,15 +116,31 @@ export default function HomePage() {
   
   // Configure swipe handlers
   const swipeHandlers = useSwipeable({
+    onSwipeStart: () => {
+      setShowSwipeIndicator(true);
+    },
+    onSwiping: (eventData) => {
+      // Show direction indicator based on swipe direction
+      if (eventData.deltaX < 0 && activeStep < maxSteps - 1) {
+        setSwipeDirection('left');
+      } else if (eventData.deltaX > 0 && activeStep > 0) {
+        setSwipeDirection('right');
+      }
+    },
     onSwipedLeft: () => {
       if (activeStep < maxSteps - 1 && !isAnimating) {
         handleNext();
       }
+      setShowSwipeIndicator(false);
     },
     onSwipedRight: () => {
       if (activeStep > 0 && !isAnimating) {
         handleBack();
       }
+      setShowSwipeIndicator(false);
+    },
+    onTouchEndOrOnMouseUp: () => {
+      setShowSwipeIndicator(false);
     },
     trackMouse: true,
     preventScrollOnSwipe: true,
@@ -261,6 +277,26 @@ export default function HomePage() {
               touchAction: 'pan-y',  // Allow vertical scrolling
             }}
           >
+            {/* Left swipe indicator */}
+            <SwipeIndicator
+              sx={{
+                left: 16,
+                opacity: (showSwipeIndicator && swipeDirection === 'right' && activeStep > 0) ? 1 : 0,
+              }}
+            >
+              <ChevronLeftIcon />
+            </SwipeIndicator>
+            
+            {/* Right swipe indicator */}
+            <SwipeIndicator
+              sx={{
+                right: 16,
+                opacity: (showSwipeIndicator && swipeDirection === 'left' && activeStep < maxSteps - 1) ? 1 : 0,
+              }}
+            >
+              <ChevronRightIcon />
+            </SwipeIndicator>
+            
             <CarouselContainer>
               {mediaItems.map((mediaItem, index) => (
                 <CarouselItem
