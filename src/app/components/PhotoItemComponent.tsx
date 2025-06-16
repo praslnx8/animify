@@ -17,7 +17,6 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { MediaItem } from "../models/MediaItem";
-import { base64ToDataUrl } from "../utils/base64-utils";
 import PhotoAnimateDialog from "./PhotoAnimateDialog";
 import PhotoTransformDialog from "./PhotoTransformDialog";
 
@@ -35,8 +34,6 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
   const [controlsVisible, setControlsVisible] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const imageUrl = mediaItem.imageUrl ? mediaItem.imageUrl : (mediaItem.base64 ? base64ToDataUrl(mediaItem.base64) : undefined);
 
   const handleCardHover = () => {
     if (!isMobile) {
@@ -81,7 +78,7 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
         <Box sx={{ position: 'relative', flex: 1, display: 'flex' }}>
           <CardMedia
             component="img"
-            image={imageUrl}
+            image={mediaItem.imageUrl}
             alt="Photo"
             sx={{
               backgroundColor: alpha(theme.palette.common.black, 0.04),
@@ -137,7 +134,6 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
                   <Button
                     variant="contained"
                     color="primary"
-                    disabled={!mediaItem.base64}
                     onClick={() => setDialogOpen(true)}
                     sx={{
                       borderRadius: '50%',
@@ -210,7 +206,7 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
           overflow: 'auto'
         }}>
           <img
-            src={imageUrl}
+            src={mediaItem.imageUrl}
             alt="Fullscreen view"
             style={{
               maxHeight: '100%',
@@ -221,24 +217,22 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
         </Box>
       </Dialog>
 
-      {mediaItem.base64 && (
-        <PhotoTransformDialog
-          initialPrompt={mediaItem.prompt || ""}
-          open={dialogOpen}
-          base64={mediaItem.base64}
-          onClose={() => setDialogOpen(false)}
-          addMediaItem={(mediaItem) => {
-            setDialogOpen(false);
-            addMediaItem(mediaItem);
-          }}
-          updateMediaItem={(mediaItem) => {
-            setDialogOpen(false);
-            updateMediaItem(mediaItem);
-          }}
-        />
-      )}
+
+      <PhotoTransformDialog
+        mediaItem={mediaItem}
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        addMediaItem={(mediaItem) => {
+          setDialogOpen(false);
+          addMediaItem(mediaItem);
+        }}
+        updateMediaItem={(mediaItem) => {
+          setDialogOpen(false);
+          updateMediaItem(mediaItem);
+        }}
+      />
+
       <PhotoAnimateDialog
-        initialPrompt={mediaItem.prompt || ""}
         open={animateDialogOpen}
         mediaItem={mediaItem}
         onClose={() => setAnimateDialogOpen(false)}

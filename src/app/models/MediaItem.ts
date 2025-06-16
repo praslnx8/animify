@@ -8,5 +8,6 @@ export interface MediaItem {
     videoUrl?: string;
     loading?: boolean;
     error?: string;
-    hasBase64?: boolean;
+    parentImageUrl?: string;
+    parentPrompt?: string;
 }

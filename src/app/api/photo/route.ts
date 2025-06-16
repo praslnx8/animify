@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GeneratePhotoParams } from '../generatePhoto';
-import { urlToBase64, saveBase64ToFile, buildPublicUrl } from '../../utils/base64-utils';
+import { buildPublicUrl, saveBase64ToFile, urlToBase64 } from '../../utils/base64-utils';
 
 export const runtime = 'nodejs';
 
@@ -18,10 +17,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'API token not configured on server' }, { status: 500 });
         }
 
-        // Convert image_url to base64 using our utility function
         const identity_image_b64 = await urlToBase64(image_url);
 
-        const params: GeneratePhotoParams = {
+        const params = {
             identity_image_b64,
             prompt,
             model_name,
@@ -50,12 +48,10 @@ export async function POST(req: NextRequest) {
 
         const data = await res.json();
         if (res.ok && data.image_b64) {
-            // Save the base64 image to file and get the URL path
             const imagePath = await saveBase64ToFile(data.image_b64);
-            
-            // Build a publicly accessible URL
+
             const imageUrl = buildPublicUrl(req, imagePath);
-                
+
             return NextResponse.json({ image_url: imageUrl });
         } else {
             console.error('Error response from API:', data);

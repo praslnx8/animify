@@ -132,7 +132,7 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
   }, [fullscreenOpen, status]);
 
   const hasVideoUrl = !!mediaItem.videoUrl;
-  const thumbnailImage = mediaItem.imageUrl;
+  const thumbnailImage = mediaItem.parentImageUrl;
 
   const renderVideoControls = () => (
     <Fade in={controlsVisible || status === VideoStatus.IDLE || status === VideoStatus.ENDED || status === VideoStatus.ERROR || !hasVideoUrl}>

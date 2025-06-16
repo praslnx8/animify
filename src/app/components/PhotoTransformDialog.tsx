@@ -24,16 +24,15 @@ import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
 
 interface PhotoTransformDialogProps {
-  initialPrompt?: string;
+  mediaItem: MediaItem;
   open: boolean;
   onClose: () => void;
   addMediaItem: (mediaItem: MediaItem) => void;
   updateMediaItem: (mediaItem: MediaItem) => void;
-  base64: string;
 }
 
-const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ initialPrompt, open, onClose, addMediaItem, updateMediaItem, base64 }) => {
-  const [prompt, setPrompt] = useState(initialPrompt || "");
+const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
+  const [prompt, setPrompt] = useState(mediaItem.prompt || "");
   const [modelName, setModelName] = useState("base");
   const [style, setStyle] = useState("realistic");
   const [gender, setGender] = useState("man");
@@ -55,22 +54,19 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ initialProm
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const mediaItem: MediaItem = {
+    const newMediaItem: MediaItem = {
       id: Date.now().toString(),
       type: MediaType.Image,
       loading: true,
-      prompt,
+      parentPrompt: mediaItem.prompt,
+      parentImageUrl: mediaItem.imageUrl,
+      prompt: prompt
     };
-    addMediaItem(mediaItem);
+    addMediaItem(newMediaItem);
 
     try {
-      if (!base64) {
-        updateMediaItem({ ...mediaItem, loading: false, error: "Base64 image is missing" });
-        setIsSubmitting(false);
-        return;
-      }
       const result = await generatePhoto({
-        identity_image_b64: base64,
+        image_url: mediaItem.imageUrl || "",
         prompt,
         model_name: modelName,
         style,
@@ -80,8 +76,8 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ initialProm
         auto_detect_hair_color: autoDetectHairColor,
         nsfw_policy: nsfwPolicy
       });
-      if (result.image_b64) {
-        updateMediaItem({ ...mediaItem, base64: result.image_b64, loading: false });
+      if (result.image_url) {
+        updateMediaItem({ ...mediaItem, imageUrl: result.image_url, loading: false });
       } else {
         updateMediaItem({ ...mediaItem, loading: false, error: result.error || "Failed to generate image" });
       }

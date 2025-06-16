@@ -24,6 +24,7 @@ import { MediaItem } from "./models/MediaItem";
 import { MediaType } from "./models/MediaType";
 import { fileToBase64 } from "./utils/base64-utils";
 import { loadMediaItemsFromLocalStorage, saveMediaItemsToLocalStorage } from "./utils/localStorage-utils";
+import { uploadBase64Image } from "./api/uploadBase64Image";
 
 // Styled components for the carousel
 const CarouselContainer = styled(Box)(({ theme }) => ({
@@ -183,16 +184,39 @@ export default function HomePage() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Create a loading indicator while the image uploads
+      const tempId = Date.now().toString();
+      setMediaItems((prev) => {
+        const newItems = [...prev, { id: tempId, type: MediaType.Image, loading: true }];
+        setTimeout(() => {
+          setActiveStep(newItems.length - 1);
+        }, 100);
+        return newItems;
+      });
+      
+      // Convert to base64 first, then upload
       fileToBase64(file).then((base64) => {
+        // Upload the base64 image and get back a URL
+        return uploadBase64Image(base64);
+      }).then((imageUrl) => {
+        // Update the media item with the uploaded image URL
         setMediaItems((prev) => {
-          const newItems = [...prev, { id: Date.now().toString(), type: MediaType.Image, base64 }];
-          setTimeout(() => {
-            setActiveStep(newItems.length - 1);
-          }, 100);
-          return newItems;
+          return prev.map(item => 
+            item.id === tempId 
+              ? { ...item, imageUrl, loading: false } 
+              : item
+          );
         });
       }).catch((error) => {
-        console.error("Error converting file to base64:", error);
+        console.error("Error uploading image:", error);
+        // Update the item with error state
+        setMediaItems((prev) => {
+          return prev.map(item => 
+            item.id === tempId 
+              ? { ...item, loading: false, error: "Failed to upload image" } 
+              : item
+          );
+        });
       });
     }
     if (event.target) {

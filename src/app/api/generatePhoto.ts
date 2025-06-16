@@ -1,5 +1,5 @@
 export interface GeneratePhotoParams {
-  identity_image_b64: string;
+  image_url: string;
   prompt: string;
   model_name?: string;
   style?: string;
@@ -11,7 +11,7 @@ export interface GeneratePhotoParams {
 }
 
 export interface GeneratePhotoResult {
-  image_b64?: string;
+  image_url?: string;
   error?: string;
 }
 
@@ -26,8 +26,8 @@ export async function generatePhoto(params: GeneratePhotoParams): Promise<Genera
     });
     const data = await res.json();
 
-    if (res.ok && data.image_b64) {
-      return { image_b64: data.image_b64 };
+    if (res.ok && data.image_url) {
+      return { image_url: data.image_url };
     } else {
       throw new Error(data.error || `Status: ${res.status} ${res.statusText}. Response: ${JSON.stringify(data)}`);
     }

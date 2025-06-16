@@ -9,21 +9,19 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { generateVideo } from "../api/generateVideo";
-import { uploadBase64Image } from "../api/uploadBase64Image";
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
 
 interface PhotoAnimateDialogProps {
-    initialPrompt?: string;
+    mediaItem: MediaItem;
     open: boolean;
     onClose: () => void;
-    mediaItem: MediaItem;
     addMediaItem: (mediaItem: MediaItem) => void;
     updateMediaItem: (mediaItem: MediaItem) => void;
 }
 
-const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ initialPrompt, open, onClose, mediaItem, addMediaItem, updateMediaItem }) => {
-    const [prompt, setPrompt] = useState(initialPrompt || "");
+const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
+    const [prompt, setPrompt] = useState(mediaItem.prompt || "");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,19 +30,11 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ initialPrompt, 
             type: MediaType.Video,
             loading: true,
             prompt,
-            base64: mediaItem.base64
+            parentPrompt: mediaItem.prompt,
+            parentImageUrl: mediaItem.imageUrl
         };
         addMediaItem(videoMediaItem);
         try {
-            if (!mediaItem.imageUrl && mediaItem.base64) {
-                const uploadedUrl = await uploadBase64Image(mediaItem.base64);
-                if (!uploadedUrl) {
-                    updateMediaItem({ ...videoMediaItem, loading: false, error: "Failed to upload image" });
-                    return;
-                }
-                updateMediaItem({ ...mediaItem, imageUrl: uploadedUrl });
-                mediaItem.imageUrl = uploadedUrl;
-            }
             if (!mediaItem.imageUrl) {
                 updateMediaItem({ ...videoMediaItem, loading: false, error: "Image URL is missing" });
                 return;
