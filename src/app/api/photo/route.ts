@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GeneratePhotoParams } from '../generatePhoto';
+import { urlToBase64, saveBase64ToFile, buildPublicUrl } from '../../utils/base64-utils';
 
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { identity_image_b64, prompt, model_name, style, gender, body_type, skin_color, auto_detect_hair_color, nsfw_policy } = body;
+        const { image_url, prompt, model_name, style, gender, body_type, skin_color, auto_detect_hair_color, nsfw_policy } = body;
 
-        if (!identity_image_b64 || !prompt) {
+        if (!image_url || !prompt) {
             return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
         }
 
@@ -16,6 +17,9 @@ export async function POST(req: NextRequest) {
         if (!apiToken) {
             return NextResponse.json({ error: 'API token not configured on server' }, { status: 500 });
         }
+
+        // Convert image_url to base64 using our utility function
+        const identity_image_b64 = await urlToBase64(image_url);
 
         const params: GeneratePhotoParams = {
             identity_image_b64,
@@ -40,14 +44,19 @@ export async function POST(req: NextRequest) {
                 "Content-Type": "application/json",
                 "accept": "application/json",
                 "authorization": `Bearer ${apiToken}`,
-
             },
             body: JSON.stringify(params),
         });
 
         const data = await res.json();
         if (res.ok && data.image_b64) {
-            return NextResponse.json({ image_b64: data.image_b64 });
+            // Save the base64 image to file and get the URL path
+            const imagePath = await saveBase64ToFile(data.image_b64);
+            
+            // Build a publicly accessible URL
+            const imageUrl = buildPublicUrl(req, imagePath);
+                
+            return NextResponse.json({ image_url: imageUrl });
         } else {
             console.error('Error response from API:', data);
             return NextResponse.json({

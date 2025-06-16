@@ -80,9 +80,7 @@ export default function HomePage() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const maxSteps = mediaItems.length;
 
-  // Load media items from localStorage on first render
   useEffect(() => {
-    // Only load from localStorage once during initialization
     if (!isInitialized) {
       const loadedItems = loadMediaItemsFromLocalStorage();
       if (loadedItems.length > 0) {
@@ -93,15 +91,12 @@ export default function HomePage() {
     }
   }, [isInitialized]);
 
-  // Save media items to localStorage whenever they change
   useEffect(() => {
-    // Only save if already initialized (prevents saving empty array on first render)
     if (isInitialized) {
       saveMediaItemsToLocalStorage(mediaItems);
     }
   }, [mediaItems, isInitialized]);
 
-  // Load media items from localStorage on component mount
   useEffect(() => {
     const storedMediaItems = loadMediaItemsFromLocalStorage();
     if (storedMediaItems.length > 0) {
@@ -110,22 +105,18 @@ export default function HomePage() {
     }
   }, []);
 
-  // Save media items to localStorage whenever they change
   useEffect(() => {
     saveMediaItemsToLocalStorage(mediaItems);
   }, [mediaItems]);
 
-  // Handle navigation with animation
   const handleNext = useCallback(() => {
     if (activeStep < maxSteps - 1 && !isAnimating) {
       setIsAnimating(true);
       setSwipeDirection('left');
 
-      // Set animation timeout to change slide
       setTimeout(() => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
-        // Reset animation flags after a short delay
         setTimeout(() => {
           setSwipeDirection(null);
           setIsAnimating(false);
@@ -139,11 +130,9 @@ export default function HomePage() {
       setIsAnimating(true);
       setSwipeDirection('right');
 
-      // Set animation timeout to change slide
       setTimeout(() => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
 
-        // Reset animation flags after a short delay
         setTimeout(() => {
           setSwipeDirection(null);
           setIsAnimating(false);
@@ -152,13 +141,11 @@ export default function HomePage() {
     }
   }, [activeStep, isAnimating]);
 
-  // Configure swipe handlers
   const swipeHandlers = useSwipeable({
     onSwipeStart: () => {
       setShowSwipeIndicator(true);
     },
     onSwiping: (eventData) => {
-      // Show direction indicator based on swipe direction
       if (eventData.deltaX < 0 && activeStep < maxSteps - 1) {
         setSwipeDirection('left');
       } else if (eventData.deltaX > 0 && activeStep > 0) {
@@ -199,7 +186,6 @@ export default function HomePage() {
       fileToBase64(file).then((base64) => {
         setMediaItems((prev) => {
           const newItems = [...prev, { id: Date.now().toString(), type: MediaType.Image, base64 }];
-          // Set active step to the newest photo
           setTimeout(() => {
             setActiveStep(newItems.length - 1);
           }, 100);
