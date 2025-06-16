@@ -77,12 +77,12 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
         nsfw_policy: nsfwPolicy
       });
       if (result.image_url) {
-        updateMediaItem({ ...mediaItem, imageUrl: result.image_url, loading: false });
+        updateMediaItem({ ...newMediaItem, imageUrl: result.image_url, loading: false });
       } else {
-        updateMediaItem({ ...mediaItem, loading: false, error: result.error || "Failed to generate image" });
+        updateMediaItem({ ...newMediaItem, loading: false, error: result.error || "Failed to generate image" });
       }
     } catch (err: any) {
-      updateMediaItem({ ...mediaItem, loading: false, error: err.message || "Network error" });
+      updateMediaItem({ ...newMediaItem, loading: false, error: err.message || "Network error" });
     } finally {
       setIsSubmitting(false);
     }
