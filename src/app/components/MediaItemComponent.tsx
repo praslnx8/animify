@@ -1,145 +1,305 @@
 'use client';
 
-import DeleteIcon from '@mui/icons-material/Delete';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CircularProgress from '@mui/material/CircularProgress';
-import Fade from '@mui/material/Fade';
-import { useTheme } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import React from "react";
-import { MediaItem } from "../models/MediaItem";
-import { MediaType } from "../models/MediaType";
-import PhotoItemComponent from "./PhotoItemComponent";
-import VideoItemComponent from "./VideoItemComponent";
+import {
+  Animation as AnimationIcon,
+  AutoFixHigh as AutoFixHighIcon,
+  Delete as DeleteIcon,
+  Download as DownloadIcon,
+  Pause as PauseIcon,
+  PlayArrow as PlayArrowIcon,
+} from '@mui/icons-material';
+import {
+  Box,
+  Card,
+  CircularProgress,
+  Dialog,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import React, { useState, useRef, useEffect } from 'react';
 
-export interface MediaItemProps {
-  mediaItem: MediaItem,
-  addMediaItem: (mediaItem: MediaItem) => void;
-  updateMediaItem: (mediaItem: MediaItem) => void;
-  onDelete: (mediaItem: MediaItem) => void;
+import { MediaItem } from '../models/MediaItem';
+import PhotoAnimateDialog from './PhotoAnimateDialog';
+import PhotoTransformDialog from './PhotoTransformDialog';
+
+interface MediaItemProps {
+  mediaItem: MediaItem;
+  addMediaItem: (item: MediaItem) => void;
+  updateMediaItem: (item: MediaItem) => void;
+  onDelete: (item: MediaItem) => void;
+  onSwipe?: (direction: 'left' | 'right') => void;
+  isTopCard?: boolean;
+  showActions?: boolean;
+  onPrev?: () => void;
+  onNext?: () => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
-const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem, updateMediaItem, onDelete }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+const MediaItemComponent: React.FC<MediaItemProps> = ({
+  mediaItem,
+  addMediaItem,
+  updateMediaItem,
+  onDelete,
+  onSwipe,
+  isTopCard,
+  showActions,
+}) => {
+  const [fullscreenOpen, setFullscreenOpen] = useState(false);
+  const [transformOpen, setTransformOpen] = useState(false);
+  const [animateOpen, setAnimateOpen] = useState(false);
 
-  if (mediaItem.error || mediaItem.loading) {
-    return (
-      <Card sx={{
-        height: '100%',
-        position: 'relative',
-        overflow: 'hidden',
-        p: 2,
-        borderRadius: 2,
-        boxShadow: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center'
-      }}>
-        <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 3 }}>
-          <Button
-            variant="outlined"
-            color="error"
-            size="small"
-            onClick={() => onDelete(mediaItem)}
-            sx={{ minWidth: 0, p: 1, borderRadius: '50%' }}
-            aria-label="Delete item"
-          >
-            <DeleteIcon fontSize={isMobile ? "small" : "medium"} />
-          </Button>
-        </Box>
-        <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
-          {mediaItem.loading ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <CircularProgress color="primary" size={isMobile ? 36 : 48} />
-              {mediaItem.prompt && (
-                <Box sx={{ mt: 2, textAlign: 'center' }}>
-                  <Typography variant="body2" color="textSecondary">
-                    Creating "{mediaItem.prompt}"
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          ) : (
-            <Fade in={!!mediaItem.error}>
-              <Box sx={{
-                color: "error.main",
-                p: 2,
-                borderRadius: 1,
-                backgroundColor: theme.palette.error.light + '20',
-                textAlign: 'center'
-              }}>
-                <Typography variant="body2">{mediaItem.error}</Typography>
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+
+  const isVideo = mediaItem.type === 'video';
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoStatus, setVideoStatus] = useState<'idle' | 'loading' | 'playing' | 'paused' | 'ended' | 'error'>('idle');
+  const [videoError, setVideoError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setVideoStatus('idle');
+    setVideoError(null);
+  }, [mediaItem.id]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!isTopCard) return;
+    setTouchStart(e.touches[0].clientX);
+    setSwipeOffset(0);
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isTopCard || touchStart === null) return;
+    const offset = e.touches[0].clientX - touchStart;
+    setSwipeOffset(offset);
+  };
+  const handleTouchEnd = () => {
+    if (!isTopCard || touchStart === null) return;
+    if (swipeOffset > 80 && onSwipe) onSwipe('right');
+    else if (swipeOffset < -80 && onSwipe) onSwipe('left');
+    setTouchStart(null);
+    setSwipeOffset(0);
+  };
+
+  const handlePlayPause = () => {
+    if (!videoRef.current) return;
+    if (videoStatus === 'playing') {
+      videoRef.current.pause();
+      setVideoStatus('paused');
+    } else {
+      setVideoStatus('loading');
+      videoRef.current.play()
+        .then(() => setVideoStatus('playing'))
+        .catch(() => setVideoError("Can't play video"));
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(mediaItem.url!);
+      if (!response.ok) throw new Error("Download failed");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `media-${mediaItem.id}.${isVideo ? 'mp4' : 'jpg'}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download failed:', err);
+    }
+  };
+
+  const renderMedia = () => {
+    if (isVideo) {
+      return (
+        <>
+          <Box position="relative" width="100%">
+            {videoStatus === 'loading' && (
+              <Box sx={loadingOverlayStyle}>
+                <CircularProgress />
               </Box>
-            </Fade>
-          )}
-        </Box>
-      </Card>
-    );
-  }
-
-  return (
-    <Fade in={true} timeout={500}>
-      <Box sx={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        {mediaItem.prompt && (
-          <Card sx={{
-            p: 1.5,
-            borderRadius: '8px 8px 0 0',
-            backgroundColor: theme.palette.background.paper,
-            boxShadow: 1
-          }}>
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              sx={{
-                fontStyle: 'italic',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical'
+            )}
+            <video
+              key={videoStatus === 'error' ? Date.now() : mediaItem.url}
+              ref={videoRef}
+              src={mediaItem.url + (videoStatus === 'error' ? `?retry=${Date.now()}` : '')}
+              onPlay={() => setVideoStatus('playing')}
+              onPause={() => setVideoStatus('paused')}
+              onEnded={() => setVideoStatus('ended')}
+              onLoadedData={() => setVideoStatus('paused')}
+              onError={() => {
+                setVideoStatus('error');
+                setVideoError('Video failed to load.');
               }}
-            >
-              {mediaItem.prompt}
-            </Typography>
-          </Card>
-        )}
+              playsInline
+              controls={false}
+              style={{ width: '100%', maxHeight: '70vh', backgroundColor: 'black' }}
+            />
+            {videoError && (
+              <Typography color="error" textAlign="center" p={1}>
+                {videoError}
+              </Typography>
+            )}
+          </Box>
+        </>
+      );
+    }
 
-        <Box sx={{ 
-          position: 'relative', 
-          flex: 1, 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          overflow: 'hidden',
-          width: '100%',
-          height: '100%'
-        }}>
-          {mediaItem.type === MediaType.Image ? (
-            <PhotoItemComponent
-              mediaItem={mediaItem}
-              addMediaItem={addMediaItem}
-              updateMediaItem={updateMediaItem}
-              onDelete={onDelete}
-            />
+    return (
+      <img
+        src={mediaItem.url}
+        alt="Media"
+        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+        onClick={() => setFullscreenOpen(true)}
+      />
+    );
+  };
+
+  const renderActions = () => {
+    if (!showActions) return null;
+
+    return (
+      <Box sx={actionBarStyle}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
+          {isVideo ? (
+            <Tooltip title={videoStatus === 'playing' ? 'Pause' : 'Play'}>
+              <IconButton onClick={handlePlayPause} sx={iconStyle} size="large">
+                {videoStatus === 'playing' ? <PauseIcon fontSize="inherit" /> : <PlayArrowIcon fontSize="inherit" />}
+              </IconButton>
+            </Tooltip>
           ) : (
-            <VideoItemComponent
-              mediaItem={mediaItem}
-              onDelete={onDelete}
-            />
+            <>
+              <Tooltip title="Transform">
+                <IconButton onClick={() => setTransformOpen(true)} sx={iconStyle} size="large">
+                  <AutoFixHighIcon fontSize="inherit" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Animate">
+                <IconButton onClick={() => setAnimateOpen(true)} sx={iconStyle} size="large">
+                  <AnimationIcon fontSize="inherit" />
+                </IconButton>
+              </Tooltip>
+            </>
           )}
+
+          <Tooltip title="Download">
+            <IconButton onClick={handleDownload} sx={iconStyle} size="large">
+              <DownloadIcon fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton onClick={() => onDelete(mediaItem)} sx={deleteIconStyle} size="large">
+              <DeleteIcon fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Box>
-    </Fade>
+    );
+  };
+
+  return (
+    <>
+      <Card
+        sx={{
+          height: '100vh',
+          width: '100vw',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          backgroundColor: 'black',
+          display: 'flex',
+          flexDirection: 'column',
+          transform: isTopCard ? `translateX(${swipeOffset}px) rotate(${swipeOffset / 20}deg)` : 'none',
+          transition: touchStart ? 'none' : 'transform 0.2s',
+          overflow: 'visible',
+          pb: '25vh',
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        elevation={isTopCard ? 8 : 2}
+      >
+        <Box sx={{ flex: '1 1 100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          {renderMedia()}
+        </Box>
+
+        {mediaItem.prompt && (
+          <Box sx={{ px: 2, py: 1, backgroundColor: 'rgba(0,0,0,0.7)', textAlign: 'center' }}>
+            <Typography variant="body2" noWrap title={mediaItem.prompt} sx={{ color: '#fff' }}>
+              {mediaItem.prompt}
+            </Typography>
+          </Box>
+        )}
+
+        {renderActions()}
+      </Card>
+
+      {/* Fullscreen for photos */}
+      {!isVideo && (
+        <Dialog fullScreen open={fullscreenOpen} onClose={() => setFullscreenOpen(false)}>
+          <Box sx={{ backgroundColor: 'black', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <img src={mediaItem.url} alt="Fullscreen" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+          </Box>
+        </Dialog>
+      )}
+
+      <PhotoTransformDialog
+        open={transformOpen}
+        onClose={() => setTransformOpen(false)}
+        mediaItem={mediaItem}
+        addMediaItem={(item) => {
+          addMediaItem(item);
+          setTransformOpen(false);
+        }}
+        updateMediaItem={(item) => {
+          updateMediaItem(item);
+          setTransformOpen(false);
+        }}
+      />
+
+      <PhotoAnimateDialog
+        open={animateOpen}
+        onClose={() => setAnimateOpen(false)}
+        mediaItem={mediaItem}
+        addMediaItem={(item) => {
+          addMediaItem(item);
+          setAnimateOpen(false);
+        }}
+        updateMediaItem={(item) => {
+          updateMediaItem(item);
+          setAnimateOpen(false);
+        }}
+      />
+    </>
   );
+};
+
+// Styles
+const iconStyle = { color: '#fff' };
+const deleteIconStyle = { color: 'red' };
+const actionBarStyle = {
+  width: '100%',
+  height: '25%',
+  background: 'linear-gradient(to top, rgba(0,0,0,0.98), rgba(0,0,0,0.5))',
+  borderTop: '1px solid rgba(255,255,255,0.1)',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  py: 1,
+  zIndex: 10,
+};
+const loadingOverlayStyle = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgba(0,0,0,0.3)',
+  zIndex: 2,
 };
 
 export default MediaItemComponent;

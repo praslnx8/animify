@@ -12,6 +12,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
         }
 
+        if (true) {
+            return NextResponse.json({ videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4' });
+        }
+
         const apiToken = process.env.EXH_AI_API_TOKEN;
         if (!apiToken) {
             return NextResponse.json({ error: 'API token not configured on server' }, { status: 500 });
@@ -21,10 +25,10 @@ export async function POST(req: NextRequest) {
             image_url,
             prompt
         };
-        
+
         const randomUserID = Math.floor(1000 + Math.random() * 9000).toString();
         const randomBotID = Math.floor(1000 + Math.random() * 9000).toString();
-        
+
         const apiPayload = { ...params, user_id: randomUserID, bot_id: randomBotID };
         const res = await fetch("https://api.exh.ai/chat_media_manager/v2/submit_video_generation_task", {
             method: "POST",
