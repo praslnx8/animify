@@ -78,7 +78,7 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
         <Box sx={{ position: 'relative', flex: 1, display: 'flex' }}>
           <CardMedia
             component="img"
-            image={mediaItem.imageUrl}
+            image={mediaItem.url}
             alt="Photo"
             sx={{
               backgroundColor: alpha(theme.palette.common.black, 0.04),
@@ -206,7 +206,7 @@ const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem,
           overflow: 'auto'
         }}>
           <img
-            src={mediaItem.imageUrl}
+            src={mediaItem.url}
             alt="Fullscreen view"
             style={{
               maxHeight: '100%',

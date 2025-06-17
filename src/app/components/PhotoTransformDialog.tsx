@@ -58,15 +58,14 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
       id: Date.now().toString(),
       type: MediaType.Image,
       loading: true,
-      parentPrompt: mediaItem.prompt,
-      parentImageUrl: mediaItem.imageUrl,
+      parent: mediaItem,
       prompt: prompt
     };
     addMediaItem(newMediaItem);
 
     try {
       const result = await generatePhoto({
-        image_url: mediaItem.imageUrl || "",
+        image_url: mediaItem.url || "",
         prompt,
         model_name: modelName,
         style,
@@ -77,7 +76,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
         nsfw_policy: nsfwPolicy
       });
       if (result.image_url) {
-        updateMediaItem({ ...newMediaItem, imageUrl: result.image_url, loading: false });
+        updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });
       } else {
         updateMediaItem({ ...newMediaItem, loading: false, error: result.error || "Failed to generate image" });
       }

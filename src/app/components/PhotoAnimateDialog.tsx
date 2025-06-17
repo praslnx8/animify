@@ -30,19 +30,18 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
             type: MediaType.Video,
             loading: true,
             prompt,
-            parentPrompt: mediaItem.prompt,
-            parentImageUrl: mediaItem.imageUrl
+            parent: mediaItem,
         };
         addMediaItem(videoMediaItem);
         try {
-            if (!mediaItem.imageUrl) {
+            if (!mediaItem.url) {
                 updateMediaItem({ ...videoMediaItem, loading: false, error: "Image URL is missing" });
                 return;
             }
-            const result = await generateVideo({ image_url: mediaItem.imageUrl, prompt });
+            const result = await generateVideo({ image_url: mediaItem.url, prompt });
             if (result.videoUrl) {
                 setTimeout(() => {
-                    updateMediaItem({ ...videoMediaItem, loading: false, videoUrl: result.videoUrl });
+                    updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl });
                 }, 10000);
             } else {
                 updateMediaItem({ ...videoMediaItem, loading: false, error: result.error || "Failed to generate video" });

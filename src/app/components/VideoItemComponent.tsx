@@ -92,10 +92,10 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
   };
 
   const handleDownload = () => {
-    if (mediaItem.videoUrl) {
+    if (mediaItem.url) {
       // Create an anchor element and use it to download the video
       const a = document.createElement('a');
-      a.href = mediaItem.videoUrl;
+      a.href = mediaItem.url;
       a.download = `video-${mediaItem.id}.mp4`; // Default filename
       document.body.appendChild(a);
       a.click();
@@ -131,8 +131,8 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
     }
   }, [fullscreenOpen, status]);
 
-  const hasVideoUrl = !!mediaItem.videoUrl;
-  const thumbnailImage = mediaItem.parentImageUrl;
+  const hasVideoUrl = !!mediaItem.url;
+  const thumbnailImage = mediaItem.parent?.url;
 
   const renderVideoControls = () => (
     <Fade in={controlsVisible || status === VideoStatus.IDLE || status === VideoStatus.ENDED || status === VideoStatus.ERROR || !hasVideoUrl}>
@@ -355,7 +355,7 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
               onLoadedData={handleVideoLoaded}
               onError={handleVideoError}
               onEnded={handleVideoEnded}
-              src={mediaItem.videoUrl}
+              src={mediaItem.url}
               playsInline
             />
             {renderVideoControls()}
@@ -462,7 +462,7 @@ const VideoItemComponent: React.FC<VideoItemProps> = ({ mediaItem, onDelete }) =
                 width: '100%',
                 height: 'auto'
               }}
-              src={mediaItem.videoUrl}
+              src={mediaItem.url}
               playsInline
               autoPlay
             />
