@@ -2,7 +2,15 @@
 
 import AddIcon from '@mui/icons-material/Add';
 import ImageIcon from '@mui/icons-material/Image';
-import { AppBar, Avatar, Box, IconButton, Toolbar, Typography, useTheme } from '@mui/material';
+import {
+  AppBar,
+  Avatar,
+  Box,
+  IconButton,
+  Toolbar,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import 'keen-slider/keen-slider.min.css';
 import { useKeenSlider } from 'keen-slider/react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -11,12 +19,22 @@ import MediaItemComponent from './components/MediaItemComponent';
 import { MediaItem } from './models/MediaItem';
 import { MediaType } from './models/MediaType';
 import { fileToBase64 } from './api/_utils/base64-utils';
-import { loadMediaItemsFromLocalStorage, saveMediaItemsToLocalStorage } from './utils/localStorage-utils';
+import {
+  loadMediaItemsFromLocalStorage,
+  saveMediaItemsToLocalStorage,
+} from './utils/localStorage-utils';
 
 export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
-  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({ loop: false });
+  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
+    loop: false,
+    slides: {
+      perView: 1,
+      spacing: 0,
+    },
+    mode: 'snap',
+  });
 
   const theme = useTheme();
 
@@ -78,12 +96,28 @@ export default function HomePage() {
         onChange={handleFileChange}
       />
 
-      <Box ref={sliderRef} className="keen-slider" sx={{ flex: 1 }}>
+      <Box
+        ref={sliderRef}
+        className="keen-slider"
+        sx={{
+          flex: 1,
+          height: '100%',
+          width: '100%',
+          overflow: 'hidden',
+        }}
+      >
         {mediaItems.length === 0 ? (
-          <Box className="keen-slider__slide" sx={{
-            height: '100%', display: 'flex', justifyContent: 'center',
-            alignItems: 'center', flexDirection: 'column'
-          }}>
+          <Box
+            className="keen-slider__slide"
+            sx={{
+              width: '100vw',
+              height: '100vh',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: 'column',
+            }}
+          >
             <Typography>No media yet</Typography>
             <IconButton onClick={handleAddPhotoClick} sx={{ mt: 2 }}>
               <AddIcon fontSize="large" />
@@ -91,10 +125,15 @@ export default function HomePage() {
           </Box>
         ) : (
           mediaItems.map((item) => (
-            <Box key={item.id} className="keen-slider__slide" sx={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: 2, height: '100%'
-            }}>
+            <Box
+              key={item.id}
+              className="keen-slider__slide"
+              sx={{
+                width: '100vw',
+                height: '100vh',
+                position: 'relative',
+              }}
+            >
               <MediaItemComponent
                 mediaItem={item}
                 addMediaItem={(mediaItem) => {
@@ -115,10 +154,9 @@ export default function HomePage() {
                 }
                 onDelete={(deletedItem) =>
                   setMediaItems((prev) => {
-                    const newItems = prev.filter((item) => item !== deletedItem);
+                    const newItems = prev.filter((item) => item.id !== deletedItem.id);
                     if (instanceRef.current!.size >= newItems.length && newItems.length > 0) {
-                      const newStep = newItems.length - 1;
-                      instanceRef.current?.moveToIdx(newStep);
+                      instanceRef.current?.moveToIdx(newItems.length - 1);
                     }
                     return newItems;
                   })
