@@ -8,12 +8,8 @@ import {
   Card,
   CardMedia,
   Dialog,
-  Fade,
   IconButton,
-  Tooltip,
-  alpha,
-  useMediaQuery,
-  useTheme
+  Tooltip
 } from "@mui/material";
 import React, { useState } from "react";
 import { MediaItem } from "../models/MediaItem";
@@ -21,228 +17,160 @@ import PhotoAnimateDialog from "./PhotoAnimateDialog";
 import PhotoTransformDialog from "./PhotoTransformDialog";
 
 export interface PhotoItemProps {
-  mediaItem: MediaItem
+  mediaItem: MediaItem;
   addMediaItem: (mediaItem: MediaItem) => void;
   updateMediaItem: (mediaItem: MediaItem) => void;
   onDelete: (mediaItem: MediaItem) => void;
 }
 
-const PhotoItemComponent: React.FC<PhotoItemProps> = ({ mediaItem, addMediaItem, updateMediaItem, onDelete }) => {
+const PhotoItemComponent: React.FC<PhotoItemProps> = ({
+  mediaItem,
+  addMediaItem,
+  updateMediaItem,
+  onDelete
+}) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [animateDialogOpen, setAnimateDialogOpen] = useState(false);
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const handleCardHover = () => {
-    if (!isMobile) {
-      setControlsVisible(true);
-    }
-  };
-
-  const handleCardLeave = () => {
-    if (!isMobile) {
-      setControlsVisible(false);
-    }
-  };
-
-  const handleCardTouch = () => {
-    if (isMobile) {
-      setControlsVisible(!controlsVisible);
-    }
-  };
+  const toggleControls = () => setControlsVisible(!controlsVisible);
 
   return (
     <>
       <Card
         sx={{
-          position: 'relative',
-          overflow: 'hidden',
+          position: "relative",
+          overflow: "hidden",
           borderRadius: 2,
           boxShadow: 2,
-          flex: 1,
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          '&:hover': {
-            boxShadow: 4,
-          },
-          transition: 'box-shadow 0.3s ease'
+          width: "100%",
+          height: "100%",
         }}
-        onMouseEnter={handleCardHover}
-        onMouseLeave={handleCardLeave}
-        onClick={handleCardTouch}
+        onClick={toggleControls}
       >
-        <Box sx={{ position: 'relative', flex: 1, display: 'flex' }}>
+        <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
           <CardMedia
             component="img"
             image={mediaItem.url}
             alt="Photo"
             sx={{
-              backgroundColor: alpha(theme.palette.common.black, 0.04),
-              objectFit: 'contain',
-              width: '100%',
-              height: '100%',
-              display: 'block'
+              objectFit: "contain",
+              width: "100%",
+              height: "100%",
             }}
           />
 
           {/* Fullscreen button - always visible */}
-          <Tooltip title="View fullscreen">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setFullscreenOpen(true);
-              }}
-              sx={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                backgroundColor: alpha(theme.palette.background.paper, 0.7),
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
-                }
-              }}
-            >
-              <FullscreenIcon />
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              setFullscreenOpen(true);
+            }}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+            }}
+          >
+            <FullscreenIcon fontSize="small" />
+          </IconButton>
 
-          <Fade in={controlsVisible || !isMobile}>
+          {/* Action buttons - visible only when controlsVisible */}
+          {controlsVisible && (
             <Box
               sx={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '12px',
-                background: isMobile
-                  ? 'rgba(0,0,0,0.5)'
-                  : 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
-                transition: 'opacity 0.3s ease'
+                position: "absolute",
+                bottom: 8,
+                left: 8,
+                right: 8,
+                display: "flex",
+                justifyContent: "space-between",
+                borderRadius: 1,
+                p: 1
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Tooltip title="Transform photo">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setDialogOpen(true)}
-                    sx={{
-                      borderRadius: '50%',
-                      minWidth: { xs: 40, sm: 48 },
-                      minHeight: { xs: 40, sm: 48 },
-                      p: 0,
-                      mx: 1
-                    }}
-                    aria-label="Transform photo"
-                  >
-                    <AutoFixHighIcon fontSize={isMobile ? "small" : "medium"} />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Animate photo">
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => setAnimateDialogOpen(true)}
-                    sx={{
-                      borderRadius: '50%',
-                      minWidth: { xs: 40, sm: 48 },
-                      minHeight: { xs: 40, sm: 48 },
-                      p: 0,
-                      mx: 1
-                    }}
-                    aria-label="Animate photo"
-                  >
-                    <AnimationIcon fontSize={isMobile ? "small" : "medium"} />
-                  </Button>
-                </Tooltip>
-              </Box>
-
-              <Tooltip title="Delete photo">
+              <Tooltip title="Transform">
                 <Button
-                  variant="contained"
-                  color="error"
-                  onClick={() => onDelete(mediaItem)}
-                  sx={{
-                    borderRadius: '50%',
-                    minWidth: { xs: 40, sm: 48 },
-                    minHeight: { xs: 40, sm: 48 },
-                    p: 0
-                  }}
-                  aria-label="Delete photo"
+                  onClick={() => setDialogOpen(true)}
+                  sx={{ minWidth: 0, p: 1 }}
                 >
-                  <DeleteIcon fontSize={isMobile ? "small" : "medium"} />
+                  <AutoFixHighIcon fontSize="small" sx={{ color: "#fff" }} />
+                </Button>
+              </Tooltip>
+              <Tooltip title="Animate">
+                <Button
+                  onClick={() => setAnimateDialogOpen(true)}
+                  sx={{ minWidth: 0, p: 1 }}
+                >
+                  <AnimationIcon fontSize="small" sx={{ color: "#fff" }} />
+                </Button>
+              </Tooltip>
+              <Tooltip title="Delete">
+                <Button
+                  onClick={() => onDelete(mediaItem)}
+                  sx={{ minWidth: 0, p: 1 }}
+                >
+                  <DeleteIcon fontSize="small" sx={{ color: "#fff" }} />
                 </Button>
               </Tooltip>
             </Box>
-          </Fade>
+          )}
         </Box>
       </Card>
 
-      {/* Fullscreen image dialog */}
+      {/* Fullscreen dialog */}
       <Dialog
         open={fullscreenOpen}
         onClose={() => setFullscreenOpen(false)}
-        maxWidth="xl"
-        fullScreen={isMobile}
+        fullScreen
         onClick={() => setFullscreenOpen(false)}
       >
-        <Box sx={{
-          backgroundColor: 'black',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '100%',
-          height: '100%',
-          position: 'relative',
-          overflow: 'auto'
-        }}>
+        <Box
+          sx={{
+            backgroundColor: "black",
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
           <img
             src={mediaItem.url}
-            alt="Fullscreen view"
-            style={{
-              maxHeight: '100%',
-              maxWidth: '100%',
-              objectFit: 'contain'
-            }}
+            alt="Fullscreen"
+            style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
           />
         </Box>
       </Dialog>
-
 
       <PhotoTransformDialog
         mediaItem={mediaItem}
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        addMediaItem={(mediaItem) => {
+        addMediaItem={(item) => {
           setDialogOpen(false);
-          addMediaItem(mediaItem);
+          addMediaItem(item);
         }}
-        updateMediaItem={(mediaItem) => {
+        updateMediaItem={(item) => {
           setDialogOpen(false);
-          updateMediaItem(mediaItem);
+          updateMediaItem(item);
         }}
       />
 
       <PhotoAnimateDialog
-        open={animateDialogOpen}
         mediaItem={mediaItem}
+        open={animateDialogOpen}
         onClose={() => setAnimateDialogOpen(false)}
-        addMediaItem={(mediaItem) => {
+        addMediaItem={(item) => {
           setAnimateDialogOpen(false);
-          addMediaItem(mediaItem);
+          addMediaItem(item);
         }}
-        updateMediaItem={(mediaItem) => {
+        updateMediaItem={(item) => {
           setAnimateDialogOpen(false);
-          updateMediaItem(mediaItem);
+          updateMediaItem(item);
         }}
       />
     </>

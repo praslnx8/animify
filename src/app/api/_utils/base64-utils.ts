@@ -40,11 +40,6 @@ export function base64ToBlob(base64: string): Blob {
   return new Blob([ab], { type: mime });
 }
 
-
-export const base64ToDataUrl = (base64: string, type: string = 'image/jpeg'): string => {
-  return `data:${type};base64,${base64}`;
-};
-
 /**
  * Fetches an image from a URL and converts it to base64
  * @param url The URL of the image to convert

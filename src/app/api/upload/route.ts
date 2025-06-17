@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { buildPublicUrl } from '../../utils/base64-utils';
+import { buildPublicUrl } from '../_utils/base64-utils';
 
 export const runtime = 'nodejs';
 

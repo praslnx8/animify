@@ -4,8 +4,7 @@ const STORAGE_KEY = 'animify_media_items';
 
 export const saveMediaItemsToLocalStorage = (mediaItems: MediaItem[]): void => {
   try {
-    const storedItems: MediaItem[] = mediaItems.filter(item => item.imageUrl);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(storedItems));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mediaItems));
   } catch (error) {
     console.error("Error saving to localStorage:", error);
   }
