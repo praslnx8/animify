@@ -307,8 +307,10 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     <>
       <Card
         sx={{
-          height: '100dvh', // Use device viewport height for mobile compatibility
-          width: '100vw',
+          minHeight: 0,
+          minWidth: 0,
+          width: '100%',
+          height: '100%',
           backgroundColor: 'black',
           display: 'flex',
           flexDirection: 'column',
@@ -324,11 +326,11 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
       >
         {/* Main content area for media */}
         <Box sx={{ 
-          flex: '1 1 auto', 
+          flex: 1,
           display: 'flex', 
           flexDirection: 'column',
           overflow: 'hidden',
-          minHeight: 0, // allow flex children to shrink
+          minHeight: 0,
         }}>
           <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', minHeight: 0 }}>
             {renderMedia()}
@@ -390,9 +392,7 @@ const iconStyle = { color: '#fff' };
 const deleteIconStyle = { color: 'red' };
 const actionBarStyle = {
   width: '100%',
-  height: 'auto',
-  maxHeight: '120px',
-  padding: '16px 0',
+  padding: '1rem 0',
   background: 'linear-gradient(to top, rgba(0,0,0,0.98), rgba(0,0,0,0.5))',
   borderTop: '1px solid rgba(255,255,255,0.1)',
   display: 'flex',
@@ -401,7 +401,8 @@ const actionBarStyle = {
   zIndex: 10,
   position: 'relative',
   boxSizing: 'border-box',
-  paddingBottom: 'env(safe-area-inset-bottom)', // for iOS safe area
+  paddingBottom: 'env(safe-area-inset-bottom)',
+  minHeight: 0,
 };
 const loadingOverlayStyle = {
   position: 'absolute',
