@@ -128,6 +128,8 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
             sx={{
               position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
               display: 'flex', justifyContent: 'center', alignItems: 'center',
+              opacity: videoStatus === VideoStatus.Playing ? 1 : 0,
+              zIndex: videoStatus === VideoStatus.Playing ? 2 : 0,
             }}
           >
             {videoStatus !== VideoStatus.Idle && (
@@ -136,12 +138,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
                 key={videoKey}
                 ref={videoRef}
                 width="100%"
-                height={160}
                 controls
-                style={{
-                  display: videoStatus === VideoStatus.Playing ? 'block' : 'none',
-                  width: '100%'
-                }}
                 src={getVideoUrlWithCacheBuster()}
                 onLoadedData={handleVideoLoaded}
                 onError={(e) => {
