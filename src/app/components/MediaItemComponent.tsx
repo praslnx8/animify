@@ -106,17 +106,33 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(mediaItem.url!);
-      if (!response.ok) throw new Error("Download failed");
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      // Try to download directly if same-origin or CORS is allowed
       const a = document.createElement('a');
-      a.href = url;
+      a.href = mediaItem.url!;
       a.download = `media-${mediaItem.id}.${isVideo ? 'mp4' : 'jpg'}`;
+      a.target = '_blank'; // Open in new tab
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (err) {
-      console.error('Download failed:', err);
+      // Fallback: try fetch (will fail if CORS is not allowed)
+      try {
+        const response = await fetch(mediaItem.url!);
+        if (!response.ok) throw new Error("Download failed");
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `media-${mediaItem.id}.${isVideo ? 'mp4' : 'jpg'}`;
+        a.target = '_blank'; // Open in new tab
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err2) {
+        console.error('Download failed:', err2);
+        alert('Download failed due to CORS restrictions. Please open the media in a new tab and save manually.');
+      }
     }
   };
 
@@ -163,16 +179,16 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           </Box>
         </>
       );
+    } else {
+      return (
+        <img
+          src={mediaItem.url}
+          alt="Media"
+          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+          onClick={() => setFullscreenOpen(true)}
+        />
+      );
     }
-
-    return (
-      <img
-        src={mediaItem.url}
-        alt="Media"
-        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-        onClick={() => setFullscreenOpen(true)}
-      />
-    );
   };
 
   const renderActions = () => {
