@@ -70,8 +70,11 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   const [videoError, setVideoError] = useState<string | null>(null);
 
   useEffect(() => {
-    setVideoStatus(VideoStatus.Idle);
+    setVideoStatus(isVideo ? VideoStatus.Paused : VideoStatus.Idle);
     setVideoError(null);
+    if (isVideo && videoRef.current) {
+      videoRef.current.pause();
+    }
   }, [mediaItem.id]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
