@@ -120,8 +120,15 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
         <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
           <Stack spacing={2.5}>
             <TextField
-              label="Transformation Description"
-              placeholder="Describe how you want to transform this photo"
+              label={<>
+                Transformation Description
+                <Box component="span" sx={{ ml: 1, verticalAlign: 'middle' }}>
+                  <Typography component="span" variant="caption" color="text.secondary">
+                    <span title="Describe the subject, style, setting, mood, and details for best results. E.g. 'A portrait of a young woman in a fantasy forest, anime style, soft lighting, intricate details.'">🛈</span>
+                  </Typography>
+                </Box>
+              </>}
+              placeholder="E.g. A portrait of a young woman in a fantasy forest, anime style, soft lighting, intricate details."
               value={prompt}
               onChange={e => setPrompt(e.target.value)}
               fullWidth
@@ -130,13 +137,45 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
               multiline
               rows={2}
               variant="outlined"
-              helperText="Be specific about the style, setting, outfit, etc."
+              helperText="Describe the subject, style, setting, mood, and details for best results."
               InputProps={{
                 sx: {
                   borderRadius: 1.5
                 }
               }}
             />
+
+            {/* Prompt Helper Section */}
+            <Box sx={{ bgcolor: 'background.paper', border: `1px solid ${theme.palette.divider}`, borderRadius: 1.5, p: 2, mb: 1 }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                Prompt Helper
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                For best results, include:
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  <li>Subject (e.g. "a young woman")</li>
+                  <li>Setting or background (e.g. "in a fantasy forest")</li>
+                  <li>Lighting, mood, or color (e.g. "soft lighting", "vibrant colors")</li>
+                  <li>Details (e.g. "intricate details", "highly detailed eyes")</li>
+                </ul>
+              </Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setPrompt('A portrait of a young woman in a fantasy forest, soft lighting, intricate details.')}
+                >
+                  Insert Example
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setPrompt('A futuristic cityscape at sunset, neon lights, bustling crowd, cinematic atmosphere.')}
+                >
+                  Insert Example 2
+                </Button>
+              </Stack>
+            </Box>
 
             <Accordion
               expanded={expanded}
