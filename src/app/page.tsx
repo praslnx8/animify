@@ -8,8 +8,7 @@ import {
   Box,
   IconButton,
   Toolbar,
-  Typography,
-  useTheme
+  Typography
 } from '@mui/material';
 import 'keen-slider/keen-slider.min.css';
 import React, { useEffect, useRef, useState } from 'react';
@@ -27,7 +26,6 @@ export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
-  const theme = useTheme();
 
   useEffect(() => {
     const stored = loadMediaItemsFromLocalStorage();
@@ -35,7 +33,7 @@ export default function HomePage() {
       setMediaItems(stored);
       setCurrentIdx(stored.length - 1);
     }
-  }, []);
+  }, [true]);
 
   useEffect(() => {
     saveMediaItemsToLocalStorage(mediaItems);
@@ -49,7 +47,7 @@ export default function HomePage() {
     const tempId = Date.now().toString();
     const newItem: MediaItem = { id: tempId, type: MediaType.Image, loading: true };
     setMediaItems((prev) => [...prev, newItem]);
-    setCurrentIdx(mediaItems.length); // go to new item
+    setCurrentIdx(mediaItems.length);
 
     try {
       const base64 = await fileToBase64(file);
@@ -129,10 +127,8 @@ export default function HomePage() {
               setMediaItems((prev) => prev.filter((item) => item.id !== mediaItem.id));
               if (currentIdx > 0) {
                 setCurrentIdx((idx) => idx - 1);
-              } else if (mediaItems.length > 1) {
-                setCurrentIdx(0);
               } else {
-                setCurrentIdx(-1);
+                setCurrentIdx(0);
               }
             }}
             onSwipe={handleSwipe}

@@ -34,12 +34,12 @@ interface PhotoTransformDialogProps {
 const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
   const [prompt, setPrompt] = useState(mediaItem.prompt || "");
   const [modelName, setModelName] = useState("base");
-  const [style, setStyle] = useState("realistic");
+  const [style, setStyle] = useState("anime");
   const [gender, setGender] = useState("man");
   const [bodyType, setBodyType] = useState("lean");
   const [skinColor, setSkinColor] = useState("pale");
   const [autoDetectHairColor, setAutoDetectHairColor] = useState(true);
-  const [nsfwPolicy, setNsfwPolicy] = useState("allow");
+  const [nsfwPolicy, setNsfwPolicy] = useState("filter");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expanded, setExpanded] = useState(false);
 

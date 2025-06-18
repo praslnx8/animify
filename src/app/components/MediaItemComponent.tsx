@@ -12,14 +12,15 @@ import {
   Box,
   Card,
   CircularProgress,
-  Dialog,
   IconButton,
   Tooltip,
-  Typography,
+  Typography
 } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { downloadMedia } from '../api/downloadMedia';
 import { MediaItem } from '../models/MediaItem';
+import { MediaType } from '../models/MediaType';
 import PhotoAnimateDialog from './PhotoAnimateDialog';
 import PhotoTransformDialog from './PhotoTransformDialog';
 
@@ -63,7 +64,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
 
-  const isVideo = mediaItem.type === 'video';
+  const isVideo = mediaItem.type === MediaType.Video;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoStatus, setVideoStatus] = useState<VideoStatus>(VideoStatus.Idle);
   const [videoError, setVideoError] = useState<string | null>(null);
@@ -104,36 +105,8 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     }
   };
 
-  const handleDownload = async () => {
-    try {
-      // Try to download directly if same-origin or CORS is allowed
-      const a = document.createElement('a');
-      a.href = mediaItem.url!;
-      a.download = `media-${mediaItem.id}.${isVideo ? 'mp4' : 'jpg'}`;
-      a.target = '_blank'; // Open in new tab
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (err) {
-      // Fallback: try fetch (will fail if CORS is not allowed)
-      try {
-        const response = await fetch(mediaItem.url!);
-        if (!response.ok) throw new Error("Download failed");
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `media-${mediaItem.id}.${isVideo ? 'mp4' : 'jpg'}`;
-        a.target = '_blank'; // Open in new tab
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } catch (err2) {
-        console.error('Download failed:', err2);
-        alert('Download failed due to CORS restrictions. Please open the media in a new tab and save manually.');
-      }
-    }
+  const handleDownload = () => {
+    downloadMedia(mediaItem.url!, mediaItem.id, isVideo);
   };
 
   const renderMedia = () => {
@@ -269,15 +242,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
 
         {renderActions()}
       </Card>
-
-      {/* Fullscreen for photos */}
-      {!isVideo && (
-        <Dialog fullScreen open={fullscreenOpen} onClose={() => setFullscreenOpen(false)}>
-          <Box sx={{ backgroundColor: 'black', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <img src={mediaItem.url} alt="Fullscreen" style={{ maxWidth: '100%', maxHeight: '100%' }} />
-          </Box>
-        </Dialog>
-      )}
 
       <PhotoTransformDialog
         open={transformOpen}
