@@ -39,8 +39,6 @@ interface MediaItemProps {
   addMediaItem: (item: MediaItem) => void;
   updateMediaItem: (item: MediaItem) => void;
   onDelete: (item: MediaItem) => void;
-  onSwipe?: (direction: 'left' | 'right') => void;
-  isTopCard?: boolean;
   showActions?: boolean;
   onPrev?: () => void;
   onNext?: () => void;
@@ -53,15 +51,10 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   addMediaItem,
   updateMediaItem,
   onDelete,
-  onSwipe,
-  isTopCard,
   showActions,
 }) => {
   const [transformOpen, setTransformOpen] = useState(false);
   const [animateOpen, setAnimateOpen] = useState(false);
-
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [swipeOffset, setSwipeOffset] = useState(0);
 
   const isVideo = mediaItem.type === MediaType.Video;
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -78,24 +71,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
       }
     }
   }, [mediaItem.id, isVideo, mediaItem.url]);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!isTopCard) return;
-    setTouchStart(e.touches[0].clientX);
-    setSwipeOffset(0);
-  };
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isTopCard || touchStart === null) return;
-    const offset = e.touches[0].clientX - touchStart;
-    setSwipeOffset(offset);
-  };
-  const handleTouchEnd = () => {
-    if (!isTopCard || touchStart === null) return;
-    if (swipeOffset > 80 && onSwipe) onSwipe('right');
-    else if (swipeOffset < -80 && onSwipe) onSwipe('left');
-    setTouchStart(null);
-    setSwipeOffset(0);
-  };
 
   const handlePlayPause = () => {
     if (!videoRef.current) return;
@@ -152,7 +127,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   const renderMedia = () => {
     if (mediaItem.loading) {
       return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
           <CircularProgress />
         </Box>
       );
@@ -215,23 +190,23 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     const showRetry = mediaItem.parent && mediaItem.prompt;
     const showDownload = mediaItem.type === MediaType.Video;
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', width: '100%' }}>
+      <Box display="flex" justifyContent="space-around" alignItems="center" width="100%">
         {mediaItem.type === MediaType.Video && (
           <Tooltip title={videoStatus === VideoStatus.Playing ? 'Pause' : 'Play'}>
-            <IconButton onClick={handlePlayPause} sx={iconStyle} size="large">
+            <IconButton onClick={handlePlayPause} color="primary" size="large">
               {videoStatus === VideoStatus.Playing ? <PauseIcon fontSize="inherit" /> : <PlayArrowIcon fontSize="inherit" />}
             </IconButton>
           </Tooltip>
         )}
         {mediaItem.type === MediaType.Image && (
           <>
-            <Tooltip title="Transform">
-              <IconButton onClick={() => setTransformOpen(true)} sx={iconStyle} size="large">
+            <Tooltip title="Edit Photo">
+              <IconButton onClick={() => setTransformOpen(true)} color="primary" size="large">
                 <AutoFixHighIcon fontSize="inherit" />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Animate">
-              <IconButton onClick={() => setAnimateOpen(true)} sx={iconStyle} size="large">
+            <Tooltip title="Animate Photo">
+              <IconButton onClick={() => setAnimateOpen(true)} color="secondary" size="large">
                 <AnimationIcon fontSize="inherit" />
               </IconButton>
             </Tooltip>
@@ -239,22 +214,22 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         )}
         {showDownload && (
           <Tooltip title="Download">
-            <IconButton onClick={handleDownload} sx={iconStyle} size="large">
+            <IconButton onClick={handleDownload} color="primary" size="large">
               <DownloadIcon fontSize="inherit" />
             </IconButton>
           </Tooltip>
         )}
         {showRetry && (
           <Tooltip title="Retry">
-            <IconButton onClick={handleRetry} sx={iconStyle} size="large">
+            <IconButton onClick={handleRetry} color="primary" size="large">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 5V2L7 7l5 5V8c3.31 0 6 2.69 6 6 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8zm-6.87 3.13l-1.46 1.46C4.93 6.93 6.85 6 9 6c4.42 0 8 3.58 8 8 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8-2.15 0-4.07.93-5.47 2.13z" fill="#fff" />
+                <path d="M12 5V2L7 7l5 5V8c3.31 0 6 2.69 6 6 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8zm-6.87 3.13l-1.46 1.46C4.93 6.93 6.85 6 9 6c4.42 0 8 3.58 8 8 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8-2.15 0-4.07.93-5.47 2.13z" fill="#1976d2" />
               </svg>
             </IconButton>
           </Tooltip>
         )}
         <Tooltip title="Delete">
-          <IconButton onClick={() => onDelete(mediaItem)} sx={deleteIconStyle} size="large">
+          <IconButton onClick={() => onDelete(mediaItem)} color="error" size="large">
             <DeleteIcon fontSize="inherit" />
           </IconButton>
         </Tooltip>
@@ -266,36 +241,27 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     <>
       <Card
         sx={{
-          minHeight: 0,
-          minWidth: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'black',
+          bgcolor: 'background.paper',
           display: 'flex',
           flexDirection: 'column',
-          transform: isTopCard ? `translateX(${swipeOffset}px) rotate(${swipeOffset / 20}deg)` : 'none',
-          transition: touchStart ? 'none' : 'transform 0.2s',
           overflow: 'hidden',
-          boxSizing: 'border-box',
         }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        elevation={isTopCard ? 8 : 2}
       >
-        <Box sx={{ flex: '0 0 75%', height: '75%', width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', height: '100%', width: '100%' }}>
+        <Box flex={3} width="100%" display="flex" flexDirection="column" overflow="hidden">
+          <Box flex={1} display="flex" justifyContent="center" alignItems="center" overflow="hidden" width="100%">
             {renderMedia()}
           </Box>
           {mediaItem.prompt && (
-            <Box sx={{ px: 2, py: 1, backgroundColor: 'rgba(0,0,0,0.7)', textAlign: 'center' }}>
-              <Typography variant="body2" noWrap title={mediaItem.prompt} sx={{ color: '#fff' }}>
+            <Box px={2} py={1} bgcolor="rgba(0,0,0,0.7)" textAlign="center">
+              <Typography variant="body2" noWrap title={mediaItem.prompt} color="#fff">
                 {mediaItem.prompt}
               </Typography>
             </Box>
           )}
         </Box>
-        <Box sx={{ flex: '0 0 25%', height: '25%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(to top, rgba(0,0,0,0.98), rgba(0,0,0,0.5))', borderTop: '1px solid rgba(255,255,255,0.1)', position: 'relative', zIndex: 10, boxSizing: 'border-box', p: 0 }}>
+        <Box flex={1} width="100%" display="flex" alignItems="center" justifyContent="center" borderTop={1} borderColor="divider" bgcolor="background.default">
           {renderActions()}
         </Box>
       </Card>
@@ -332,8 +298,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
 };
 
 // Styles
-const iconStyle = { color: '#fff' };
-const deleteIconStyle = { color: 'red' };
 const loadingOverlayStyle = {
   position: 'absolute',
   top: 0,
