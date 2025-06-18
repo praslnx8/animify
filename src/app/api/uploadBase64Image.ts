@@ -1,4 +1,4 @@
-import { base64ToBlob } from "./_utils/base64-utils";
+import { base64ToBlob } from "./_utils/base64-server-utils";
 
 export async function uploadBase64Image(base64: string): Promise<string> {
     try {

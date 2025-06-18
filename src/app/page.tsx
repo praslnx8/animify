@@ -12,11 +12,11 @@ import {
 } from '@mui/material';
 import 'keen-slider/keen-slider.min.css';
 import React, { useEffect, useRef, useState } from 'react';
-import { fileToBase64 } from './api/_utils/base64-utils';
 import { uploadBase64Image } from './api/uploadBase64Image';
 import MediaItemComponent from './components/MediaItemComponent';
 import { MediaItem } from './models/MediaItem';
 import { MediaType } from './models/MediaType';
+import { fileToBase64 } from './utils/base64-utils';
 import {
   loadMediaItemsFromLocalStorage,
   saveMediaItemsToLocalStorage,

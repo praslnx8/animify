@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { buildPublicUrl, saveBase64ToFile, urlToBase64 } from '../_utils/base64-utils';
+import { buildPublicUrl, saveBase64ToFile, urlToBase64 } from '../_utils/base64-server-utils';
 
 export const runtime = 'nodejs';
 
