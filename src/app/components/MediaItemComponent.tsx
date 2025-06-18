@@ -17,11 +17,21 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { MediaItem } from '../models/MediaItem';
 import PhotoAnimateDialog from './PhotoAnimateDialog';
 import PhotoTransformDialog from './PhotoTransformDialog';
+
+// Enum for video status
+enum VideoStatus {
+  Idle = 'idle',
+  Loading = 'loading',
+  Playing = 'playing',
+  Paused = 'paused',
+  Ended = 'ended',
+  Error = 'error',
+}
 
 interface MediaItemProps {
   mediaItem: MediaItem;
@@ -55,11 +65,11 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
 
   const isVideo = mediaItem.type === 'video';
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoStatus, setVideoStatus] = useState<'idle' | 'loading' | 'playing' | 'paused' | 'ended' | 'error'>('idle');
+  const [videoStatus, setVideoStatus] = useState<VideoStatus>(VideoStatus.Idle);
   const [videoError, setVideoError] = useState<string | null>(null);
 
   useEffect(() => {
-    setVideoStatus('idle');
+    setVideoStatus(VideoStatus.Idle);
     setVideoError(null);
   }, [mediaItem.id]);
 
@@ -83,13 +93,13 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
 
   const handlePlayPause = () => {
     if (!videoRef.current) return;
-    if (videoStatus === 'playing') {
+    if (videoStatus === VideoStatus.Playing) {
       videoRef.current.pause();
-      setVideoStatus('paused');
+      setVideoStatus(VideoStatus.Paused);
     } else {
-      setVideoStatus('loading');
+      setVideoStatus(VideoStatus.Loading);
       videoRef.current.play()
-        .then(() => setVideoStatus('playing'))
+        .then(() => setVideoStatus(VideoStatus.Playing))
         .catch(() => setVideoError("Can't play video"));
     }
   };
@@ -111,25 +121,34 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   };
 
   const renderMedia = () => {
+
+    if (mediaItem.loading) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
+
     if (isVideo) {
       return (
         <>
           <Box position="relative" width="100%">
-            {videoStatus === 'loading' && (
+            {videoStatus === VideoStatus.Loading && (
               <Box sx={loadingOverlayStyle}>
                 <CircularProgress />
               </Box>
             )}
             <video
-              key={videoStatus === 'error' ? Date.now() : mediaItem.url}
+              key={videoStatus === VideoStatus.Error ? Date.now() : mediaItem.url}
               ref={videoRef}
-              src={mediaItem.url + (videoStatus === 'error' ? `?retry=${Date.now()}` : '')}
-              onPlay={() => setVideoStatus('playing')}
-              onPause={() => setVideoStatus('paused')}
-              onEnded={() => setVideoStatus('ended')}
-              onLoadedData={() => setVideoStatus('paused')}
+              src={mediaItem.url + (videoStatus === VideoStatus.Error ? `?retry=${Date.now()}` : '')}
+              onPlay={() => setVideoStatus(VideoStatus.Playing)}
+              onPause={() => setVideoStatus(VideoStatus.Paused)}
+              onEnded={() => setVideoStatus(VideoStatus.Ended)}
+              onLoadedData={() => setVideoStatus(VideoStatus.Paused)}
               onError={() => {
-                setVideoStatus('error');
+                setVideoStatus(VideoStatus.Error);
                 setVideoError('Video failed to load.');
               }}
               playsInline
@@ -163,9 +182,9 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
       <Box sx={actionBarStyle}>
         <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
           {isVideo ? (
-            <Tooltip title={videoStatus === 'playing' ? 'Pause' : 'Play'}>
+            <Tooltip title={videoStatus === VideoStatus.Playing ? 'Pause' : 'Play'}>
               <IconButton onClick={handlePlayPause} sx={iconStyle} size="large">
-                {videoStatus === 'playing' ? <PauseIcon fontSize="inherit" /> : <PlayArrowIcon fontSize="inherit" />}
+                {videoStatus === VideoStatus.Playing ? <PauseIcon fontSize="inherit" /> : <PlayArrowIcon fontSize="inherit" />}
               </IconButton>
             </Tooltip>
           ) : (

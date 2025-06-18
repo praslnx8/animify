@@ -12,10 +12,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
         }
 
-        if (true) {
-            return NextResponse.json({ videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4' });
-        }
-
         const apiToken = process.env.EXH_AI_API_TOKEN;
         if (!apiToken) {
             return NextResponse.json({ error: 'API token not configured on server' }, { status: 500 });

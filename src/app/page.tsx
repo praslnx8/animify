@@ -9,16 +9,15 @@ import {
   IconButton,
   Toolbar,
   Typography,
-  useTheme,
-  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import 'keen-slider/keen-slider.min.css';
 import React, { useEffect, useRef, useState } from 'react';
+import { fileToBase64 } from './api/_utils/base64-utils';
 import { uploadBase64Image } from './api/uploadBase64Image';
 import MediaItemComponent from './components/MediaItemComponent';
 import { MediaItem } from './models/MediaItem';
 import { MediaType } from './models/MediaType';
-import { fileToBase64 } from './api/_utils/base64-utils';
 import {
   loadMediaItemsFromLocalStorage,
   saveMediaItemsToLocalStorage,
@@ -29,7 +28,6 @@ export default function HomePage() {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const stored = loadMediaItemsFromLocalStorage();
@@ -41,13 +39,9 @@ export default function HomePage() {
 
   useEffect(() => {
     saveMediaItemsToLocalStorage(mediaItems);
-    if (mediaItems.length > 0 && currentIdx > mediaItems.length - 1) {
-      setCurrentIdx(mediaItems.length - 1);
-    }
   }, [mediaItems]);
 
   const handleAddPhotoClick = () => fileInputRef.current?.click();
-
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -72,7 +66,6 @@ export default function HomePage() {
     }
   };
 
-  // Tinder-like swipe logic: navigate index
   const handleSwipe = (direction: 'left' | 'right') => {
     if (direction === 'left' && currentIdx < mediaItems.length - 1) {
       setCurrentIdx((idx) => idx + 1);
@@ -87,8 +80,6 @@ export default function HomePage() {
   const handleNext = () => {
     if (currentIdx < mediaItems.length - 1) setCurrentIdx((idx) => idx + 1);
   };
-
-  const currentMediaItem = mediaItems.length > 0 ? mediaItems[currentIdx] : null;
 
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#111' }}>
@@ -120,26 +111,28 @@ export default function HomePage() {
           background: '#111',
         }}
       >
-        {currentMediaItem ? (
+        {mediaItems.length > 0 ? (
           <MediaItemComponent
-            mediaItem={currentMediaItem}
+            mediaItem={mediaItems[currentIdx]}
             addMediaItem={(mediaItem) => {
               setMediaItems((prev) => [...prev, mediaItem]);
-              setCurrentIdx(mediaItems.length); 
+              setCurrentIdx(mediaItems.length);
             }}
             updateMediaItem={(updatedItem) =>
               setMediaItems((prev) =>
                 prev.map((item, idx) =>
-                  idx === currentIdx ? updatedItem : item
+                  item.id === updatedItem.id ? updatedItem : item
                 )
               )
             }
-            onDelete={() => {
-              setMediaItems((prev) => prev.filter((item) => item.id !== currentMediaItem.id));
+            onDelete={(mediaItem) => {
+              setMediaItems((prev) => prev.filter((item) => item.id !== mediaItem.id));
               if (currentIdx > 0) {
                 setCurrentIdx((idx) => idx - 1);
               } else if (mediaItems.length > 1) {
                 setCurrentIdx(0);
+              } else {
+                setCurrentIdx(-1);
               }
             }}
             onSwipe={handleSwipe}

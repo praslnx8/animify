@@ -40,9 +40,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
             }
             const result = await generateVideo({ image_url: mediaItem.url, prompt });
             if (result.videoUrl) {
-                setTimeout(() => {
-                    updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl });
-                }, 10000);
+                updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl });
             } else {
                 updateMediaItem({ ...videoMediaItem, loading: false, error: result.error || "Failed to generate video" });
             }
