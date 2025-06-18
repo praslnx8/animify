@@ -5,7 +5,6 @@ import {
   AutoFixHigh as AutoFixHighIcon,
   Delete as DeleteIcon,
   Download as DownloadIcon,
-  Pause as PauseIcon,
   PlayArrow as PlayArrowIcon,
 } from '@mui/icons-material';
 import {
@@ -29,7 +28,6 @@ enum VideoStatus {
   Idle = 'idle',
   Loading = 'loading',
   Playing = 'playing',
-  Paused = 'paused',
   Ended = 'ended',
   Error = 'error',
 }
@@ -52,41 +50,19 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
 
   const isVideo = mediaItem.type === MediaType.Video;
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoKey, setVideoKey] = React.useState<number>(0);
   const [videoStatus, setVideoStatus] = useState<VideoStatus>(VideoStatus.Idle);
   const [videoError, setVideoError] = useState<string | null>(null);
-  const [videoSrc, setVideoSrc] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    setVideoStatus(isVideo ? VideoStatus.Paused : VideoStatus.Idle);
+    setVideoStatus(VideoStatus.Idle);
     setVideoError(null);
-    setVideoSrc(undefined); // Reset video src on media change
-    if (isVideo && videoRef.current) {
-      videoRef.current.pause();
-    }
-  }, [mediaItem.id, isVideo, mediaItem.url]);
+  }, [mediaItem.id]);
 
-  const handlePlayPause = () => {
-    if (!videoRef.current) return;
-    if (videoStatus === VideoStatus.Playing) {
-      videoRef.current.pause();
-      setVideoStatus(VideoStatus.Paused);
-    } else {
-      setVideoError(null);
-      setVideoStatus(VideoStatus.Loading);
-      if (!videoSrc) {
-        const src = mediaItem.url + `?retry=${Date.now()}`;
-        setVideoSrc(src);
-        // Wait for src to be set, then play in onLoadedData
-      } else {
-        videoRef.current.play()
-          .then(() => setVideoStatus(VideoStatus.Playing))
-          .catch((error) => {
-            console.error('Video play error:', error);
-            setVideoStatus(VideoStatus.Error);
-            setVideoError("Can't play video - content may not be ready yet");
-          });
-      }
-    }
+  const handlePlay = () => {
+    setVideoError(null);
+    setVideoStatus(VideoStatus.Loading);
+    setVideoKey(prevKey => prevKey + 1);
   };
 
   const handleDownload = () => {
@@ -119,6 +95,16 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     }
   };
 
+  const getVideoUrlWithCacheBuster = () => {
+    const separator = mediaItem.url!.includes('?') ? '&' : '?';
+    return `${mediaItem.url}${separator}t=${Date.now()}`;
+  };
+
+  const handleVideoLoaded = () => {
+    setVideoStatus(VideoStatus.Playing);
+    videoRef.current?.play();
+  };
+
   const renderMedia = () => {
     if (mediaItem.loading) {
       return (
@@ -142,36 +128,28 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
             sx={{
               position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
               display: 'flex', justifyContent: 'center', alignItems: 'center',
-              opacity: videoStatus === VideoStatus.Playing ? 1 : 0,
-              zIndex: videoStatus === VideoStatus.Playing ? 2 : 0,
-              transition: 'opacity 0.3s ease', overflow: 'hidden'
             }}
           >
-            <video
-              ref={videoRef}
-              src={videoSrc}
-              onPlay={() => setVideoStatus(VideoStatus.Playing)}
-              onPause={() => setVideoStatus(VideoStatus.Paused)}
-              onEnded={() => setVideoStatus(VideoStatus.Ended)}
-              onLoadedData={() => {
-                if (videoStatus === VideoStatus.Loading && videoRef.current) {
-                  videoRef.current.play()
-                    .then(() => setVideoStatus(VideoStatus.Playing))
-                    .catch((error) => {
-                      setVideoStatus(VideoStatus.Error);
-                      setVideoError("Can't play video - content may not be ready yet");
-                    });
-                }
-              }}
-              onError={(e) => {
-                console.error('Video error event:', e);
-                setVideoStatus(VideoStatus.Error);
-                setVideoError('Video failed to load. Try playing again later.');
-              }}
-              playsInline
-              controls={false}
-              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', backgroundColor: 'black' }}
-            />
+            {videoStatus !== VideoStatus.Idle && (
+
+              <video
+                key={videoKey}
+                ref={videoRef}
+                width="100%"
+                height={160}
+                controls
+                style={{
+                  display: videoStatus === VideoStatus.Playing ? 'block' : 'none',
+                  width: '100%'
+                }}
+                src={getVideoUrlWithCacheBuster()}
+                onLoadedData={handleVideoLoaded}
+                onError={(e) => {
+                  console.error('Video error event:', e);
+                  setVideoStatus(VideoStatus.Error);
+                  setVideoError('Video failed to load. Try playing again later.');
+                }}
+              />)}
           </Box>
           {videoError && (
             <Typography color="error" textAlign="center" p={1} sx={{ position: 'absolute', bottom: 0, width: '100%' }}>
@@ -196,9 +174,9 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     return (
       <Box display="flex" justifyContent="space-around" alignItems="center" width="100%">
         {mediaItem.type === MediaType.Video && (
-          <Tooltip title={videoStatus === VideoStatus.Playing ? 'Pause' : 'Play'}>
-            <IconButton onClick={handlePlayPause} color="primary" size="large">
-              {videoStatus === VideoStatus.Playing ? <PauseIcon fontSize="inherit" /> : <PlayArrowIcon fontSize="inherit" />}
+          <Tooltip title='Play'>
+            <IconButton onClick={handlePlay} color="primary" size="large" disabled={videoStatus === VideoStatus.Playing}>
+              <PlayArrowIcon fontSize="inherit" />
             </IconButton>
           </Tooltip>
         )}
