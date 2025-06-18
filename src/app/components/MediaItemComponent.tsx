@@ -54,15 +54,14 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoStatus, setVideoStatus] = useState<VideoStatus>(VideoStatus.Idle);
   const [videoError, setVideoError] = useState<string | null>(null);
+  const [videoSrc, setVideoSrc] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setVideoStatus(isVideo ? VideoStatus.Paused : VideoStatus.Idle);
     setVideoError(null);
+    setVideoSrc(undefined); // Reset video src on media change
     if (isVideo && videoRef.current) {
       videoRef.current.pause();
-      if (mediaItem.url) {
-        videoRef.current.src = mediaItem.url + `?retry=${Date.now()}`;
-      }
     }
   }, [mediaItem.id, isVideo, mediaItem.url]);
 
@@ -74,17 +73,19 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     } else {
       setVideoError(null);
       setVideoStatus(VideoStatus.Loading);
-      if (videoRef.current) {
-        videoRef.current.src = mediaItem.url + `?retry=${Date.now()}`;
-        videoRef.current.load();
+      if (!videoSrc) {
+        const src = mediaItem.url + `?retry=${Date.now()}`;
+        setVideoSrc(src);
+        // Wait for src to be set, then play in onLoadedData
+      } else {
+        videoRef.current.play()
+          .then(() => setVideoStatus(VideoStatus.Playing))
+          .catch((error) => {
+            console.error('Video play error:', error);
+            setVideoStatus(VideoStatus.Error);
+            setVideoError("Can't play video - content may not be ready yet");
+          });
       }
-      videoRef.current.play()
-        .then(() => setVideoStatus(VideoStatus.Playing))
-        .catch((error) => {
-          console.error('Video play error:', error);
-          setVideoStatus(VideoStatus.Error);
-          setVideoError("Can't play video - content may not be ready yet");
-        });
     }
   };
 
@@ -148,10 +149,20 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           >
             <video
               ref={videoRef}
+              src={videoSrc}
               onPlay={() => setVideoStatus(VideoStatus.Playing)}
               onPause={() => setVideoStatus(VideoStatus.Paused)}
               onEnded={() => setVideoStatus(VideoStatus.Ended)}
-              onLoadedData={() => videoStatus === VideoStatus.Loading && setVideoStatus(VideoStatus.Paused)}
+              onLoadedData={() => {
+                if (videoStatus === VideoStatus.Loading && videoRef.current) {
+                  videoRef.current.play()
+                    .then(() => setVideoStatus(VideoStatus.Playing))
+                    .catch((error) => {
+                      setVideoStatus(VideoStatus.Error);
+                      setVideoError("Can't play video - content may not be ready yet");
+                    });
+                }
+              }}
               onError={(e) => {
                 console.error('Video error event:', e);
                 setVideoStatus(VideoStatus.Error);

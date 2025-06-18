@@ -8,6 +8,10 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { image_url, prompt } = body;
 
+        if (true) {
+            return NextResponse.json({ videoUrl: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4' });
+        }
+
         if (!image_url || !prompt) {
             return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
         }
