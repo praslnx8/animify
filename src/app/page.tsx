@@ -131,8 +131,6 @@ export default function HomePage() {
                 setCurrentIdx(0);
               }
             }}
-            onSwipe={handleSwipe}
-            isTopCard={true}
             showActions
             onPrev={handlePrev}
             onNext={handleNext}
