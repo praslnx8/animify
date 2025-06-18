@@ -215,51 +215,49 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     const showRetry = mediaItem.parent && mediaItem.prompt;
     const showDownload = mediaItem.type === MediaType.Video;
     return (
-      <Box sx={actionBarStyle}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
-          {mediaItem.type === MediaType.Video && (
-            <Tooltip title={videoStatus === VideoStatus.Playing ? 'Pause' : 'Play'}>
-              <IconButton onClick={handlePlayPause} sx={iconStyle} size="large">
-                {videoStatus === VideoStatus.Playing ? <PauseIcon fontSize="inherit" /> : <PlayArrowIcon fontSize="inherit" />}
-              </IconButton>
-            </Tooltip>
-          )}
-          {mediaItem.type === MediaType.Image && (
-            <>
-              <Tooltip title="Transform">
-                <IconButton onClick={() => setTransformOpen(true)} sx={iconStyle} size="large">
-                  <AutoFixHighIcon fontSize="inherit" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Animate">
-                <IconButton onClick={() => setAnimateOpen(true)} sx={iconStyle} size="large">
-                  <AnimationIcon fontSize="inherit" />
-                </IconButton>
-              </Tooltip>
-            </>
-          )}
-          {showDownload && (
-            <Tooltip title="Download">
-              <IconButton onClick={handleDownload} sx={iconStyle} size="large">
-                <DownloadIcon fontSize="inherit" />
-              </IconButton>
-            </Tooltip>
-          )}
-          {showRetry && (
-            <Tooltip title="Retry">
-              <IconButton onClick={handleRetry} sx={iconStyle} size="large">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 5V2L7 7l5 5V8c3.31 0 6 2.69 6 6 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8zm-6.87 3.13l-1.46 1.46C4.93 6.93 6.85 6 9 6c4.42 0 8 3.58 8 8 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8-2.15 0-4.07.93-5.47 2.13z" fill="#fff" />
-                </svg>
-              </IconButton>
-            </Tooltip>
-          )}
-          <Tooltip title="Delete">
-            <IconButton onClick={() => onDelete(mediaItem)} sx={deleteIconStyle} size="large">
-              <DeleteIcon fontSize="inherit" />
+      <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', width: '100%' }}>
+        {mediaItem.type === MediaType.Video && (
+          <Tooltip title={videoStatus === VideoStatus.Playing ? 'Pause' : 'Play'}>
+            <IconButton onClick={handlePlayPause} sx={iconStyle} size="large">
+              {videoStatus === VideoStatus.Playing ? <PauseIcon fontSize="inherit" /> : <PlayArrowIcon fontSize="inherit" />}
             </IconButton>
           </Tooltip>
-        </Box>
+        )}
+        {mediaItem.type === MediaType.Image && (
+          <>
+            <Tooltip title="Transform">
+              <IconButton onClick={() => setTransformOpen(true)} sx={iconStyle} size="large">
+                <AutoFixHighIcon fontSize="inherit" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Animate">
+              <IconButton onClick={() => setAnimateOpen(true)} sx={iconStyle} size="large">
+                <AnimationIcon fontSize="inherit" />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
+        {showDownload && (
+          <Tooltip title="Download">
+            <IconButton onClick={handleDownload} sx={iconStyle} size="large">
+              <DownloadIcon fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
+        )}
+        {showRetry && (
+          <Tooltip title="Retry">
+            <IconButton onClick={handleRetry} sx={iconStyle} size="large">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5V2L7 7l5 5V8c3.31 0 6 2.69 6 6 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8zm-6.87 3.13l-1.46 1.46C4.93 6.93 6.85 6 9 6c4.42 0 8 3.58 8 8 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8-2.15 0-4.07.93-5.47 2.13z" fill="#fff" />
+              </svg>
+            </IconButton>
+          </Tooltip>
+        )}
+        <Tooltip title="Delete">
+          <IconButton onClick={() => onDelete(mediaItem)} sx={deleteIconStyle} size="large">
+            <DeleteIcon fontSize="inherit" />
+          </IconButton>
+        </Tooltip>
       </Box>
     );
   };
@@ -285,8 +283,8 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         onTouchEnd={handleTouchEnd}
         elevation={isTopCard ? 8 : 2}
       >
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+        <Box sx={{ flex: '0 0 75%', height: '75%', width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', height: '100%', width: '100%' }}>
             {renderMedia()}
           </Box>
           {mediaItem.prompt && (
@@ -296,6 +294,8 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
               </Typography>
             </Box>
           )}
+        </Box>
+        <Box sx={{ flex: '0 0 25%', height: '25%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(to top, rgba(0,0,0,0.98), rgba(0,0,0,0.5))', borderTop: '1px solid rgba(255,255,255,0.1)', position: 'relative', zIndex: 10, boxSizing: 'border-box', p: 0 }}>
           {renderActions()}
         </Box>
       </Card>
@@ -334,18 +334,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
 // Styles
 const iconStyle = { color: '#fff' };
 const deleteIconStyle = { color: 'red' };
-const actionBarStyle = {
-  width: '100%',
-  background: 'linear-gradient(to top, rgba(0,0,0,0.98), rgba(0,0,0,0.5))',
-  borderTop: '1px solid rgba(255,255,255,0.1)',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: '0.75rem 1rem 1rem',
-  position: 'relative',
-  zIndex: 10,
-  boxSizing: 'border-box',
-};
 const loadingOverlayStyle = {
   position: 'absolute',
   top: 0,
