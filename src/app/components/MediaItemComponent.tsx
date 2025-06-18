@@ -73,7 +73,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     setVideoError(null);
     if (isVideo && videoRef.current) {
       videoRef.current.pause();
-      // Set the initial src with timestamp when component mounts or mediaItem changes
       if (mediaItem.url) {
         videoRef.current.src = mediaItem.url + `?retry=${Date.now()}`;
       }
@@ -104,19 +103,12 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
       videoRef.current.pause();
       setVideoStatus(VideoStatus.Paused);
     } else {
-      // Clear any previous errors
       setVideoError(null);
-
-      // Set to loading state and attempt to refresh the video source with a new timestamp
       setVideoStatus(VideoStatus.Loading);
-
-      // Update the video source to force a fresh load from server
       if (videoRef.current) {
         videoRef.current.src = mediaItem.url + `?retry=${Date.now()}`;
         videoRef.current.load();
       }
-
-      // Try to play the video
       videoRef.current.play()
         .then(() => setVideoStatus(VideoStatus.Playing))
         .catch((error) => {
@@ -131,11 +123,9 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     downloadMedia(mediaItem.url!, mediaItem.id, mediaItem.type === MediaType.Video);
   };
 
-  // Retry handler
   const handleRetry = async () => {
     if (!mediaItem.parent || !mediaItem.prompt) return;
     if (mediaItem.type === MediaType.Image) {
-      // Use silentPhotoTransform to retry with all params
       await silentPhotoTransform({
         parentMediaItem: mediaItem.parent,
         prompt: mediaItem.prompt,
@@ -150,7 +140,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         nsfwPolicy: mediaItem.nsfw_policy,
       });
     } else if (mediaItem.type === MediaType.Video) {
-      // Use silentPhotoAnimate to retry
       await silentPhotoAnimate({
         parentMediaItem: mediaItem.parent,
         prompt: mediaItem.prompt,
@@ -161,7 +150,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   };
 
   const renderMedia = () => {
-
     if (mediaItem.loading) {
       return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -169,94 +157,67 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         </Box>
       );
     }
-
     if (isVideo) {
       return (
-        <>
-          <Box position="relative" width="100%" height="100%" display="flex" justifyContent="center" alignItems="center">
-            {videoStatus === VideoStatus.Loading && (
-              <Box sx={loadingOverlayStyle}>
-                <CircularProgress />
-              </Box>
-            )}
-            {(videoStatus !== VideoStatus.Playing) && (
-              <img
-                src={mediaItem.parent?.url}
-                alt="Media"
-                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-              />
-            )}
-            <Box
-              sx={{
-                display: 'flex',
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                opacity: videoStatus === VideoStatus.Playing ? 1 : 0,
-                zIndex: videoStatus === VideoStatus.Playing ? 2 : 0,
-                transition: 'opacity 0.3s ease',
-                justifyContent: 'center',
-                alignItems: 'center',
-                overflow: 'hidden'
+        <Box position="relative" width="100%" flex={1} display="flex" justifyContent="center" alignItems="center">
+          {videoStatus === VideoStatus.Loading && <Box sx={loadingOverlayStyle}><CircularProgress /></Box>}
+          {(videoStatus !== VideoStatus.Playing) && (
+            <img
+              src={mediaItem.parent?.url}
+              alt="Media"
+              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+            />
+          )}
+          <Box
+            sx={{
+              position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+              display: 'flex', justifyContent: 'center', alignItems: 'center',
+              opacity: videoStatus === VideoStatus.Playing ? 1 : 0,
+              zIndex: videoStatus === VideoStatus.Playing ? 2 : 0,
+              transition: 'opacity 0.3s ease', overflow: 'hidden'
+            }}
+          >
+            <video
+              ref={videoRef}
+              onPlay={() => setVideoStatus(VideoStatus.Playing)}
+              onPause={() => setVideoStatus(VideoStatus.Paused)}
+              onEnded={() => setVideoStatus(VideoStatus.Ended)}
+              onLoadedData={() => videoStatus === VideoStatus.Loading && setVideoStatus(VideoStatus.Paused)}
+              onError={(e) => {
+                console.error('Video error event:', e);
+                setVideoStatus(VideoStatus.Error);
+                setVideoError('Video failed to load. Try playing again later.');
               }}
-            >
-              <video
-                ref={videoRef}
-                onPlay={() => setVideoStatus(VideoStatus.Playing)}
-                onPause={() => setVideoStatus(VideoStatus.Paused)}
-                onEnded={() => setVideoStatus(VideoStatus.Ended)}
-                onLoadedData={() => {
-                  // Only update status if we're loading (to avoid interrupting playback)
-                  if (videoStatus === VideoStatus.Loading) {
-                    setVideoStatus(VideoStatus.Paused);
-                  }
-                }}
-                onError={(e) => {
-                  console.error('Video error event:', e);
-                  setVideoStatus(VideoStatus.Error);
-                  setVideoError('Video failed to load. Try playing again later.');
-                }}
-                playsInline
-                controls={false}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain',
-                  backgroundColor: 'black'
-                }}
-              />
-            </Box>
-            {videoError && (
-              <Typography color="error" textAlign="center" p={1} sx={{ position: 'absolute', bottom: 0, width: '100%' }}>
-                {videoError}
-              </Typography>
-            )}
+              playsInline
+              controls={false}
+              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', backgroundColor: 'black' }}
+            />
           </Box>
-        </>
-      );
-    } else {
-      return (
-        <img
-          src={mediaItem.url}
-          alt="Media"
-          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-        />
+          {videoError && (
+            <Typography color="error" textAlign="center" p={1} sx={{ position: 'absolute', bottom: 0, width: '100%' }}>
+              {videoError}
+            </Typography>
+          )}
+        </Box>
       );
     }
+    return (
+      <img
+        src={mediaItem.url}
+        alt="Media"
+        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+      />
+    );
   };
 
   const renderActions = () => {
     if (!showActions) return null;
-
     const showRetry = mediaItem.parent && mediaItem.prompt;
     const showDownload = mediaItem.type === MediaType.Video;
-
     return (
       <Box sx={actionBarStyle}>
         <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
-          {mediaItem.type == MediaType.Video && (
+          {mediaItem.type === MediaType.Video && (
             <Tooltip title={videoStatus === VideoStatus.Playing ? 'Pause' : 'Play'}>
               <IconButton onClick={handlePlayPause} sx={iconStyle} size="large">
                 {videoStatus === VideoStatus.Playing ? <PauseIcon fontSize="inherit" /> : <PlayArrowIcon fontSize="inherit" />}
@@ -324,36 +285,19 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         onTouchEnd={handleTouchEnd}
         elevation={isTopCard ? 8 : 2}
       >
-        {/* Main content area for media */}
-        <Box sx={{ 
-          flex: 1,
-          display: 'flex', 
-          flexDirection: 'column',
-          overflow: 'hidden',
-          minHeight: 0,
-        }}>
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', minHeight: 0 }}>
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
             {renderMedia()}
           </Box>
-
           {mediaItem.prompt && (
-            <Box sx={{ 
-              px: 2, 
-              py: 1, 
-              backgroundColor: 'rgba(0,0,0,0.7)', 
-              textAlign: 'center',
-              position: 'relative',
-              zIndex: 3
-            }}>
+            <Box sx={{ px: 2, py: 1, backgroundColor: 'rgba(0,0,0,0.7)', textAlign: 'center' }}>
               <Typography variant="body2" noWrap title={mediaItem.prompt} sx={{ color: '#fff' }}>
                 {mediaItem.prompt}
               </Typography>
             </Box>
           )}
+          {renderActions()}
         </Box>
-
-        {/* Action bar at the bottom */}
-        {renderActions()}
       </Card>
 
       <PhotoTransformDialog
@@ -392,17 +336,15 @@ const iconStyle = { color: '#fff' };
 const deleteIconStyle = { color: 'red' };
 const actionBarStyle = {
   width: '100%',
-  padding: '1rem 0',
   background: 'linear-gradient(to top, rgba(0,0,0,0.98), rgba(0,0,0,0.5))',
   borderTop: '1px solid rgba(255,255,255,0.1)',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  zIndex: 10,
+  padding: '0.75rem 1rem 1rem',
   position: 'relative',
+  zIndex: 10,
   boxSizing: 'border-box',
-  paddingBottom: 'env(safe-area-inset-bottom)',
-  minHeight: 0,
 };
 const loadingOverlayStyle = {
   position: 'absolute',
