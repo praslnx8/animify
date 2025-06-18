@@ -33,13 +33,13 @@ interface PhotoTransformDialogProps {
 
 const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
   const [prompt, setPrompt] = useState(mediaItem.prompt || "");
-  const [modelName, setModelName] = useState("base");
-  const [style, setStyle] = useState("anime");
-  const [gender, setGender] = useState("man");
-  const [bodyType, setBodyType] = useState("lean");
-  const [skinColor, setSkinColor] = useState("pale");
-  const [autoDetectHairColor, setAutoDetectHairColor] = useState(true);
-  const [nsfwPolicy, setNsfwPolicy] = useState("filter");
+  const [modelName, setModelName] = useState(mediaItem.parent?.model_name || "base");
+  const [style, setStyle] = useState(mediaItem.parent?.style || "anime");
+  const [gender, setGender] = useState(mediaItem.parent?.gender || "man");
+  const [bodyType, setBodyType] = useState(mediaItem.parent?.body_type || "lean");
+  const [skinColor, setSkinColor] = useState(mediaItem.parent?.skin_color || "pale");
+  const [autoDetectHairColor, setAutoDetectHairColor] = useState(mediaItem.parent?.auto_detect_hair_color || true);
+  const [nsfwPolicy, setNsfwPolicy] = useState(mediaItem.parent?.nsfw_policy || "filter");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expanded, setExpanded] = useState(false);
 

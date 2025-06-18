@@ -132,8 +132,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
               zIndex: videoStatus === VideoStatus.Playing ? 2 : 0,
             }}
           >
-            {videoStatus !== VideoStatus.Idle && (
-
+            {videoStatus !== VideoStatus.Idle && videoStatus !== VideoStatus.Ended && (
               <video
                 key={videoKey}
                 ref={videoRef}
