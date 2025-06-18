@@ -159,22 +159,30 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
                 <CircularProgress />
               </Box>
             )}
-            <video
-              key={videoStatus === VideoStatus.Error ? Date.now() : mediaItem.url}
-              ref={videoRef}
-              src={mediaItem.url + (videoStatus === VideoStatus.Error ? `?retry=${Date.now()}` : '')}
-              onPlay={() => setVideoStatus(VideoStatus.Playing)}
-              onPause={() => setVideoStatus(VideoStatus.Paused)}
-              onEnded={() => setVideoStatus(VideoStatus.Ended)}
-              onLoadedData={() => setVideoStatus(VideoStatus.Paused)}
-              onError={() => {
-                setVideoStatus(VideoStatus.Error);
-                setVideoError('Video failed to load.');
-              }}
-              playsInline
-              controls={false}
-              style={{ width: '100%', maxHeight: '70vh', backgroundColor: 'black' }}
-            />
+            {(videoStatus === VideoStatus.Idle || videoStatus === VideoStatus.Loading) && (
+              <img
+                src={mediaItem.parent?.url}
+                alt="Media"
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+              />
+            )}
+            {(videoStatus === VideoStatus.Playing || videoStatus === VideoStatus.Paused) && (
+              <video
+                key={mediaItem.url}
+                ref={videoRef}
+                src={mediaItem.url + `?retry=${Date.now()}`}
+                onPlay={() => setVideoStatus(VideoStatus.Playing)}
+                onPause={() => setVideoStatus(VideoStatus.Paused)}
+                onEnded={() => setVideoStatus(VideoStatus.Ended)}
+                onLoadedData={() => setVideoStatus(VideoStatus.Paused)}
+                onError={() => {
+                  setVideoStatus(VideoStatus.Error);
+                  setVideoError('Video failed to load.');
+                }}
+                playsInline
+                controls={false}
+                style={{ width: '100%', maxHeight: '70vh', backgroundColor: 'black' }}
+              />)}
             {videoError && (
               <Typography color="error" textAlign="center" p={1}>
                 {videoError}
