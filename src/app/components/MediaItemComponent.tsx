@@ -198,7 +198,8 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
                 zIndex: videoStatus === VideoStatus.Playing ? 2 : 0,
                 transition: 'opacity 0.3s ease',
                 justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
+                overflow: 'hidden'
               }}
             >
               <video
@@ -220,8 +221,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
                 playsInline
                 controls={false}
                 style={{
-                  width: 'auto',
-                  height: 'auto',
                   maxWidth: '100%',
                   maxHeight: '100%',
                   objectFit: 'contain',
@@ -230,7 +229,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
               />
             </Box>
             {videoError && (
-              <Typography color="error" textAlign="center" p={1}>
+              <Typography color="error" textAlign="center" p={1} sx={{ position: 'absolute', bottom: 0, width: '100%' }}>
                 {videoError}
               </Typography>
             )}
@@ -308,32 +307,30 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     <>
       <Card
         sx={{
-          height: '100vh',
+          height: '100dvh', // Use device viewport height for mobile compatibility
           width: '100vw',
-          position: 'absolute',
-          top: 0,
-          left: 0,
           backgroundColor: 'black',
           display: 'flex',
           flexDirection: 'column',
           transform: isTopCard ? `translateX(${swipeOffset}px) rotate(${swipeOffset / 20}deg)` : 'none',
           transition: touchStart ? 'none' : 'transform 0.2s',
-          overflow: 'hidden', // Changed from 'visible' to 'hidden'
-          pb: 0, // Removed the fixed padding bottom
+          overflow: 'hidden',
+          boxSizing: 'border-box',
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         elevation={isTopCard ? 8 : 2}
       >
+        {/* Main content area for media */}
         <Box sx={{ 
           flex: '1 1 auto', 
           display: 'flex', 
           flexDirection: 'column',
-          height: mediaItem.prompt ? 'calc(75vh)' : 'calc(100vh - 25vh)', // Adjust height based on prompt existence
-          overflow: 'hidden'
+          overflow: 'hidden',
+          minHeight: 0, // allow flex children to shrink
         }}>
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', minHeight: 0 }}>
             {renderMedia()}
           </Box>
 
@@ -353,6 +350,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           )}
         </Box>
 
+        {/* Action bar at the bottom */}
         {renderActions()}
       </Card>
 
@@ -392,16 +390,18 @@ const iconStyle = { color: '#fff' };
 const deleteIconStyle = { color: 'red' };
 const actionBarStyle = {
   width: '100%',
-  height: '25vh',
-  minHeight: '120px',
+  height: 'auto',
+  maxHeight: '120px',
+  padding: '16px 0',
   background: 'linear-gradient(to top, rgba(0,0,0,0.98), rgba(0,0,0,0.5))',
   borderTop: '1px solid rgba(255,255,255,0.1)',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  py: 1,
   zIndex: 10,
-  position: 'relative', // Ensure it stays in place
+  position: 'relative',
+  boxSizing: 'border-box',
+  paddingBottom: 'env(safe-area-inset-bottom)', // for iOS safe area
 };
 const loadingOverlayStyle = {
   position: 'absolute',
