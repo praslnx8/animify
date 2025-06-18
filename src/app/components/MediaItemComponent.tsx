@@ -173,7 +173,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     if (isVideo) {
       return (
         <>
-          <Box position="relative" width="100%">
+          <Box position="relative" width="100%" height="100%" display="flex" justifyContent="center" alignItems="center">
             {videoStatus === VideoStatus.Loading && (
               <Box sx={loadingOverlayStyle}>
                 <CircularProgress />
@@ -188,19 +188,21 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
             )}
             <Box
               sx={{
-                display: 'block',
+                display: 'flex',
                 width: '100%',
+                height: '100%',
                 position: 'absolute',
                 top: 0,
                 left: 0,
                 opacity: videoStatus === VideoStatus.Playing ? 1 : 0,
                 zIndex: videoStatus === VideoStatus.Playing ? 2 : 0,
-                transition: 'opacity 0.3s ease'
+                transition: 'opacity 0.3s ease',
+                justifyContent: 'center',
+                alignItems: 'center'
               }}
             >
               <video
                 ref={videoRef}
-                // The key is moved to the Box to prevent complete remounting of video element
                 onPlay={() => setVideoStatus(VideoStatus.Playing)}
                 onPause={() => setVideoStatus(VideoStatus.Paused)}
                 onEnded={() => setVideoStatus(VideoStatus.Ended)}
@@ -218,8 +220,11 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
                 playsInline
                 controls={false}
                 style={{
-                  width: '100%',
-                  maxHeight: '70vh',
+                  width: 'auto',
+                  height: 'auto',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
                   backgroundColor: 'black'
                 }}
               />
@@ -313,25 +318,40 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           flexDirection: 'column',
           transform: isTopCard ? `translateX(${swipeOffset}px) rotate(${swipeOffset / 20}deg)` : 'none',
           transition: touchStart ? 'none' : 'transform 0.2s',
-          overflow: 'visible',
-          pb: '25vh',
+          overflow: 'hidden', // Changed from 'visible' to 'hidden'
+          pb: 0, // Removed the fixed padding bottom
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         elevation={isTopCard ? 8 : 2}
       >
-        <Box sx={{ flex: '1 1 100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          {renderMedia()}
-        </Box>
-
-        {mediaItem.prompt && (
-          <Box sx={{ px: 2, py: 1, backgroundColor: 'rgba(0,0,0,0.7)', textAlign: 'center' }}>
-            <Typography variant="body2" noWrap title={mediaItem.prompt} sx={{ color: '#fff' }}>
-              {mediaItem.prompt}
-            </Typography>
+        <Box sx={{ 
+          flex: '1 1 auto', 
+          display: 'flex', 
+          flexDirection: 'column',
+          height: mediaItem.prompt ? 'calc(75vh)' : 'calc(100vh - 25vh)', // Adjust height based on prompt existence
+          overflow: 'hidden'
+        }}>
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+            {renderMedia()}
           </Box>
-        )}
+
+          {mediaItem.prompt && (
+            <Box sx={{ 
+              px: 2, 
+              py: 1, 
+              backgroundColor: 'rgba(0,0,0,0.7)', 
+              textAlign: 'center',
+              position: 'relative',
+              zIndex: 3
+            }}>
+              <Typography variant="body2" noWrap title={mediaItem.prompt} sx={{ color: '#fff' }}>
+                {mediaItem.prompt}
+              </Typography>
+            </Box>
+          )}
+        </Box>
 
         {renderActions()}
       </Card>
@@ -372,7 +392,8 @@ const iconStyle = { color: '#fff' };
 const deleteIconStyle = { color: 'red' };
 const actionBarStyle = {
   width: '100%',
-  height: '25%',
+  height: '25vh',
+  minHeight: '120px',
   background: 'linear-gradient(to top, rgba(0,0,0,0.98), rgba(0,0,0,0.5))',
   borderTop: '1px solid rgba(255,255,255,0.1)',
   display: 'flex',
@@ -380,6 +401,7 @@ const actionBarStyle = {
   alignItems: 'center',
   py: 1,
   zIndex: 10,
+  position: 'relative', // Ensure it stays in place
 };
 const loadingOverlayStyle = {
   position: 'absolute',
