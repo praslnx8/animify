@@ -21,8 +21,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { downloadMedia } from '../api/downloadMedia';
 import { MediaItem } from '../models/MediaItem';
 import { MediaType } from '../models/MediaType';
-import PhotoAnimateDialog from './PhotoAnimateDialog';
-import PhotoTransformDialog from './PhotoTransformDialog';
+import PhotoAnimateDialog, { silentPhotoAnimate } from './PhotoAnimateDialog';
+import PhotoTransformDialog, { silentPhotoTransform } from './PhotoTransformDialog';
 
 // Enum for video status
 enum VideoStatus {
@@ -57,7 +57,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   isTopCard,
   showActions,
 }) => {
-  const [fullscreenOpen, setFullscreenOpen] = useState(false);
   const [transformOpen, setTransformOpen] = useState(false);
   const [animateOpen, setAnimateOpen] = useState(false);
 
@@ -109,7 +108,36 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   };
 
   const handleDownload = () => {
-    downloadMedia(mediaItem.url!, mediaItem.id, isVideo);
+    downloadMedia(mediaItem.url!, mediaItem.id, mediaItem.type === MediaType.Video);
+  };
+
+  // Retry handler
+  const handleRetry = async () => {
+    if (!mediaItem.parent || !mediaItem.prompt) return;
+    if (mediaItem.type === MediaType.Image) {
+      // Use silentPhotoTransform to retry with all params
+      await silentPhotoTransform({
+        parentMediaItem: mediaItem.parent,
+        prompt: mediaItem.prompt,
+        addMediaItem,
+        updateMediaItem,
+        modelName: mediaItem.model_name,
+        style: mediaItem.style,
+        gender: mediaItem.gender,
+        bodyType: mediaItem.body_type,
+        skinColor: mediaItem.skin_color,
+        autoDetectHairColor: mediaItem.auto_detect_hair_color,
+        nsfwPolicy: mediaItem.nsfw_policy,
+      });
+    } else if (mediaItem.type === MediaType.Video) {
+      // Use silentPhotoAnimate to retry
+      await silentPhotoAnimate({
+        parentMediaItem: mediaItem.parent,
+        prompt: mediaItem.prompt,
+        addMediaItem,
+        updateMediaItem,
+      });
+    }
   };
 
   const renderMedia = () => {
@@ -161,7 +189,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           src={mediaItem.url}
           alt="Media"
           style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-          onClick={() => setFullscreenOpen(true)}
         />
       );
     }
@@ -170,16 +197,20 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   const renderActions = () => {
     if (!showActions) return null;
 
+    const showRetry = mediaItem.parent && mediaItem.prompt;
+    const showDownload = mediaItem.type === MediaType.Video;
+
     return (
       <Box sx={actionBarStyle}>
         <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
-          {isVideo ? (
+          {mediaItem.type == MediaType.Video && (
             <Tooltip title={videoStatus === VideoStatus.Playing ? 'Pause' : 'Play'}>
               <IconButton onClick={handlePlayPause} sx={iconStyle} size="large">
                 {videoStatus === VideoStatus.Playing ? <PauseIcon fontSize="inherit" /> : <PlayArrowIcon fontSize="inherit" />}
               </IconButton>
             </Tooltip>
-          ) : (
+          )}
+          {mediaItem.type === MediaType.Image && (
             <>
               <Tooltip title="Transform">
                 <IconButton onClick={() => setTransformOpen(true)} sx={iconStyle} size="large">
@@ -193,12 +224,22 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
               </Tooltip>
             </>
           )}
-
-          <Tooltip title="Download">
-            <IconButton onClick={handleDownload} sx={iconStyle} size="large">
-              <DownloadIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
+          {showDownload && (
+            <Tooltip title="Download">
+              <IconButton onClick={handleDownload} sx={iconStyle} size="large">
+                <DownloadIcon fontSize="inherit" />
+              </IconButton>
+            </Tooltip>
+          )}
+          {showRetry && (
+            <Tooltip title="Retry">
+              <IconButton onClick={handleRetry} sx={iconStyle} size="large">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 5V2L7 7l5 5V8c3.31 0 6 2.69 6 6 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8zm-6.87 3.13l-1.46 1.46C4.93 6.93 6.85 6 9 6c4.42 0 8 3.58 8 8 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8-2.15 0-4.07.93-5.47 2.13z" fill="#fff" />
+                </svg>
+              </IconButton>
+            </Tooltip>
+          )}
           <Tooltip title="Delete">
             <IconButton onClick={() => onDelete(mediaItem)} sx={deleteIconStyle} size="large">
               <DeleteIcon fontSize="inherit" />

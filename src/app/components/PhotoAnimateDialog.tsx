@@ -76,4 +76,40 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
     );
 };
 
+// Utility function for silent photo animate (for retry)
+export async function silentPhotoAnimate({
+  parentMediaItem,
+  prompt,
+  addMediaItem,
+  updateMediaItem,
+}: {
+  parentMediaItem: MediaItem;
+  prompt: string;
+  addMediaItem: (item: MediaItem) => void;
+  updateMediaItem: (item: MediaItem) => void;
+}) {
+  const videoMediaItem: MediaItem = {
+    id: Date.now().toString(),
+    type: MediaType.Video,
+    loading: true,
+    prompt,
+    parent: parentMediaItem,
+  };
+  addMediaItem(videoMediaItem);
+  try {
+    if (!parentMediaItem.url) {
+      updateMediaItem({ ...videoMediaItem, loading: false, error: 'Image URL is missing' });
+      return;
+    }
+    const result = await generateVideo({ image_url: parentMediaItem.url, prompt });
+    if (result.videoUrl) {
+      updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl });
+    } else {
+      updateMediaItem({ ...videoMediaItem, loading: false, error: result.error || 'Failed to generate video' });
+    }
+  } catch (err: any) {
+    updateMediaItem({ ...videoMediaItem, loading: false, error: err.message || 'An error occurred' });
+  }
+}
+
 export default PhotoAnimateDialog;
