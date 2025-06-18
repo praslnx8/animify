@@ -64,14 +64,6 @@ export default function HomePage() {
     }
   };
 
-  const handleSwipe = (direction: 'left' | 'right') => {
-    if (direction === 'left' && currentIdx < mediaItems.length - 1) {
-      setCurrentIdx((idx) => idx + 1);
-    } else if (direction === 'right' && currentIdx > 0) {
-      setCurrentIdx((idx) => idx - 1);
-    }
-  };
-
   const handlePrev = () => {
     if (currentIdx > 0) setCurrentIdx((idx) => idx - 1);
   };
@@ -110,33 +102,69 @@ export default function HomePage() {
         }}
       >
         {mediaItems.length > 0 ? (
-          <MediaItemComponent
-            mediaItem={mediaItems[currentIdx]}
-            addMediaItem={(mediaItem) => {
-              setMediaItems((prev) => [...prev, mediaItem]);
-              setCurrentIdx(mediaItems.length);
-            }}
-            updateMediaItem={(updatedItem) =>
-              setMediaItems((prev) =>
-                prev.map((item, idx) =>
-                  item.id === updatedItem.id ? updatedItem : item
-                )
-              )
-            }
-            onDelete={(mediaItem) => {
-              setMediaItems((prev) => prev.filter((item) => item.id !== mediaItem.id));
-              if (currentIdx > 0) {
-                setCurrentIdx((idx) => idx - 1);
-              } else {
-                setCurrentIdx(0);
-              }
-            }}
-            showActions
-            onPrev={handlePrev}
-            onNext={handleNext}
-            isFirst={currentIdx === 0}
-            isLast={currentIdx === mediaItems.length - 1}
-          />
+          <Box sx={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {/* Left transparent click area */}
+            <Box
+              onClick={handlePrev}
+              sx={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                width: '15%',
+                height: '75%', // Only cover the media area, not the bottom actions
+                zIndex: 2,
+                cursor: currentIdx === 0 ? 'default' : 'pointer',
+                pointerEvents: currentIdx === 0 ? 'none' : 'auto',
+                // No background, fully transparent
+              }}
+            />
+            {/* Media item */}
+            <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <MediaItemComponent
+                mediaItem={mediaItems[currentIdx]}
+                addMediaItem={(mediaItem) => {
+                  setMediaItems((prev) => [...prev, mediaItem]);
+                  setCurrentIdx(mediaItems.length);
+                }}
+                updateMediaItem={(updatedItem) =>
+                  setMediaItems((prev) =>
+                    prev.map((item, idx) =>
+                      item.id === updatedItem.id ? updatedItem : item
+                    )
+                  )
+                }
+                onDelete={(mediaItem) => {
+                  setMediaItems((prev) => prev.filter((item) => item.id !== mediaItem.id));
+                  if (currentIdx > 0) {
+                    setCurrentIdx((idx) => idx - 1);
+                  } else {
+                    setCurrentIdx(0);
+                  }
+                }}
+              />
+            </Box>
+            {/* Right transparent click area */}
+            <Box
+              onClick={handleNext}
+              sx={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                width: '15%',
+                height: '75%', // Only cover the media area, not the bottom actions
+                zIndex: 2,
+                cursor: currentIdx === mediaItems.length - 1 ? 'default' : 'pointer',
+                pointerEvents: currentIdx === mediaItems.length - 1 ? 'none' : 'auto',
+                // No background, fully transparent
+              }}
+            />
+            {/* Counter at top right */}
+            <Box sx={{ position: 'absolute', top: 8, right: 16, bgcolor: 'background.paper', px: 1, py: 0.5, borderRadius: 2, boxShadow: 1, zIndex: 2, fontSize: 12 }}>
+              <Typography variant="caption" color="text.secondary">
+                {currentIdx + 1} / {mediaItems.length}
+              </Typography>
+            </Box>
+          </Box>
         ) : (
           <Box
             sx={{

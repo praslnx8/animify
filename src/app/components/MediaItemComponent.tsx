@@ -39,11 +39,6 @@ interface MediaItemProps {
   addMediaItem: (item: MediaItem) => void;
   updateMediaItem: (item: MediaItem) => void;
   onDelete: (item: MediaItem) => void;
-  showActions?: boolean;
-  onPrev?: () => void;
-  onNext?: () => void;
-  isFirst?: boolean;
-  isLast?: boolean;
 }
 
 const MediaItemComponent: React.FC<MediaItemProps> = ({
@@ -51,7 +46,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   addMediaItem,
   updateMediaItem,
   onDelete,
-  showActions,
 }) => {
   const [transformOpen, setTransformOpen] = useState(false);
   const [animateOpen, setAnimateOpen] = useState(false);
@@ -186,7 +180,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   };
 
   const renderActions = () => {
-    if (!showActions) return null;
     const showRetry = mediaItem.parent && mediaItem.prompt;
     const showDownload = mediaItem.type === MediaType.Video;
     return (
