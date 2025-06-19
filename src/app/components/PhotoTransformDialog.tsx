@@ -34,12 +34,12 @@ interface PhotoTransformDialogProps {
 const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
   const [prompt, setPrompt] = useState(mediaItem.prompt || "");
   const [modelName, setModelName] = useState(mediaItem.parent?.model_name || "base");
-  const [style, setStyle] = useState(mediaItem.parent?.style || "anime");
-  const [gender, setGender] = useState(mediaItem.parent?.gender || "man");
+  const [style, setStyle] = useState(mediaItem.parent?.style || "realistic");
+  const [gender, setGender] = useState(mediaItem.parent?.gender || "women");
   const [bodyType, setBodyType] = useState(mediaItem.parent?.body_type || "lean");
-  const [skinColor, setSkinColor] = useState(mediaItem.parent?.skin_color || "pale");
-  const [autoDetectHairColor, setAutoDetectHairColor] = useState<boolean>(mediaItem.parent?.auto_detect_hair_color || true);
-  const [nsfwPolicy, setNsfwPolicy] = useState(mediaItem.parent?.nsfw_policy || "filter");
+  const [skinColor, setSkinColor] = useState(mediaItem.parent?.skin_color || "tanned");
+  const [autoDetectHairColor, setAutoDetectHairColor] = useState<boolean>(mediaItem.parent?.auto_detect_hair_color || false);
+  const [nsfwPolicy, setNsfwPolicy] = useState(mediaItem.parent?.nsfw_policy || "allow");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
@@ -163,16 +163,30 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                 <Button
                   size="small"
                   variant="outlined"
-                  onClick={() => setPrompt('A portrait of a young woman in a fantasy forest, soft lighting, intricate details.')}
+                  onClick={() => setPrompt('South Indian woman wearing a traditional cotton nighty, ankle-length, floral print, short sleeves, loose-fitting, standing in a tiled house corridor, realistic, Indian home setting')}
                 >
-                  Insert Example
+                  Nighty
                 </Button>
                 <Button
                   size="small"
                   variant="outlined"
-                  onClick={() => setPrompt('A futuristic cityscape at sunset, neon lights, bustling crowd, cinematic atmosphere.')}
+                  onClick={() => setPrompt('Point of view from a South Indian man sitting down, looking slightly upward at a South Indian woman in her 40s wearing a traditional floral cotton nighty, standing and slightly bending forward to offer a stainless steel tumbler of tea with one hand, realistic indoor lighting, tiled floor, simple South Indian home interior, camera angle from eye level of the man, the woman is in focus, no sitting pose')}
                 >
-                  Insert Example 2
+                  Aunty giving tea
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setPrompt('A South Indian middle-aged woman wearing a loose-fitting cotton floral nighty, standing beside a young adult man in casual Indian homewear (t-shirt and lungi), both inside a small tiled South Indian house, chatting casually in the kitchen while she helps him with something on the counter, stainless steel utensils on the shelf, window light coming in, ceiling fan above, realistic documentary-style scene, warm and friendly atmosphere, no modern furniture, no Western dress')}
+                >
+                  With neighbour
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setPrompt('A South Indian aunty in a maroon floral nighty helping her young male neighbor with documents at a dining table, ceiling fan above, framed family photos in background, stainless steel plate on table, calm and realistic setting')}
+                >
+                  Helping document
                 </Button>
               </Stack>
             </Box>
