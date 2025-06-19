@@ -5,7 +5,9 @@ import {
   DialogContent,
   DialogTitle,
   Stack,
-  TextField
+  TextField,
+  Box,
+  Typography
 } from "@mui/material";
 import React, { useState } from "react";
 import { generateVideo } from "../api/generateVideo";
@@ -65,13 +67,13 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
             />
 
             {/* Prompt Helper Section */}
-            <div style={{ background: '#fafbfc', border: '1px solid #e0e0e0', borderRadius: 12, padding: 16, marginTop: 8 }}>
-              <div style={{ marginBottom: 8 }}>
-                <strong style={{ color: '#666', fontSize: 13 }}>Prompt Helper</strong>
-              </div>
-              <div style={{ color: '#888', fontSize: 13, marginBottom: 8 }}>
+            <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: 2, mt: 1 }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                Prompt Helper
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 For best results, describe the animation you want (e.g. facial expression, gesture, or movement). Example prompts:
-              </div>
+              </Typography>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                 <Button
                   size="small"
@@ -102,7 +104,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
                   Nod
                 </Button>
               </Stack>
-            </div>
+            </Box>
           </Stack>
         </DialogContent>
         <DialogActions>
