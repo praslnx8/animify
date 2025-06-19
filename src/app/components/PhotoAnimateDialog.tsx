@@ -64,6 +64,11 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
               fullWidth
               required
               autoFocus
+              multiline
+              minRows={2}
+              maxRows={4}
+              variant="outlined"
+              helperText="Describe the animation in detail for best results."
             />
 
             {/* Prompt Helper Section */}
