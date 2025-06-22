@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing required parameters: imageUrl and prompt are required' }, { status: 400 });
         }
 
-        const apiToken = process.env.EXH_VIDEO_API_TOKEN;
+        const apiToken = process.env.EXH_AI_API_TOKEN;
         if (!apiToken) {
             return NextResponse.json({ error: 'API token not configured on server' }, { status: 500 });
         }
