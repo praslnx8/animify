@@ -1,4 +1,5 @@
 export enum MediaType {
     Image = 'image',
-    Video = 'video'
+    Video = 'video',
+    AnimatedStory = 'animatedStory'
 }

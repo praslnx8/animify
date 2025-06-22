@@ -6,6 +6,7 @@ import {
   Delete as DeleteIcon,
   Download as DownloadIcon,
   PlayArrow as PlayArrowIcon,
+  AutoStories as AutoStoriesIcon,
 } from '@mui/icons-material';
 import {
   Box,
@@ -22,6 +23,7 @@ import { MediaItem } from '../models/MediaItem';
 import { MediaType } from '../models/MediaType';
 import PhotoAnimateDialog, { silentPhotoAnimate } from './PhotoAnimateDialog';
 import PhotoTransformDialog, { silentPhotoTransform } from './PhotoTransformDialog';
+import AnimateStoryDialog, { silentAnimateStory } from './AnimateStoryDialog';
 
 // Enum for video status
 enum VideoStatus {
@@ -47,6 +49,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
 }) => {
   const [transformOpen, setTransformOpen] = useState(false);
   const [animateOpen, setAnimateOpen] = useState(false);
+  const [animateStoryOpen, setAnimateStoryOpen] = useState(false);
 
   const isVideo = mediaItem.type === MediaType.Video;
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -91,6 +94,17 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         prompt: mediaItem.prompt,
         addMediaItem,
         updateMediaItem,
+      });
+    } else if (mediaItem.type === MediaType.AnimatedStory) {
+      await silentAnimateStory({
+        parentMediaItem: mediaItem.parent!,
+        prompt: mediaItem.prompt!,
+        gender: mediaItem.gender,
+        bodyType: mediaItem.body_type,
+        skinColor: mediaItem.skin_color,
+        hairColor: mediaItem.hair_color,
+        addMediaItem,
+        updateMediaItem
       });
     }
   };
@@ -188,6 +202,11 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
                 <AnimationIcon fontSize="inherit" />
               </IconButton>
             </Tooltip>
+            <Tooltip title="Animate Story">
+              <IconButton onClick={() => setAnimateStoryOpen(true)} color="info" size="large">
+                <AutoStoriesIcon fontSize="inherit" />
+              </IconButton>
+            </Tooltip>
           </>
         )}
         {showDownload && (
@@ -269,6 +288,20 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         updateMediaItem={(item) => {
           updateMediaItem(item);
           setAnimateOpen(false);
+        }}
+      />
+
+      <AnimateStoryDialog
+        open={animateStoryOpen}
+        onClose={() => setAnimateStoryOpen(false)}
+        mediaItem={mediaItem}
+        addMediaItem={(item) => {
+          addMediaItem(item);
+          setAnimateStoryOpen(false);
+        }}
+        updateMediaItem={(item) => {
+          updateMediaItem(item);
+          setAnimateStoryOpen(false);
         }}
       />
     </>
