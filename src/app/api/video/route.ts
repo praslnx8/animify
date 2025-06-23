@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { image_url, prompt, animation_model = "pro", duration = 15 } = body;
+        const { image_url, prompt, animation_model = "pro", duration = 10 } = body;
 
         if (!image_url || !prompt) {
             return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
