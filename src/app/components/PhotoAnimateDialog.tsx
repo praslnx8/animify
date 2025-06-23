@@ -678,9 +678,38 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
             )}
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button type="submit" variant="contained" disabled={!prompt.trim()}>
+        <DialogActions sx={{ 
+          px: 2, 
+          py: 1.5, 
+          gap: 1,
+          position: 'sticky',
+          bottom: 0,
+          bgcolor: 'background.paper',
+          borderTop: 1,
+          borderColor: 'divider'
+        }}>
+          <Button 
+            onClick={onClose}
+            size="large"
+            sx={{ 
+              flex: 1,
+              py: 1.5,
+              fontSize: '1rem'
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            variant="contained" 
+            disabled={!prompt.trim()}
+            size="large"
+            sx={{ 
+              flex: 2,
+              py: 1.5,
+              fontSize: '1rem'
+            }}
+          >
             Generate Video
           </Button>
         </DialogActions>
