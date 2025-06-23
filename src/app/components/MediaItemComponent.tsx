@@ -134,6 +134,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
 
   const handleVideoLoaded = () => {
     setVideoStatus(VideoStatus.Playing);
+    // Start playing once the video is loaded
     videoRef.current?.play();
   };
 
@@ -150,7 +151,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     }
     if (isVideo) {
       return (
-        <Box position="relative" width="100%" flex={1} display="flex" justifyContent="center" alignItems="center">
+        <Box position="relative" width="100%" height="100%" display="flex" justifyContent="center" alignItems="center" bgcolor="#000">
           {videoStatus === VideoStatus.Loading && (
             <Box sx={loadingOverlayStyle}>
               <CircularProgress size={60} thickness={4} />
@@ -160,13 +161,13 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
             </Box>
           )}
           {(videoStatus !== VideoStatus.Playing) && (
-            <Box position="relative" width="100%" height="100%">
+            <Box position="relative" width="100%" height="100%" display="flex" justifyContent="center" alignItems="center">
               <img
                 src={mediaItem.parent?.url}
                 alt="Media"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
               />
-              {videoStatus === VideoStatus.Idle && (
+              {(videoStatus === VideoStatus.Idle || videoStatus === VideoStatus.Ended) && (
                 <Fab
                   color="primary"
                   onClick={handlePlay}
@@ -183,41 +184,39 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
               )}
             </Box>
           )}
-          <Box
-            sx={{
-              position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-              display: 'flex', justifyContent: 'center', alignItems: 'center',
-              opacity: videoStatus === VideoStatus.Playing ? 1 : 0,
-              zIndex: videoStatus === VideoStatus.Playing ? 2 : 0,
-            }}
-          >
-            {videoStatus !== VideoStatus.Idle && videoStatus !== VideoStatus.Ended && (
-              <video
-                key={videoKey}
-                ref={videoRef}
-                width="100%"
-                height="100%"
-                controls
-                playsInline
-                style={{ objectFit: 'contain' }}
-                src={getVideoUrlWithCacheBuster()}
-                onLoadedData={handleVideoLoaded}
-                onError={(e) => {
-                  console.error('Video error event:', e);
-                  setVideoStatus(VideoStatus.Error);
-                  setVideoError('Video failed to load. Try playing again later.');
-                }}
-              />)}
-          </Box>
+          {videoStatus === VideoStatus.Playing && (
+            <video
+              key={videoKey}
+              ref={videoRef}
+              controls
+              playsInline
+              style={{ 
+                maxWidth: '100%', 
+                maxHeight: '100%', 
+                objectFit: 'contain',
+                backgroundColor: '#000'
+              }}
+              src={getVideoUrlWithCacheBuster()}
+              onLoadedData={handleVideoLoaded}
+              onError={(e) => {
+                console.error('Video error event:', e);
+                setVideoStatus(VideoStatus.Error);
+                setVideoError('Video failed to load. Try playing again later.');
+              }}
+              onEnded={() => setVideoStatus(VideoStatus.Ended)}
+            />
+          )}
         </Box>
       );
     }
     return (
-      <img
-        src={mediaItem.url}
-        alt="Media"
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-      />
+      <Box width="100%" height="100%" display="flex" justifyContent="center" alignItems="center" bgcolor="#f5f5f5">
+        <img
+          src={mediaItem.url}
+          alt="Media"
+          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+        />
+      </Box>
     );
   };
 
@@ -327,6 +326,19 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
             <Chip
               label="Playing"
               color="success"
+              size="small"
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                zIndex: 10,
+              }}
+            />
+          )}
+          {mediaItem.type === MediaType.Video && videoStatus === VideoStatus.Ended && (
+            <Chip
+              label="Ended"
+              color="default"
               size="small"
               sx={{
                 position: 'absolute',
