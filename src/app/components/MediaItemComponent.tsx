@@ -66,7 +66,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
 
   const isVideo = mediaItem.type === MediaType.Video;
   const videoRef = useRef<HTMLVideoElement>(null);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [videoKey, setVideoKey] = React.useState<number>(0);
   const [videoStatus, setVideoStatus] = useState<VideoStatus>(VideoStatus.Idle);
   const [videoError, setVideoError] = useState<string | null>(null);
@@ -75,11 +74,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     setVideoStatus(VideoStatus.Idle);
     setVideoError(null);
     setShowError(false);
-    // Clear any existing timeout
-    if (loadingTimeoutRef.current) {
-      clearTimeout(loadingTimeoutRef.current);
-      loadingTimeoutRef.current = null;
-    }
   }, [mediaItem.id]);
 
   useEffect(() => {
@@ -88,27 +82,10 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     }
   }, [videoError]);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const handlePlay = () => {
-    console.log('Play button clicked, video URL:', mediaItem.url);
     setVideoError(null);
     setVideoStatus(VideoStatus.Loading);
     setVideoKey(prevKey => prevKey + 1);
-    
-    // Set a timeout to handle stuck loading
-    loadingTimeoutRef.current = setTimeout(() => {
-      console.log('Video loading timeout');
-      setVideoStatus(VideoStatus.Error);
-      setVideoError('Video loading timed out. The video might still be processing. Please try again in a moment.');
-    }, 30000); // 30 second timeout
   };
 
   const handleDownload = () => {
@@ -156,29 +133,8 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   };
 
   const handleVideoLoaded = () => {
-    console.log('Video loaded successfully');
-    // Clear loading timeout
-    if (loadingTimeoutRef.current) {
-      clearTimeout(loadingTimeoutRef.current);
-      loadingTimeoutRef.current = null;
-    }
     setVideoStatus(VideoStatus.Playing);
-    // Start playing once the video is loaded
-    videoRef.current?.play().catch((error) => {
-      console.error('Failed to play video:', error);
-      setVideoError('Failed to play video. Please try again.');
-      setVideoStatus(VideoStatus.Error);
-    });
-  };
-
-  const handleVideoCanPlay = () => {
-    console.log('Video can play');
-    // Clear loading timeout
-    if (loadingTimeoutRef.current) {
-      clearTimeout(loadingTimeoutRef.current);
-      loadingTimeoutRef.current = null;
-    }
-    setVideoStatus(VideoStatus.Playing);
+    videoRef.current?.play();
   };
 
   const renderMedia = () => {
@@ -227,25 +183,35 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
               )}
             </Box>
           )}
-          {videoStatus === VideoStatus.Playing && (
-            <video
-              key={videoKey}
-              ref={videoRef}
-              controls
-              preload="metadata"
-              style={{ 
-                maxWidth: '100%', 
-                maxHeight: '100%', 
-                objectFit: 'contain',
-                backgroundColor: '#000'
-              }}
-              src={getVideoUrlWithCacheBuster()}
-              onLoadedData={handleVideoLoaded}
-              onError={(e) => {
-                setVideoStatus(VideoStatus.Error);
-                setVideoError('Video failed to load. The file might still be processing or there was a network error.');
-              }}
-            />
+          <Box
+            sx={{
+              position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+              display: 'flex', justifyContent: 'center', alignItems: 'center',
+              opacity: videoStatus === VideoStatus.Playing ? 1 : 0,
+              zIndex: videoStatus === VideoStatus.Playing ? 2 : 0,
+            }}
+          >
+            {videoStatus !== VideoStatus.Idle && videoStatus !== VideoStatus.Ended && (
+              <video
+                key={videoKey}
+                ref={videoRef}
+                width="100%"
+                controls
+                playsInline
+                src={getVideoUrlWithCacheBuster()}
+                onLoadedData={handleVideoLoaded}
+                onError={(e) => {
+                  console.error('Video error event:', e);
+                  setVideoStatus(VideoStatus.Error);
+                  setVideoError('Video failed to load. Try playing again later.');
+                }}
+                onEnded={() => setVideoStatus(VideoStatus.Ended)}
+              />)}
+          </Box>
+          {videoError && (
+            <Typography color="error" textAlign="center" p={1} sx={{ position: 'absolute', bottom: 0, width: '100%' }}>
+              {videoError}
+            </Typography>
           )}
         </Box>
       );
