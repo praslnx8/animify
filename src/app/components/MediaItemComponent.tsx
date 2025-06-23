@@ -7,6 +7,8 @@ import {
   Download as DownloadIcon,
   PlayArrow as PlayArrowIcon,
   AutoStories as AutoStoriesIcon,
+  MoreVert as MoreVertIcon,
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import {
   Box,
@@ -14,7 +16,16 @@ import {
   CircularProgress,
   IconButton,
   Tooltip,
-  Typography
+  Typography,
+  Button,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Chip,
+  Fab,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -23,7 +34,7 @@ import { MediaItem } from '../models/MediaItem';
 import { MediaType } from '../models/MediaType';
 import PhotoAnimateDialog, { silentPhotoAnimate } from './PhotoAnimateDialog';
 import PhotoTransformDialog, { silentPhotoTransform } from './PhotoTransformDialog';
-import AnimateStoryDialog, { silentAnimateStory } from './AnimateStoryDialog';
+import AnimateStoryDialog from './AnimateStoryDialog';
 
 // Enum for video status
 enum VideoStatus {
@@ -50,6 +61,8 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   const [transformOpen, setTransformOpen] = useState(false);
   const [animateOpen, setAnimateOpen] = useState(false);
   const [animateStoryOpen, setAnimateStoryOpen] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const [showError, setShowError] = useState(false);
 
   const isVideo = mediaItem.type === MediaType.Video;
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -60,7 +73,14 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   useEffect(() => {
     setVideoStatus(VideoStatus.Idle);
     setVideoError(null);
+    setShowError(false);
   }, [mediaItem.id]);
+
+  useEffect(() => {
+    if (videoError) {
+      setShowError(true);
+    }
+  }, [videoError]);
 
   const handlePlay = () => {
     setVideoError(null);
@@ -70,6 +90,15 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
 
   const handleDownload = () => {
     downloadMedia(mediaItem.url!, mediaItem.id, mediaItem.type === MediaType.Video);
+    setMenuAnchor(null);
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchor(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
   };
 
   const handleRetry = async () => {
@@ -111,21 +140,48 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   const renderMedia = () => {
     if (mediaItem.loading) {
       return (
-        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-          <CircularProgress />
+        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%" gap={2}>
+          <CircularProgress size={60} thickness={4} />
+          <Typography variant="body2" color="text.secondary">
+            Generating your content...
+          </Typography>
         </Box>
       );
     }
     if (isVideo) {
       return (
         <Box position="relative" width="100%" flex={1} display="flex" justifyContent="center" alignItems="center">
-          {videoStatus === VideoStatus.Loading && <Box sx={loadingOverlayStyle}><CircularProgress /></Box>}
+          {videoStatus === VideoStatus.Loading && (
+            <Box sx={loadingOverlayStyle}>
+              <CircularProgress size={60} thickness={4} />
+              <Typography variant="body2" color="white" mt={1}>
+                Loading video...
+              </Typography>
+            </Box>
+          )}
           {(videoStatus !== VideoStatus.Playing) && (
-            <img
-              src={mediaItem.parent?.url}
-              alt="Media"
-              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-            />
+            <Box position="relative" width="100%" height="100%">
+              <img
+                src={mediaItem.parent?.url}
+                alt="Media"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              {videoStatus === VideoStatus.Idle && (
+                <Fab
+                  color="primary"
+                  onClick={handlePlay}
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 3,
+                  }}
+                >
+                  <PlayArrowIcon />
+                </Fab>
+              )}
+            </Box>
           )}
           <Box
             sx={{
@@ -140,7 +196,10 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
                 key={videoKey}
                 ref={videoRef}
                 width="100%"
+                height="100%"
                 controls
+                playsInline
+                style={{ objectFit: 'contain' }}
                 src={getVideoUrlWithCacheBuster()}
                 onLoadedData={handleVideoLoaded}
                 onError={(e) => {
@@ -150,11 +209,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
                 }}
               />)}
           </Box>
-          {videoError && (
-            <Typography color="error" textAlign="center" p={1} sx={{ position: 'absolute', bottom: 0, width: '100%' }}>
-              {videoError}
-            </Typography>
-          )}
         </Box>
       );
     }
@@ -162,63 +216,85 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
       <img
         src={mediaItem.url}
         alt="Media"
-        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       />
     );
   };
 
   const renderActions = () => {
     const showRetry = mediaItem.parent && mediaItem.prompt;
-    const showDownload = mediaItem.type === MediaType.Video;
+    
     return (
-      <Box display="flex" justifyContent="space-around" alignItems="center" width="100%">
-        {mediaItem.type === MediaType.Video && (
-          <Tooltip title='Play'>
-            <IconButton onClick={handlePlay} color="primary" size="large" disabled={videoStatus === VideoStatus.Playing}>
-              <PlayArrowIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
-        )}
-        {mediaItem.type === MediaType.Image && (
-          <>
-            <Tooltip title="Edit Photo">
-              <IconButton onClick={() => setTransformOpen(true)} color="primary" size="large">
-                <AutoFixHighIcon fontSize="inherit" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Animate Photo">
-              <IconButton onClick={() => setAnimateOpen(true)} color="secondary" size="large">
-                <AnimationIcon fontSize="inherit" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Animate Story">
-              <IconButton onClick={() => setAnimateStoryOpen(true)} color="info" size="large">
-                <AutoStoriesIcon fontSize="inherit" />
-              </IconButton>
-            </Tooltip>
-          </>
-        )}
-        {showDownload && (
-          <Tooltip title="Download">
-            <IconButton onClick={handleDownload} color="primary" size="large">
-              <DownloadIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
-        )}
-        {showRetry && (
-          <Tooltip title="Retry">
-            <IconButton onClick={handleRetry} color="primary" size="large">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 5V2L7 7l5 5V8c3.31 0 6 2.69 6 6 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8zm-6.87 3.13l-1.46 1.46C4.93 6.93 6.85 6 9 6c4.42 0 8 3.58 8 8 0 1.3-.42 2.5-1.13 3.47l1.46 1.46C19.07 17.07 20 15.15 20 13c0-4.42-3.58-8-8-8-2.15 0-4.07.93-5.47 2.13z" fill="#1976d2" />
-              </svg>
-            </IconButton>
-          </Tooltip>
-        )}
-        <Tooltip title="Delete">
-          <IconButton onClick={() => onDelete(mediaItem)} color="error" size="large">
-            <DeleteIcon fontSize="inherit" />
+      <Box display="flex" flexDirection="column" width="100%" gap={1}>
+        {/* Primary Actions */}
+        <Box display="flex" gap={1} width="100%">
+          {mediaItem.type === MediaType.Image && (
+            <>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                startIcon={<AutoFixHighIcon />}
+                onClick={() => setTransformOpen(true)}
+                sx={{ minHeight: 48 }}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                fullWidth
+                startIcon={<AnimationIcon />}
+                onClick={() => setAnimateOpen(true)}
+                sx={{ minHeight: 48 }}
+              >
+                Animate
+              </Button>
+            </>
+          )}
+        </Box>
+        
+        {/* Secondary Actions */}
+        <Box display="flex" gap={1} width="100%" alignItems="center">
+          {mediaItem.type === MediaType.Image && (
+            <Button
+              variant="outlined"
+              color="info"
+              fullWidth
+              startIcon={<AutoStoriesIcon />}
+              onClick={() => setAnimateStoryOpen(true)}
+              sx={{ minHeight: 40 }}
+            >
+              Story
+            </Button>
+          )}
+          
+          {showRetry && (
+            <Button
+              variant="outlined"
+              color="primary"
+              fullWidth
+              startIcon={<RefreshIcon />}
+              onClick={handleRetry}
+              sx={{ minHeight: 40 }}
+            >
+              Retry
+            </Button>
+          )}
+          
+          {/* More Actions Menu */}
+          <IconButton 
+            onClick={handleMenuOpen}
+            sx={{ 
+              minWidth: 40, 
+              minHeight: 40,
+              border: 1,
+              borderColor: 'divider'
+            }}
+          >
+            <MoreVertIcon />
           </IconButton>
-        </Tooltip>
+        </Box>
       </Box>
     );
   };
@@ -235,22 +311,76 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           overflow: 'hidden',
         }}
       >
-        <Box flex={3} width="100%" display="flex" flexDirection="column" overflow="hidden">
+        <Box flex={3} width="100%" display="flex" flexDirection="column" overflow="hidden" position="relative">
           <Box flex={1} display="flex" justifyContent="center" alignItems="center" overflow="hidden" width="100%">
             {renderMedia()}
           </Box>
           {mediaItem.prompt && (
-            <Box px={2} py={1} bgcolor="rgba(0,0,0,0.7)" textAlign="center">
-              <Typography variant="body2" noWrap title={mediaItem.prompt} color="#fff">
+            <Box px={2} py={1} bgcolor="rgba(0,0,0,0.8)" textAlign="center">
+              <Typography variant="body2" noWrap title={mediaItem.prompt} color="#fff" fontSize="0.875rem">
                 {mediaItem.prompt}
               </Typography>
             </Box>
           )}
+          {/* Status Chip */}
+          {mediaItem.type === MediaType.Video && videoStatus === VideoStatus.Playing && (
+            <Chip
+              label="Playing"
+              color="success"
+              size="small"
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                zIndex: 10,
+              }}
+            />
+          )}
         </Box>
-        <Box flex={1} width="100%" display="flex" alignItems="center" justifyContent="center" borderTop={1} borderColor="divider" bgcolor="background.default">
+        <Box flex={1} width="100%" display="flex" flexDirection="column" p={2} borderTop={1} borderColor="divider" bgcolor="background.default">
           {renderActions()}
         </Box>
       </Card>
+
+      {/* Actions Menu */}
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={handleMenuClose}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        {mediaItem.type === MediaType.Video && (
+          <MenuItem onClick={handleDownload}>
+            <ListItemIcon>
+              <DownloadIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Download Video" />
+          </MenuItem>
+        )}
+        <MenuItem onClick={() => { onDelete(mediaItem); handleMenuClose(); }}>
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText primary="Delete" />
+        </MenuItem>
+      </Menu>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={showError}
+        autoHideDuration={6000}
+        onClose={() => setShowError(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setShowError(false)}
+          severity="error"
+          sx={{ width: '100%' }}
+        >
+          {videoError}
+        </Alert>
+      </Snackbar>
 
       <PhotoTransformDialog
         open={transformOpen}
@@ -305,9 +435,10 @@ const loadingOverlayStyle = {
   width: '100%',
   height: '100%',
   display: 'flex',
+  flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'rgba(0,0,0,0.3)',
+  backgroundColor: 'rgba(0,0,0,0.7)',
   zIndex: 2,
 };
 
