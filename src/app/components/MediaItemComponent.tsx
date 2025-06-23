@@ -232,7 +232,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
               key={videoKey}
               ref={videoRef}
               controls
-              playsInline
               preload="metadata"
               style={{ 
                 maxWidth: '100%', 
@@ -242,23 +241,10 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
               }}
               src={getVideoUrlWithCacheBuster()}
               onLoadedData={handleVideoLoaded}
-              onCanPlay={handleVideoCanPlay}
-              onLoadStart={() => console.log('Video load started')}
-              onProgress={() => console.log('Video loading progress')}
               onError={(e) => {
-                console.error('Video error event:', e);
-                console.error('Video error details:', {
-                  error: e.currentTarget.error,
-                  networkState: e.currentTarget.networkState,
-                  readyState: e.currentTarget.readyState,
-                  src: e.currentTarget.src
-                });
                 setVideoStatus(VideoStatus.Error);
                 setVideoError('Video failed to load. The file might still be processing or there was a network error.');
               }}
-              onEnded={() => setVideoStatus(VideoStatus.Ended)}
-              onPause={() => console.log('Video paused')}
-              onPlay={() => console.log('Video started playing')}
             />
           )}
         </Box>
