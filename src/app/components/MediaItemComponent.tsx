@@ -95,18 +95,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         addMediaItem,
         updateMediaItem,
       });
-    } else if (mediaItem.type === MediaType.AnimatedStory) {
-      await silentAnimateStory({
-        parentMediaItem: mediaItem.parent!,
-        prompt: mediaItem.prompt!,
-        gender: mediaItem.gender,
-        bodyType: mediaItem.body_type,
-        skinColor: mediaItem.skin_color,
-        hairColor: mediaItem.hair_color,
-        addMediaItem,
-        updateMediaItem
-      });
-    }
+    } 
   };
 
   const getVideoUrlWithCacheBuster = () => {

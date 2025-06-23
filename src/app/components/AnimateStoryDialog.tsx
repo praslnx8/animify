@@ -36,7 +36,7 @@ export const silentAnimateStory = async (params: SilentAnimateStoryParams) => {
 
   const storyMediaItem: MediaItem = {
     id: crypto.randomUUID(),
-    type: MediaType.AnimatedStory,
+    type: MediaType.Video,
     parent: parentMediaItem,
     prompt,
     loading: true,
@@ -124,7 +124,7 @@ const AnimateStoryDialog: React.FC<AnimateStoryDialogProps> = ({
 
     const storyMediaItem: MediaItem = {
       id: crypto.randomUUID(),
-      type: MediaType.AnimatedStory,
+      type: MediaType.Video,
       parent: mediaItem,
       prompt,
       loading: true,
@@ -220,10 +220,10 @@ const AnimateStoryDialog: React.FC<AnimateStoryDialogProps> = ({
                 onChange={handleBodyTypeChange}
               >
                 <MenuItem value="skinny">Skinny</MenuItem>
-                <MenuItem value="slim">Slim</MenuItem>
-                <MenuItem value="average">Average</MenuItem>
-                <MenuItem value="athletic">Athletic</MenuItem>
+                <MenuItem value="lean">Lean</MenuItem>
+                <MenuItem value="muscular">Muscular</MenuItem>
                 <MenuItem value="curvy">Curvy</MenuItem>
+                <MenuItem value="heavyset">Heavyset</MenuItem>
               </Select>
             </FormControl>
 
@@ -236,12 +236,9 @@ const AnimateStoryDialog: React.FC<AnimateStoryDialogProps> = ({
                 onChange={handleSkinColorChange}
               >
                 <MenuItem value="pale">Pale</MenuItem>
-                <MenuItem value="fair">Fair</MenuItem>
-                <MenuItem value="light">Light</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
+                <MenuItem value="white">White</MenuItem>
                 <MenuItem value="tanned">Tanned</MenuItem>
-                <MenuItem value="brown">Brown</MenuItem>
-                <MenuItem value="dark">Dark</MenuItem>
+                <MenuItem value="black">Black</MenuItem>
               </Select>
             </FormControl>
 
@@ -256,9 +253,7 @@ const AnimateStoryDialog: React.FC<AnimateStoryDialogProps> = ({
                 <MenuItem value="black">Black</MenuItem>
                 <MenuItem value="brown">Brown</MenuItem>
                 <MenuItem value="blonde">Blonde</MenuItem>
-                <MenuItem value="red">Red</MenuItem>
                 <MenuItem value="gray">Gray</MenuItem>
-                <MenuItem value="white">White</MenuItem>
               </Select>
             </FormControl>
 
