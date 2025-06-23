@@ -140,9 +140,9 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   const renderMedia = () => {
     if (mediaItem.loading) {
       return (
-        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%" gap={2}>
-          <CircularProgress size={60} thickness={4} />
-          <Typography variant="body2" color="text.secondary">
+        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%" gap={2} bgcolor="#1a1a1a">
+          <CircularProgress size={60} thickness={4} sx={{ color: '#58a6ff' }} />
+          <Typography variant="body2" color="#8b949e">
             Generating your content...
           </Typography>
         </Box>
@@ -151,13 +151,12 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     if (isVideo) {
       return (
         <Box position="relative" width="100%" height="100%" display="flex" justifyContent="center" alignItems="center" bgcolor="#000">
-          {videoStatus === VideoStatus.Loading && (
-            <Box sx={loadingOverlayStyle}>
-              <CircularProgress size={60} thickness={4} />
-              <Typography variant="body2" color="white" mt={1}>
-                Loading video...
-              </Typography>
-            </Box>
+          {videoStatus === VideoStatus.Loading && (          <Box sx={loadingOverlayStyle}>
+            <CircularProgress size={60} thickness={4} sx={{ color: '#58a6ff' }} />
+            <Typography variant="body2" color="white" mt={1}>
+              Loading video...
+            </Typography>
+          </Box>
           )}
           {(videoStatus !== VideoStatus.Playing) && (
             <Box position="relative" width="100%" height="100%" display="flex" justifyContent="center" alignItems="center">
@@ -198,6 +197,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
                 width="100%"
                 controls
                 playsInline
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                 src={getVideoUrlWithCacheBuster()}
                 onLoadedData={handleVideoLoaded}
                 onError={(e) => {
@@ -217,7 +217,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
       );
     }
     return (
-      <Box width="100%" height="100%" display="flex" justifyContent="center" alignItems="center" bgcolor="#f5f5f5">
+      <Box width="100%" height="100%" display="flex" justifyContent="center" alignItems="center" bgcolor="#000">
         <img
           src={mediaItem.url}
           alt="Media"
@@ -238,21 +238,33 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
             <>
               <Button
                 variant="contained"
-                color="primary"
                 fullWidth
                 startIcon={<AutoFixHighIcon />}
                 onClick={() => setTransformOpen(true)}
-                sx={{ minHeight: 48 }}
+                sx={{ 
+                  minHeight: 48,
+                  bgcolor: '#238636',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: '#2ea043',
+                  }
+                }}
               >
                 Edit
               </Button>
               <Button
                 variant="contained"
-                color="secondary"
                 fullWidth
                 startIcon={<AnimationIcon />}
                 onClick={() => setAnimateOpen(true)}
-                sx={{ minHeight: 48 }}
+                sx={{ 
+                  minHeight: 48,
+                  bgcolor: '#8957e5',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: '#a475f9',
+                  }
+                }}
               >
                 Animate
               </Button>
@@ -265,11 +277,18 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           {mediaItem.type === MediaType.Image && (
             <Button
               variant="outlined"
-              color="info"
               fullWidth
               startIcon={<AutoStoriesIcon />}
               onClick={() => setAnimateStoryOpen(true)}
-              sx={{ minHeight: 40 }}
+              sx={{ 
+                minHeight: 40,
+                borderColor: '#30363d',
+                color: '#58a6ff',
+                '&:hover': {
+                  borderColor: '#58a6ff',
+                  bgcolor: 'rgba(88, 166, 255, 0.1)',
+                }
+              }}
             >
               Story
             </Button>
@@ -278,11 +297,18 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           {showRetry && (
             <Button
               variant="outlined"
-              color="primary"
               fullWidth
               startIcon={<RefreshIcon />}
               onClick={handleRetry}
-              sx={{ minHeight: 40 }}
+              sx={{ 
+                minHeight: 40,
+                borderColor: '#30363d',
+                color: '#238636',
+                '&:hover': {
+                  borderColor: '#238636',
+                  bgcolor: 'rgba(35, 134, 54, 0.1)',
+                }
+              }}
             >
               Retry
             </Button>
@@ -295,7 +321,12 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
               minWidth: 40, 
               minHeight: 40,
               border: 1,
-              borderColor: 'divider'
+              borderColor: '#30363d',
+              color: '#8b949e',
+              '&:hover': {
+                borderColor: '#58a6ff',
+                bgcolor: 'rgba(88, 166, 255, 0.1)',
+              }
             }}
           >
             <MoreVertIcon />
@@ -311,13 +342,14 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         sx={{
           width: '100%',
           height: '100%',
-          bgcolor: 'background.paper',
+          bgcolor: '#1a1a1a',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          border: '1px solid #333',
         }}
       >
-        <Box flex={3} width="100%" display="flex" flexDirection="column" overflow="hidden" position="relative">
+        <Box flex={1} width="100%" display="flex" flexDirection="column" overflow="hidden" position="relative">
           <Box flex={1} display="flex" justifyContent="center" alignItems="center" overflow="hidden" width="100%">
             {renderMedia()}
           </Box>
@@ -369,7 +401,14 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
             />
           )}
         </Box>
-        <Box flex={1} width="100%" display="flex" flexDirection="column" p={2} borderTop={1} borderColor="divider" bgcolor="background.default">
+        <Box sx={{ 
+          flexShrink: 0,
+          width: '100%', 
+          p: 2, 
+          borderTop: 1, 
+          borderColor: '#333', 
+          bgcolor: '#0d1117' 
+        }}>
           {renderActions()}
         </Box>
       </Card>
@@ -381,6 +420,18 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         onClose={handleMenuClose}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        PaperProps={{
+          sx: {
+            bgcolor: '#21262d',
+            border: '1px solid #30363d',
+            '& .MuiMenuItem-root': {
+              color: '#e6edf3',
+              '&:hover': {
+                bgcolor: 'rgba(88, 166, 255, 0.1)',
+              }
+            }
+          }
+        }}
       >
         {mediaItem.type === MediaType.Video && (
           <MenuItem onClick={handleDownload}>
@@ -408,7 +459,14 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         <Alert
           onClose={() => setShowError(false)}
           severity="error"
-          sx={{ width: '100%' }}
+          sx={{ 
+            width: '100%',
+            bgcolor: '#da3633',
+            color: 'white',
+            '& .MuiAlert-icon': {
+              color: 'white'
+            }
+          }}
         >
           {videoError}
         </Alert>
