@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { imageUrl, prompt, gender = 'woman', body_type = 'skinny', skin_color = 'tanned', hair_color = 'black',  animation_model = "basic", duration = 5 } = body;
+        const { imageUrl, prompt, gender = 'woman', body_type = 'skinny', skin_color = 'tanned', hair_color = 'black',  animation_model = "pro", duration = 10 } = body;
 
         if (!imageUrl || !prompt) {
             return NextResponse.json({ error: 'Missing required parameters: imageUrl and prompt are required' }, { status: 400 });
