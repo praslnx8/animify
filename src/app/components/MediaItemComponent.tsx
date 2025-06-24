@@ -140,7 +140,19 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
   const renderMedia = () => {
     if (mediaItem.loading) {
       return (
-        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%" gap={2} bgcolor="#1a1a1a">
+        <Box 
+          sx={{
+            display: 'flex', 
+            flexDirection: 'column', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '100%', 
+            gap: 2, 
+            bgcolor: '#1a1a1a',
+            maxHeight: '100%',
+            overflow: 'hidden'
+          }}
+        >
           <CircularProgress size={60} thickness={4} sx={{ color: '#58a6ff' }} />
           <Typography variant="body2" color="#8b949e">
             Generating your content...
@@ -150,7 +162,19 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
     }
     if (isVideo) {
       return (
-        <Box position="relative" width="100%" height="100%" display="flex" justifyContent="center" alignItems="center" bgcolor="#000">
+        <Box 
+          sx={{
+            position: 'relative', 
+            width: '100%', 
+            height: '100%', 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            bgcolor: '#000',
+            maxHeight: '100%',
+            overflow: 'hidden'
+          }}
+        >
           {videoStatus === VideoStatus.Loading && (          <Box sx={loadingOverlayStyle}>
             <CircularProgress size={60} thickness={4} sx={{ color: '#58a6ff' }} />
             <Typography variant="body2" color="white" mt={1}>
@@ -217,7 +241,18 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
       );
     }
     return (
-      <Box width="100%" height="100%" display="flex" justifyContent="center" alignItems="center" bgcolor="#000">
+      <Box 
+        sx={{
+          width: '100%', 
+          height: '100%', 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          bgcolor: '#000',
+          maxHeight: '100%',
+          overflow: 'hidden'
+        }}
+      >
         <img
           src={mediaItem.url}
           alt="Media"
@@ -351,8 +386,30 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           border: '1px solid #333',
         }}
       >
-        <Box flex={1} width="100%" display="flex" flexDirection="column" overflow="hidden" position="relative" minHeight={0}>
-          <Box flex={1} display="flex" justifyContent="center" alignItems="center" overflow="hidden" width="100%" minHeight={0}>
+        <Box 
+          sx={{
+            flex: 1,
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            position: 'relative',
+            minHeight: 0,
+            maxHeight: 'calc(100% - 140px)' // Reserve space for action buttons
+          }}
+        >
+          <Box 
+            sx={{
+              flex: 1,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              overflow: 'hidden',
+              width: '100%',
+              minHeight: 0,
+              maxHeight: '100%'
+            }}
+          >
             {renderMedia()}
           </Box>
           {mediaItem.prompt && (
@@ -407,7 +464,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           flexShrink: 0,
           width: '100%', 
           p: 2,
-          minHeight: 120, // Ensure minimum height for action buttons
+          height: 140, // Fixed height for action buttons
           borderTop: 1, 
           borderColor: '#333', 
           bgcolor: '#0d1117' 
