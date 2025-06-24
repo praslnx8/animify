@@ -464,7 +464,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           flexShrink: 0,
           width: '100%', 
           p: 2,
-          height: 140, // Fixed height for action buttons
+          height: 160, // Fixed height for action buttons
           borderTop: 1, 
           borderColor: '#333', 
           bgcolor: '#0d1117' 
