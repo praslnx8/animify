@@ -377,25 +377,20 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         sx={{
           width: '100%',
           height: '100%',
-          maxHeight: '100%',
-          minHeight: 0,
           bgcolor: '#1a1a1a',
-          display: 'flex',
-          flexDirection: 'column',
+          display: 'grid',
+          gridTemplateRows: '1fr auto',
           overflow: 'hidden',
           border: '1px solid #333',
         }}
       >
         <Box 
           sx={{
-            flex: 1,
-            width: '100%',
+            position: 'relative',
+            overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden',
-            position: 'relative',
             minHeight: 0,
-            maxHeight: 'calc(100% - 160px)' // Reserve space for action buttons
           }}
         >
           <Box 
@@ -405,9 +400,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
               justifyContent: 'center',
               alignItems: 'center',
               overflow: 'hidden',
-              width: '100%',
               minHeight: 0,
-              maxHeight: '100%'
             }}
           >
             {renderMedia()}
@@ -461,10 +454,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
           )}
         </Box>
         <Box sx={{ 
-          flexShrink: 0,
-          width: '100%', 
           p: 2,
-          height: 160, // Fixed height for action buttons
           borderTop: 1, 
           borderColor: '#333', 
           bgcolor: '#0d1117' 
