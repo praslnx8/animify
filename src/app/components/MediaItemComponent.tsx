@@ -342,6 +342,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         sx={{
           width: '100%',
           height: '100%',
+          maxHeight: '100%',
           minHeight: 0,
           bgcolor: '#1a1a1a',
           display: 'flex',
@@ -405,7 +406,8 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
         <Box sx={{ 
           flexShrink: 0,
           width: '100%', 
-          p: 2, 
+          p: 2,
+          minHeight: 120, // Ensure minimum height for action buttons
           borderTop: 1, 
           borderColor: '#333', 
           bgcolor: '#0d1117' 

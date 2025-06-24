@@ -126,7 +126,6 @@ export default function HomePage() {
       background: '#111',
       // Safe area support for mobile
       paddingTop: 'env(safe-area-inset-top)',
-      paddingBottom: 'env(safe-area-inset-bottom)',
     }}>
       <AppBar position="sticky" color="default" sx={{ zIndex: 3 }}>
         <Toolbar>
@@ -161,6 +160,7 @@ export default function HomePage() {
           position: 'relative',
           overflow: 'hidden',
           background: '#111',
+          paddingBottom: 'env(safe-area-inset-bottom)',
         }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -217,7 +217,14 @@ export default function HomePage() {
             )}
 
             {/* Media item */}
-            <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box sx={{ 
+              width: '100%', 
+              height: '100%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              minHeight: 0,
+            }}>
               <MediaItemComponent
                 mediaItem={mediaItems[currentIdx]}
                 addMediaItem={(mediaItem) => {
