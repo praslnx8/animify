@@ -395,7 +395,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({
             overflow: 'hidden',
             position: 'relative',
             minHeight: 0,
-            maxHeight: 'calc(100% - 140px)' // Reserve space for action buttons
+            maxHeight: 'calc(100% - 160px)' // Reserve space for action buttons
           }}
         >
           <Box 
