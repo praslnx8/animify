@@ -21,7 +21,6 @@ import {
   ListItemText,
   Divider,
 } from '@mui/material';
-import 'keen-slider/keen-slider.min.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { uploadBase64Image } from './api/uploadBase64Image';
 import MediaItemComponent from './components/MediaItemComponent';
