@@ -1,13 +1,18 @@
 'use client';
 
-import React from 'react';
-import {
-    AppBar, Box, Toolbar, Typography, TextField, IconButton, List, ListItem, ListItemText,
-    ToggleButton, ToggleButtonGroup, Divider, Paper
-} from '@mui/material';
 import {
     Send as SendIcon
 } from '@mui/icons-material';
+import {
+    Box,
+    Divider,
+    IconButton,
+    Paper,
+    TextField,
+    ToggleButton, ToggleButtonGroup,
+    Typography
+} from '@mui/material';
+import React from 'react';
 
 enum BotRole {
     Bot1 = 'Bot1',
@@ -15,14 +20,14 @@ enum BotRole {
 }
 
 export default function ChatPage() {
-    const [messages, setMessages] = React.useState<{ sender: string; text: string }[]>([]);
+    const [messages, setMessages] = React.useState<{ sender: string; text: string; image?: string; media_url?: string; media_id?: string | null }[]>([]);
     const [input, setInput] = React.useState('');
     const [activeBot, setActiveBot] = React.useState<BotRole>(BotRole.Bot1);
     const [bot1Id, setBot1Id] = React.useState('268785');
     const [bot2Id, setBot2Id] = React.useState('268786');
 
     const handleSendMessage = async () => {
-        const userMessage = input.trim() ? { sender: activeBot, text: input } : null;
+        const userMessage = input.trim() ? { sender: activeBot, text: input, media_id: null } : null;
         const updatedMessages = userMessage ? [...messages, userMessage] : messages;
 
         if (userMessage) {
@@ -40,7 +45,7 @@ export default function ChatPage() {
                     context: updatedMessages.map(msg => ({
                         message: msg.text,
                         turn: msg.sender === activeBot ? 'user' : 'bot',
-                        media_id: null,
+                        media_id: msg.media_id || null,
                     })),
                     strapi_bot_id: activeBot === BotRole.Bot1 ? bot1Id : bot2Id,
                     output_audio: false,
@@ -53,6 +58,9 @@ export default function ChatPage() {
                 const botMessage = {
                     sender: activeBot === BotRole.Bot1 ? BotRole.Bot2 : BotRole.Bot1,
                     text: data.responses[0].response,
+                    image: data.responses[0]?.image_response?.bs64 || undefined,
+                    media_url: data.responses[0]?.media_response?.media_url || undefined,
+                    media_id: data.responses[0]?.media_response?.media_id || null,
                 };
                 setMessages(prev => [...prev, botMessage]);
                 setActiveBot(prev => (prev === BotRole.Bot1 ? BotRole.Bot2 : BotRole.Bot1));
@@ -61,6 +69,41 @@ export default function ChatPage() {
             }
         } catch (error) {
             console.error('Error occurred while sending message:', error);
+        }
+    };
+
+    const requestContextualPhoto = async (messageIndex: number) => {
+        try {
+            const context = messages.map(msg => ({
+                message: msg.text,
+                turn: msg.sender === activeBot ? 'user' : 'bot',
+                media_id: msg.media_id || null,
+            }));
+
+            const response = await fetch('/api/contextualPhoto', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    strapi_bot_id: activeBot === BotRole.Bot1 ? bot1Id : bot2Id,
+                    user_id: 'OkBq02NSt3eHY9Y65pmd1Yjxaut1',
+                    context,
+                    photo_model_id: 'basic',
+                }),
+            });
+
+            const data = await response.json();
+            if (response.ok && data.responses?.[0]?.media_response?.media_url) {
+                const updatedMessages = [...messages];
+                updatedMessages[messageIndex].media_url = data.media_url;
+                updatedMessages[messageIndex].media_id = data.media_id;
+                setMessages(updatedMessages);
+            } else {
+                console.error('Error fetching contextual photo:', data);
+            }
+        } catch (error) {
+            console.error('Error occurred while requesting contextual photo:', error);
         }
     };
 
@@ -109,6 +152,32 @@ export default function ChatPage() {
                             >
                                 {message.text}
                             </Typography>
+                            {message.image && (
+                                <Box sx={{ mt: 1, textAlign: 'center' }}>
+                                    <img
+                                        src={`data:image/jpeg;base64,${message.image}`}
+                                        alt="Response Image"
+                                        style={{ width: '100%', maxWidth: '80vw', height: 'auto', borderRadius: 12 }}
+                                    />
+                                </Box>
+                            )}
+                            {message.media_url && (
+                                <Box sx={{ mt: 1, textAlign: 'center' }}>
+                                    <img
+                                        src={message.media_url}
+                                        alt="Media Response"
+                                        style={{ width: '100%', maxWidth: '80vw', height: 'auto', borderRadius: 12 }}
+                                    />
+                                </Box>
+                            )}
+                            <IconButton
+                                size="small"
+                                onClick={() => requestContextualPhoto(index)}
+                                sx={{ position: 'absolute', top: 2, right: 2, color: 'grey.400' }}
+                                title="Request Contextual Photo"
+                            >
+                                <SendIcon fontSize="small" />
+                            </IconButton>
                         </Paper>
                     </Box>
                 ))}
