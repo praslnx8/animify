@@ -4,6 +4,9 @@ import {
     Send as SendIcon
 } from '@mui/icons-material';
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
     Box,
     CircularProgress,
     Divider,
@@ -14,22 +17,84 @@ import {
     Typography
 } from '@mui/material';
 import React from 'react';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-enum BotRole {
-    Bot1 = 'Bot1',
-    Bot2 = 'Bot2',
-}
+type BotRole = 'Bot1' | 'Bot2';
 
 const userId = process.env.NEXT_PUBLIC_USER_ID;
 const bot1Id = process.env.NEXT_PUBLIC_BOT1_ID;
 const bot2Id = process.env.NEXT_PUBLIC_BOT2_ID;
 
+type BotProfile = {
+    id: string;
+    name: string;
+    description: string;
+    appearance: string;
+    pronoun: string;
+    example_messages: string[];
+};
+
+const botProfileFields: Array<keyof BotProfile> = ['id', 'name', 'description', 'appearance', 'pronoun', 'example_messages'];
+
+type UserProfile = {
+    id: string;
+    name: string;
+    description: string;
+    appearance: string;
+    pronoun: string;
+    example_messages: string[];
+};
+
+const userProfileFields: Array<keyof UserProfile> = ['id', 'name', 'description', 'appearance', 'pronoun', 'example_messages'];
+
 export default function ChatPage() {
     const [messages, setMessages] = React.useState<{ sender: string; text: string; image?: string; media_url?: string; media_id?: string | null }[]>([]);
     const [input, setInput] = React.useState('');
-    const [activeBot, setActiveBot] = React.useState<BotRole>(BotRole.Bot1);
+    const [activeBot, setActiveBot] = React.useState<BotRole>('Bot1');
     const [loadingMessageIndex, setLoadingMessageIndex] = React.useState<number | null>(null);
     const [sendingMessage, setSendingMessage] = React.useState(false);
+    const [botProfiles, setBotProfiles] = React.useState<Record<'Bot1' | 'Bot2', BotProfile>>({
+        Bot1: {
+            id: '',
+            name: '',
+            description: '',
+            appearance: '',
+            pronoun: '',
+            example_messages: ['']
+        },
+        Bot2: {
+            id: '',
+            name: '',
+            description: '',
+            appearance: '',
+            pronoun: '',
+            example_messages: ['']
+        }
+    });
+    const [userProfile, setUserProfile] = React.useState<UserProfile>({
+        id: '',
+        name: '',
+        description: '',
+        appearance: '',
+        pronoun: '',
+        example_messages: ['']
+    });
+    const [chatSettings, setChatSettings] = React.useState({
+        model_name: 'base',
+        allow_nsfw: false,
+        tasks: [''],
+        enable_memory: false
+    });
+    const [imageSettings, setImageSettings] = React.useState({
+        identity_image_url: '',
+        model_name: 'base',
+        style: 'realistic',
+        gender: 'neutral',
+        skin_color: 'default',
+        allow_nsfw: false,
+        usage_mode: 'off',
+        return_bs64: false
+    });
 
     const handleSendMessage = async () => {
         const userMessage = input.trim() ? { sender: activeBot, text: input, media_id: null } : null;
@@ -53,7 +118,10 @@ export default function ChatPage() {
                         turn: msg.sender === activeBot ? 'user' : 'bot',
                         media_id: msg.media_id || null,
                     })),
-                    strapi_bot_id: activeBot === BotRole.Bot1 ? bot1Id : bot2Id,
+                    bot_profile: botProfiles[activeBot],
+                    user_profile: userProfile,
+                    chat_settings: chatSettings,
+                    image_settings: imageSettings,
                     output_audio: false,
                     enable_proactive_photos: true,
                 }),
@@ -62,14 +130,14 @@ export default function ChatPage() {
             const data = await response.json();
             if (response.ok && data.responses?.[0]?.response) {
                 const botMessage = {
-                    sender: activeBot === BotRole.Bot1 ? BotRole.Bot2 : BotRole.Bot1,
+                    sender: activeBot === 'Bot1' ? 'Bot2' : 'Bot1',
                     text: data.responses[0].response,
                     image: data.responses[0]?.image_response?.bs64 || undefined,
                     media_url: data.responses[0]?.media_response?.media_url || undefined,
                     media_id: data.responses[0]?.media_response?.media_id || null,
                 };
                 setMessages(prev => [...prev, botMessage]);
-                setActiveBot(prev => (prev === BotRole.Bot1 ? BotRole.Bot2 : BotRole.Bot1));
+                setActiveBot(prev => (prev === 'Bot1' ? 'Bot2' : 'Bot1'));
             } else {
                 console.error('Error fetching chatbot response:', data);
             }
@@ -81,40 +149,38 @@ export default function ChatPage() {
     };
 
     const requestContextualPhoto = async (messageIndex: number) => {
-        setLoadingMessageIndex(messageIndex);
-        try {
-            const context = messages.map(msg => ({
-                message: msg.text,
-                turn: msg.sender === activeBot ? 'user' : 'bot',
-                media_id: msg.media_id || null,
-            }));
+        console.warn('requestContextualPhoto is deprecated as the new API always returns the image.');
+    };
 
-            const response = await fetch('/api/contextualPhoto', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    strapi_bot_id: activeBot === BotRole.Bot1 ? bot1Id : bot2Id,
-                    user_id: userId,
-                    context
-                }),
-            });
-
-            const data = await response.json();
-            if (response.ok && data?.media_url) {
-                const updatedMessages = [...messages];
-                updatedMessages[messageIndex].media_url = data.media_url;
-                updatedMessages[messageIndex].media_id = data.media_id;
-                setMessages(updatedMessages);
-            } else {
-                console.error('Error fetching contextual photo:', data);
+    const handleProfileChange = (bot: BotRole, field: keyof BotProfile, value: string) => {
+        setBotProfiles(prev => ({
+            ...prev,
+            [bot]: {
+                ...prev[bot],
+                [field]: value
             }
-        } catch (error) {
-            console.error('Error occurred while requesting contextual photo:', error);
-        } finally {
-            setLoadingMessageIndex(null);
-        }
+        }));
+    };
+
+    const handleUserProfileChange = (field: keyof UserProfile, value: string) => {
+        setUserProfile(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleChatSettingsChange = (field: keyof typeof chatSettings, value: any) => {
+        setChatSettings(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleImageSettingsChange = (field: keyof typeof imageSettings, value: any) => {
+        setImageSettings(prev => ({
+            ...prev,
+            [field]: value
+        }));
     };
 
     return (
@@ -230,21 +296,85 @@ export default function ChatPage() {
                         <ToggleButton value="Bot2">Bot2</ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
-                <Box display="flex" alignItems="center" gap={1} mt={1}>
-                    <TextField
-                        label="Bot1 ID"
-                        value={bot1Id}
-                        size="small"
-                        sx={{ flex: 1, bgcolor: 'background.default', borderRadius: 2 }}
-                        disabled
-                    />
-                    <TextField
-                        label="Bot2 ID"
-                        value={bot2Id}
-                        size="small"
-                        sx={{ flex: 1, bgcolor: 'background.default', borderRadius: 2 }}
-                        disabled
-                    />
+                <Box display="flex" flexDirection="column" gap={1} mt={2}>
+                    {['Bot1', 'Bot2'].map(bot => (
+                        <Accordion key={bot} sx={{ bgcolor: 'background.default' }}>
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                <Typography variant="subtitle1">{bot} Profile</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                {botProfileFields.map(field => (
+                                    <TextField
+                                        key={field}
+                                        label={field}
+                                        value={botProfiles[bot as BotRole][field]}
+                                        onChange={(e) => handleProfileChange(bot as BotRole, field, e.target.value)}
+                                        fullWidth
+                                        size="small"
+                                        sx={{ mb: 1 }}
+                                    />
+                                ))}
+                            </AccordionDetails>
+                        </Accordion>
+                    ))}
+                </Box>
+                <Box display="flex" flexDirection="column" gap={1} mt={2}>
+                    <Accordion sx={{ bgcolor: 'background.default' }}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography variant="subtitle1">User Profile</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            {userProfileFields.map(field => (
+                                <TextField
+                                    key={field}
+                                    label={field}
+                                    value={userProfile[field]}
+                                    onChange={(e) => handleUserProfileChange(field, e.target.value)}
+                                    fullWidth
+                                    size="small"
+                                    sx={{ mb: 1 }}
+                                />
+                            ))}
+                        </AccordionDetails>
+                    </Accordion>
+
+                    <Accordion sx={{ bgcolor: 'background.default' }}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography variant="subtitle1">Chat Settings</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            {Object.keys(chatSettings).map(field => (
+                                <TextField
+                                    key={field}
+                                    label={field}
+                                    value={chatSettings[field as keyof typeof chatSettings]}
+                                    onChange={(e) => handleChatSettingsChange(field as keyof typeof chatSettings, e.target.value)}
+                                    fullWidth
+                                    size="small"
+                                    sx={{ mb: 1 }}
+                                />
+                            ))}
+                        </AccordionDetails>
+                    </Accordion>
+
+                    <Accordion sx={{ bgcolor: 'background.default' }}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography variant="subtitle1">Image Settings</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            {Object.keys(imageSettings).map(field => (
+                                <TextField
+                                    key={field}
+                                    label={field}
+                                    value={imageSettings[field as keyof typeof imageSettings]}
+                                    onChange={(e) => handleImageSettingsChange(field as keyof typeof imageSettings, e.target.value)}
+                                    fullWidth
+                                    size="small"
+                                    sx={{ mb: 1 }}
+                                />
+                            ))}
+                        </AccordionDetails>
+                    </Accordion>
                 </Box>
             </Paper>
         </Box>
