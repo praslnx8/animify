@@ -9,18 +9,23 @@ import {
     Send as SendIcon
 } from '@mui/icons-material';
 
+enum BotRole {
+    Bot1 = 'Bot1',
+    Bot2 = 'Bot2',
+}
+
 export default function ChatPage() {
     const [messages, setMessages] = React.useState<{ sender: string; text: string }[]>([]);
     const [input, setInput] = React.useState('');
-    const [activeBot, setActiveBot] = React.useState<'Bot1' | 'Bot2'>('Bot1');
+    const [activeBot, setActiveBot] = React.useState<BotRole>(BotRole.Bot1);
     const [bot1Id, setBot1Id] = React.useState('268785');
     const [bot2Id, setBot2Id] = React.useState('268786');
 
     const handleSendMessage = async () => {
-        var updatedMessages = messages;
-        if (input.trim()) {
-            const userMessage = { sender: activeBot, text: input };
-            updatedMessages = [...messages, userMessage];
+        const userMessage = input.trim() ? { sender: activeBot, text: input } : null;
+        const updatedMessages = userMessage ? [...messages, userMessage] : messages;
+
+        if (userMessage) {
             setMessages(updatedMessages);
             setInput('');
         }
@@ -37,7 +42,7 @@ export default function ChatPage() {
                         turn: msg.sender === activeBot ? 'user' : 'bot',
                         media_id: null,
                     })),
-                    strapi_bot_id: activeBot === 'Bot1' ? bot1Id : bot2Id,
+                    strapi_bot_id: activeBot === BotRole.Bot1 ? bot1Id : bot2Id,
                     output_audio: false,
                     enable_proactive_photos: true,
                 }),
@@ -46,11 +51,11 @@ export default function ChatPage() {
             const data = await response.json();
             if (response.ok && data.responses?.[0]?.response) {
                 const botMessage = {
-                    sender: activeBot === 'Bot1' ? 'Bot2' : 'Bot1',
+                    sender: activeBot === BotRole.Bot1 ? BotRole.Bot2 : BotRole.Bot1,
                     text: data.responses[0].response,
                 };
                 setMessages(prev => [...prev, botMessage]);
-                setActiveBot(prev => (prev === 'Bot1' ? 'Bot2' : 'Bot1'));
+                setActiveBot(prev => (prev === BotRole.Bot1 ? BotRole.Bot2 : BotRole.Bot1));
             } else {
                 console.error('Error fetching chatbot response:', data);
             }
