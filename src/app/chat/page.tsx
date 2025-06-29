@@ -21,10 +21,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 type BotRole = 'Bot1' | 'Bot2';
 
-const userId = process.env.NEXT_PUBLIC_USER_ID;
-const bot1Id = process.env.NEXT_PUBLIC_BOT1_ID;
-const bot2Id = process.env.NEXT_PUBLIC_BOT2_ID;
-
 type BotProfile = {
     id: string;
     name: string;
@@ -51,7 +47,6 @@ export default function ChatPage() {
     const [messages, setMessages] = React.useState<{ sender: string; text: string; image?: string; media_url?: string; media_id?: string | null }[]>([]);
     const [input, setInput] = React.useState('');
     const [activeBot, setActiveBot] = React.useState<BotRole>('Bot1');
-    const [loadingMessageIndex, setLoadingMessageIndex] = React.useState<number | null>(null);
     const [sendingMessage, setSendingMessage] = React.useState(false);
     const [botProfiles, setBotProfiles] = React.useState<Record<'Bot1' | 'Bot2', BotProfile>>({
         Bot1: {
@@ -128,13 +123,12 @@ export default function ChatPage() {
             });
 
             const data = await response.json();
-            if (response.ok && data.responses?.[0]?.response) {
+            if (response.ok && data.response) {
                 const botMessage = {
                     sender: activeBot === 'Bot1' ? 'Bot2' : 'Bot1',
-                    text: data.responses[0].response,
-                    image: data.responses[0]?.image_response?.bs64 || undefined,
-                    media_url: data.responses[0]?.media_response?.media_url || undefined,
-                    media_id: data.responses[0]?.media_response?.media_id || null,
+                    text: data.response,
+                    image: data.image_response?.bs64 || undefined,
+                    image_prompt: data.image_response?.prompt || undefined,
                 };
                 setMessages(prev => [...prev, botMessage]);
                 setActiveBot(prev => (prev === 'Bot1' ? 'Bot2' : 'Bot1'));
@@ -146,10 +140,6 @@ export default function ChatPage() {
         } finally {
             setSendingMessage(false);
         }
-    };
-
-    const requestContextualPhoto = async (messageIndex: number) => {
-        console.warn('requestContextualPhoto is deprecated as the new API always returns the image.');
     };
 
     const handleProfileChange = (bot: BotRole, field: keyof BotProfile, value: string) => {
@@ -246,14 +236,6 @@ export default function ChatPage() {
                                     />
                                 </Box>
                             )}
-                            <IconButton
-                                size="small"
-                                onClick={() => requestContextualPhoto(index)}
-                                sx={{ position: 'absolute', top: 2, right: 2, color: 'grey.400' }}
-                                title="Request Contextual Photo"
-                            >
-                                {loadingMessageIndex === index ? <CircularProgress size={20} color="inherit" /> : <SendIcon fontSize="small" />}
-                            </IconButton>
                         </Paper>
                     </Box>
                 ))}

@@ -27,38 +27,10 @@ export async function POST(req: NextRequest) {
             strapi_bot_id,
             output_audio,
             enable_proactive_photos,
-            bot_profile: body.bot_profile || {
-                id: 'default_bot_id',
-                name: 'Default Bot',
-                description: 'Default bot description',
-                appearance: 'Default appearance',
-                pronoun: 'they/them',
-                example_messages: ['Hello!']
-            },
-            user_profile: body.user_profile || {
-                id: 'default_user_id',
-                name: 'Default User',
-                description: 'Default user description',
-                appearance: 'Default appearance',
-                pronoun: 'they/them',
-                example_messages: ['Hi!']
-            },
-            chat_settings: body.chat_settings || {
-                model_name: 'base',
-                allow_nsfw: false,
-                tasks: [],
-                enable_memory: false
-            },
-            image_settings: body.image_settings || {
-                identity_image_url: '',
-                model_name: 'base',
-                style: 'realistic',
-                gender: 'neutral',
-                skin_color: 'default',
-                allow_nsfw: false,
-                usage_mode: 'off',
-                return_bs64: false
-            }
+            bot_profile: body.bot_profile,
+            user_profile: body.user_profile,
+            chat_settings: body.chat_settings,
+            image_settings: body.image_settings
         };
 
         const res = await fetch("https://api.exh.ai/chatbot/v3/response", {

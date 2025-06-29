@@ -29,7 +29,8 @@ export async function POST(req: NextRequest) {
                 body_type,
                 skin_color,
                 hair_color,
-                animation_model
+                animation_model,
+                duration,
             };
             
             // Make the API call
