@@ -27,6 +27,8 @@ export async function POST(req: NextRequest) {
             strapi_bot_id,
             output_audio,
             enable_proactive_photos,
+            conversational_model_id: 'rp_v1',
+            photo_model_id: 'elite'
         };
 
         const res = await fetch("https://api.exh.ai/chatbot/v4/botify/response", {

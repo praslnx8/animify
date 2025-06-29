@@ -20,12 +20,14 @@ enum BotRole {
     Bot2 = 'Bot2',
 }
 
+const userId = process.env.NEXT_PUBLIC_USER_ID;
+const bot1Id = process.env.NEXT_PUBLIC_BOT1_ID;
+const bot2Id = process.env.NEXT_PUBLIC_BOT2_ID;
+
 export default function ChatPage() {
     const [messages, setMessages] = React.useState<{ sender: string; text: string; image?: string; media_url?: string; media_id?: string | null }[]>([]);
     const [input, setInput] = React.useState('');
     const [activeBot, setActiveBot] = React.useState<BotRole>(BotRole.Bot1);
-    const [bot1Id, setBot1Id] = React.useState('268785');
-    const [bot2Id, setBot2Id] = React.useState('268786');
     const [loadingMessageIndex, setLoadingMessageIndex] = React.useState<number | null>(null);
     const [sendingMessage, setSendingMessage] = React.useState(false);
 
@@ -94,9 +96,8 @@ export default function ChatPage() {
                 },
                 body: JSON.stringify({
                     strapi_bot_id: activeBot === BotRole.Bot1 ? bot1Id : bot2Id,
-                    user_id: 'OkBq02NSt3eHY9Y65pmd1Yjxaut1',
-                    context,
-                    photo_model_id: 'basic',
+                    user_id: userId,
+                    context
                 }),
             });
 
@@ -233,16 +234,16 @@ export default function ChatPage() {
                     <TextField
                         label="Bot1 ID"
                         value={bot1Id}
-                        onChange={(e) => setBot1Id(e.target.value)}
                         size="small"
                         sx={{ flex: 1, bgcolor: 'background.default', borderRadius: 2 }}
+                        disabled
                     />
                     <TextField
                         label="Bot2 ID"
                         value={bot2Id}
-                        onChange={(e) => setBot2Id(e.target.value)}
                         size="small"
                         sx={{ flex: 1, bgcolor: 'background.default', borderRadius: 2 }}
+                        disabled
                     />
                 </Box>
             </Paper>

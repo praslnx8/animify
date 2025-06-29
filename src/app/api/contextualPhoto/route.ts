@@ -25,7 +25,7 @@ export async function POST(request: Request) {
                 strapi_bot_id: body.strapi_bot_id,
                 user_id: body.user_id,
                 context: body.context,
-                photo_model_id: body.photo_model_id,
+                photo_model_id: 'elite',
             }),
         });
 
