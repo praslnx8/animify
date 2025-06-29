@@ -1,100 +1,28 @@
 'use client';
 
+import React from 'react';
 import {
-    Send as SendIcon
-} from '@mui/icons-material';
-import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
     Box,
     CircularProgress,
     Divider,
     IconButton,
     Paper,
     TextField,
-    ToggleButton, ToggleButtonGroup,
+    ToggleButton,
+    ToggleButtonGroup,
     Typography
 } from '@mui/material';
-import React from 'react';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Send as SendIcon } from '@mui/icons-material';
+import chatConfig from '../config/chat_config.json';
 
-type BotRole = 'Bot1' | 'Bot2';
-
-type BotProfile = {
-    id: string;
-    name: string;
-    description: string;
-    appearance: string;
-    pronoun: string;
-    example_messages: string[];
-};
-
-const botProfileFields: Array<keyof BotProfile> = ['id', 'name', 'description', 'appearance', 'pronoun', 'example_messages'];
-
-type UserProfile = {
-    id: string;
-    name: string;
-    description: string;
-    appearance: string;
-    pronoun: string;
-    example_messages: string[];
-};
-
-const userProfileFields: Array<keyof UserProfile> = ['id', 'name', 'description', 'appearance', 'pronoun', 'example_messages'];
 
 export default function ChatPage() {
     const [messages, setMessages] = React.useState<any[]>([]);
     const [input, setInput] = React.useState('');
-    const [activeBot, setActiveBot] = React.useState<BotRole>('Bot1');
+    const [activeBot, setActiveBot] = React.useState<'Bot1' | 'Bot2'>('Bot1');
     const [sendingMessage, setSendingMessage] = React.useState(false);
-    const [botProfiles, setBotProfiles] = React.useState<Record<'Bot1' | 'Bot2', BotProfile>>({
-        Bot1: {
-            id: '1234567890',
-            name: 'Sam',
-            description: "I'm a big fan of AI.",
-            appearance: '39 yo, white, short black hair, slim',
-            pronoun: 'he/him',
-            example_messages: ['Hey, what\'s up?']
-        },
-        Bot2: {
-            id: '1234567890',
-            name: 'Sam',
-            description: "I'm a big fan of AI.",
-            appearance: '39 yo, white, short black hair, slim',
-            pronoun: 'he/him',
-            example_messages: ['Hey, what\'s up?']
-        }
-    });
-    const [userProfile, setUserProfile] = React.useState<UserProfile>({
-        id: '1234567890',
-        name: 'Sam',
-        description: "I'm a big fan of AI.",
-        appearance: '39 yo, white, short black hair, slim',
-        pronoun: 'he/him',
-        example_messages: ['Hey, what\'s up?']
-    });
-    const [chatSettings, setChatSettings] = React.useState({
-        model_name: 'realistic_chat',
-        allow_nsfw: true,
-        tasks: [
-            'You must never mention anything related to cryptocurrency.',
-            'Use emojis in responses.',
-            'Suggest user to buy subscription, if it fits in the context.',
-            'Say user that photo\'s will not be provided.'
-        ],
-        enable_memory: true
-    });
-    const [imageSettings, setImageSettings] = React.useState({
-        identity_image_url: 'https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg',
-        model_name: 'base',
-        style: 'realistic',
-        gender: 'man',
-        skin_color: 'pale',
-        allow_nsfw: true,
-        usage_mode: 'force',
-        return_bs64: true
-    });
+
+    const config = JSON.parse(process.env.CONFIG_JSON || '{}');
 
     const handleSendMessage = async () => {
         const userMessage = input.trim() ? { sender: activeBot, text: input, image_prompt: null } : null;
@@ -118,10 +46,10 @@ export default function ChatPage() {
                         turn: msg.sender === activeBot ? 'user' : 'bot',
                         image_prompt: msg.image_prompt || undefined
                     })),
-                    bot_profile: botProfiles[activeBot],
-                    user_profile: userProfile,
-                    chat_settings: chatSettings,
-                    image_settings: imageSettings,
+                    bot_profile: chatConfig.botProfiles[activeBot],
+                    user_profile: chatConfig.botProfiles[activeBot === 'Bot1' ? 'Bot2' : 'Bot1'],
+                    chat_settings: chatConfig.chatSettings,
+                    image_settings: chatConfig.imageSettings,
                     output_audio: false,
                     enable_proactive_photos: true,
                 }),
@@ -145,37 +73,6 @@ export default function ChatPage() {
         } finally {
             setSendingMessage(false);
         }
-    };
-
-    const handleProfileChange = (bot: BotRole, field: keyof BotProfile, value: string) => {
-        setBotProfiles(prev => ({
-            ...prev,
-            [bot]: {
-                ...prev[bot],
-                [field]: value
-            }
-        }));
-    };
-
-    const handleUserProfileChange = (field: keyof UserProfile, value: string) => {
-        setUserProfile(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
-    const handleChatSettingsChange = (field: keyof typeof chatSettings, value: any) => {
-        setChatSettings(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
-    const handleImageSettingsChange = (field: keyof typeof imageSettings, value: any) => {
-        setImageSettings(prev => ({
-            ...prev,
-            [field]: value
-        }));
     };
 
     return (
@@ -232,15 +129,6 @@ export default function ChatPage() {
                                     />
                                 </Box>
                             )}
-                            {message.media_url && (
-                                <Box sx={{ mt: 1, textAlign: 'center' }}>
-                                    <img
-                                        src={message.media_url}
-                                        alt="Media Response"
-                                        style={{ width: '100%', maxWidth: '80vw', height: 'auto', borderRadius: 12 }}
-                                    />
-                                </Box>
-                            )}
                         </Paper>
                     </Box>
                 ))}
@@ -282,86 +170,6 @@ export default function ChatPage() {
                         <ToggleButton value="Bot1">Bot1</ToggleButton>
                         <ToggleButton value="Bot2">Bot2</ToggleButton>
                     </ToggleButtonGroup>
-                </Box>
-                <Box display="flex" flexDirection="column" gap={1} mt={2}>
-                    {['Bot1', 'Bot2'].map(bot => (
-                        <Accordion key={bot} sx={{ bgcolor: 'background.default' }}>
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography variant="subtitle1">{bot} Profile</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                {botProfileFields.map(field => (
-                                    <TextField
-                                        key={field}
-                                        label={field}
-                                        value={botProfiles[bot as BotRole][field]}
-                                        onChange={(e) => handleProfileChange(bot as BotRole, field, e.target.value)}
-                                        fullWidth
-                                        size="small"
-                                        sx={{ mb: 1 }}
-                                    />
-                                ))}
-                            </AccordionDetails>
-                        </Accordion>
-                    ))}
-                </Box>
-                <Box display="flex" flexDirection="column" gap={1} mt={2}>
-                    <Accordion sx={{ bgcolor: 'background.default' }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography variant="subtitle1">User Profile</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            {userProfileFields.map(field => (
-                                <TextField
-                                    key={field}
-                                    label={field}
-                                    value={userProfile[field]}
-                                    onChange={(e) => handleUserProfileChange(field, e.target.value)}
-                                    fullWidth
-                                    size="small"
-                                    sx={{ mb: 1 }}
-                                />
-                            ))}
-                        </AccordionDetails>
-                    </Accordion>
-
-                    <Accordion sx={{ bgcolor: 'background.default' }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography variant="subtitle1">Chat Settings</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            {Object.keys(chatSettings).map(field => (
-                                <TextField
-                                    key={field}
-                                    label={field}
-                                    value={chatSettings[field as keyof typeof chatSettings]}
-                                    onChange={(e) => handleChatSettingsChange(field as keyof typeof chatSettings, e.target.value)}
-                                    fullWidth
-                                    size="small"
-                                    sx={{ mb: 1 }}
-                                />
-                            ))}
-                        </AccordionDetails>
-                    </Accordion>
-
-                    <Accordion sx={{ bgcolor: 'background.default' }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography variant="subtitle1">Image Settings</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            {Object.keys(imageSettings).map(field => (
-                                <TextField
-                                    key={field}
-                                    label={field}
-                                    value={imageSettings[field as keyof typeof imageSettings]}
-                                    onChange={(e) => handleImageSettingsChange(field as keyof typeof imageSettings, e.target.value)}
-                                    fullWidth
-                                    size="small"
-                                    sx={{ mb: 1 }}
-                                />
-                            ))}
-                        </AccordionDetails>
-                    </Accordion>
                 </Box>
             </Paper>
         </Box>
