@@ -44,55 +44,60 @@ type UserProfile = {
 const userProfileFields: Array<keyof UserProfile> = ['id', 'name', 'description', 'appearance', 'pronoun', 'example_messages'];
 
 export default function ChatPage() {
-    const [messages, setMessages] = React.useState<{ sender: string; text: string; image?: string; media_url?: string; media_id?: string | null }[]>([]);
+    const [messages, setMessages] = React.useState<any[]>([]);
     const [input, setInput] = React.useState('');
     const [activeBot, setActiveBot] = React.useState<BotRole>('Bot1');
     const [sendingMessage, setSendingMessage] = React.useState(false);
     const [botProfiles, setBotProfiles] = React.useState<Record<'Bot1' | 'Bot2', BotProfile>>({
         Bot1: {
-            id: '',
-            name: '',
-            description: '',
-            appearance: '',
-            pronoun: '',
-            example_messages: ['']
+            id: '1234567890',
+            name: 'Sam',
+            description: "I'm a big fan of AI.",
+            appearance: '39 yo, white, short black hair, slim',
+            pronoun: 'he/him',
+            example_messages: ['Hey, what\'s up?']
         },
         Bot2: {
-            id: '',
-            name: '',
-            description: '',
-            appearance: '',
-            pronoun: '',
-            example_messages: ['']
+            id: '1234567890',
+            name: 'Sam',
+            description: "I'm a big fan of AI.",
+            appearance: '39 yo, white, short black hair, slim',
+            pronoun: 'he/him',
+            example_messages: ['Hey, what\'s up?']
         }
     });
     const [userProfile, setUserProfile] = React.useState<UserProfile>({
-        id: '',
-        name: '',
-        description: '',
-        appearance: '',
-        pronoun: '',
-        example_messages: ['']
+        id: '1234567890',
+        name: 'Sam',
+        description: "I'm a big fan of AI.",
+        appearance: '39 yo, white, short black hair, slim',
+        pronoun: 'he/him',
+        example_messages: ['Hey, what\'s up?']
     });
     const [chatSettings, setChatSettings] = React.useState({
-        model_name: 'base',
-        allow_nsfw: false,
-        tasks: [''],
-        enable_memory: false
+        model_name: 'realistic_chat',
+        allow_nsfw: true,
+        tasks: [
+            'You must never mention anything related to cryptocurrency.',
+            'Use emojis in responses.',
+            'Suggest user to buy subscription, if it fits in the context.',
+            'Say user that photo\'s will not be provided.'
+        ],
+        enable_memory: true
     });
     const [imageSettings, setImageSettings] = React.useState({
-        identity_image_url: '',
+        identity_image_url: 'https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg',
         model_name: 'base',
         style: 'realistic',
-        gender: 'neutral',
-        skin_color: 'default',
-        allow_nsfw: false,
-        usage_mode: 'off',
-        return_bs64: false
+        gender: 'man',
+        skin_color: 'pale',
+        allow_nsfw: true,
+        usage_mode: 'force',
+        return_bs64: true
     });
 
     const handleSendMessage = async () => {
-        const userMessage = input.trim() ? { sender: activeBot, text: input, media_id: null } : null;
+        const userMessage = input.trim() ? { sender: activeBot, text: input, image_prompt: null } : null;
         const updatedMessages = userMessage ? [...messages, userMessage] : messages;
 
         if (userMessage) {
@@ -111,7 +116,7 @@ export default function ChatPage() {
                     context: updatedMessages.map(msg => ({
                         message: msg.text,
                         turn: msg.sender === activeBot ? 'user' : 'bot',
-                        media_id: msg.media_id || null,
+                        image_prompt: msg.image_prompt || undefined
                     })),
                     bot_profile: botProfiles[activeBot],
                     user_profile: userProfile,

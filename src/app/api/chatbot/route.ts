@@ -5,28 +5,18 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { context, strapi_bot_id, output_audio, enable_proactive_photos } = body;
 
-        if (!context || !strapi_bot_id) {
+        if (!body.context) {
             return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
         }
 
-        const apiToken = process.env.EXH_BOTIFY_TOKEN;
+        const apiToken = process.env.EXH_AI_API_TOKEN;
         if (!apiToken) {
             return NextResponse.json({ error: 'API token not configured on server' }, { status: 500 });
         }
 
-        const xAuthToken = process.env.X_AUTH_TOKEN;
-        if (!xAuthToken) {
-            return NextResponse.json({ error: 'X-Auth token not configured on server' }, { status: 500 });
-        }
-
-
         const params = {
             context: body.context,
-            strapi_bot_id,
-            output_audio,
-            enable_proactive_photos,
             bot_profile: body.bot_profile,
             user_profile: body.user_profile,
             chat_settings: body.chat_settings,
@@ -39,7 +29,6 @@ export async function POST(req: NextRequest) {
                 "Content-Type": "application/json",
                 "accept": "application/json",
                 "authorization": `Bearer ${apiToken}`,
-                "x-auth-token": xAuthToken
             },
             body: JSON.stringify(params),
         });
