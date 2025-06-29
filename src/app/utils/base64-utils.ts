@@ -1,14 +1,14 @@
 export const fileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result.split(",")[1] || "");
-      }
-    };
-    reader.readAsDataURL(file);
-    reader.onerror = (error) => reject(error);
-  });
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            if (typeof reader.result === "string") {
+                resolve(reader.result.split(",")[1] || "");
+            }
+        };
+        reader.readAsDataURL(file);
+        reader.onerror = (error) => reject(error);
+    });
 };
 
 export function base64ToBlob(base64: string): Blob {
@@ -39,8 +39,3 @@ export function base64ToBlob(base64: string): Blob {
   for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
   return new Blob([ab], { type: mime });
 }
-
-
-export const base64ToDataUrl = (base64: string, type: string = 'image/jpeg'): string => {
-  return `data:${type};base64,${base64}`;
-};

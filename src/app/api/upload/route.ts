@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { buildPublicUrl } from '../_utils/base64-server-utils';
 
 export const runtime = 'nodejs';
 
@@ -23,11 +24,9 @@ export async function POST(req: NextRequest) {
         const arrayBuffer = await (file as File).arrayBuffer();
         await fs.writeFile(filepath, Buffer.from(arrayBuffer));
 
-        const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
-        const protocol = req.headers.get('x-forwarded-proto') || 'http';
-        const imageUrl = host
-            ? `${protocol}://${host}/uploads/${filename}`
-            : `/uploads/${filename}`;
+        // Build a publicly accessible URL using our utility function
+        const imagePath = `/uploads/${filename}`;
+        const imageUrl = buildPublicUrl(req, imagePath);
             
         return NextResponse.json({ imageUrl });
     } catch (error) {
