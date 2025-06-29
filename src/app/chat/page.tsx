@@ -5,6 +5,7 @@ import {
 } from '@mui/icons-material';
 import {
     Box,
+    CircularProgress,
     Divider,
     IconButton,
     Paper,
@@ -25,6 +26,8 @@ export default function ChatPage() {
     const [activeBot, setActiveBot] = React.useState<BotRole>(BotRole.Bot1);
     const [bot1Id, setBot1Id] = React.useState('268785');
     const [bot2Id, setBot2Id] = React.useState('268786');
+    const [loadingMessageIndex, setLoadingMessageIndex] = React.useState<number | null>(null);
+    const [sendingMessage, setSendingMessage] = React.useState(false);
 
     const handleSendMessage = async () => {
         const userMessage = input.trim() ? { sender: activeBot, text: input, media_id: null } : null;
@@ -36,6 +39,7 @@ export default function ChatPage() {
         }
 
         try {
+            setSendingMessage(true);
             const response = await fetch('/api/chatbot', {
                 method: 'POST',
                 headers: {
@@ -69,10 +73,13 @@ export default function ChatPage() {
             }
         } catch (error) {
             console.error('Error occurred while sending message:', error);
+        } finally {
+            setSendingMessage(false);
         }
     };
 
     const requestContextualPhoto = async (messageIndex: number) => {
+        setLoadingMessageIndex(messageIndex);
         try {
             const context = messages.map(msg => ({
                 message: msg.text,
@@ -94,7 +101,7 @@ export default function ChatPage() {
             });
 
             const data = await response.json();
-            if (response.ok && data.responses?.[0]?.media_response?.media_url) {
+            if (response.ok && data?.media_url) {
                 const updatedMessages = [...messages];
                 updatedMessages[messageIndex].media_url = data.media_url;
                 updatedMessages[messageIndex].media_id = data.media_id;
@@ -104,6 +111,8 @@ export default function ChatPage() {
             }
         } catch (error) {
             console.error('Error occurred while requesting contextual photo:', error);
+        } finally {
+            setLoadingMessageIndex(null);
         }
     };
 
@@ -176,7 +185,7 @@ export default function ChatPage() {
                                 sx={{ position: 'absolute', top: 2, right: 2, color: 'grey.400' }}
                                 title="Request Contextual Photo"
                             >
-                                <SendIcon fontSize="small" />
+                                {loadingMessageIndex === index ? <CircularProgress size={20} color="inherit" /> : <SendIcon fontSize="small" />}
                             </IconButton>
                         </Paper>
                     </Box>
@@ -200,10 +209,11 @@ export default function ChatPage() {
                         aria-label="Send"
                         color="primary"
                         onClick={handleSendMessage}
+                        disabled={sendingMessage}
                         sx={{ ml: 0.2, bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.main', color: 'white' }, p: 0.75 }}
                         size="medium"
                     >
-                        <SendIcon fontSize="medium" />
+                        {sendingMessage ? <CircularProgress size={20} color="inherit" /> : <SendIcon fontSize="medium" />}
                     </IconButton>
                 </Box>
                 <Box display="flex" alignItems="center" gap={1} mt={1}>
