@@ -28,7 +28,7 @@
     ],
     "enable_memory": true
   },
-  "imageSettings": {
+  "imageSettingsUser": {
     "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
     "model_name": "base",
     "style": "realistic",
@@ -37,5 +37,27 @@
     "allow_nsfw": true,
     "usage_mode": "force",
     "return_bs64": true
+  },
+  "imageSettings": {
+    "User": {
+      "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
+      "model_name": "base",
+      "style": "realistic",
+      "gender": "man",
+      "skin_color": "pale",
+      "allow_nsfw": true,
+      "usage_mode": "force",
+      "return_bs64": true
+    },
+    "Bot": {
+      "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
+      "model_name": "base",
+      "style": "realistic",
+      "gender": "man",
+      "skin_color": "pale",
+      "allow_nsfw": true,
+      "usage_mode": "force",
+      "return_bs64": true
+    }
   }
 }
