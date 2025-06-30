@@ -51,7 +51,7 @@ export default function ChatPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    context: updatedMessages.map(msg => ({
+                    context: updatedMessages.slice(-15).map(msg => ({
                         message: msg.text,
                         turn: msg.sender === messageSender ? 'user' : 'bot',
                         image_prompt: msg.prompt || undefined
