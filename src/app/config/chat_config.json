@@ -1,6 +1,6 @@
 {
   "botProfiles": {
-    "Bot1": {
+    "User": {
       "id": "1234567890",
       "name": "Sam",
       "description": "I'm a big fan of AI.",
@@ -8,7 +8,7 @@
       "pronoun": "he/him",
       "example_messages": ["Hey, what's up?"]
     },
-    "Bot2": {
+    "Bot": {
       "id": "1234567890",
       "name": "Sam",
       "description": "I'm a big fan of AI.",

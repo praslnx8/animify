@@ -17,12 +17,14 @@ import { Send as SendIcon } from '@mui/icons-material';
 import chatConfig from '../config/chat_config.json';
 import ChatAnimateDialog from '../components/ChatAnimateDialog';
 import { downloadMedia } from '../api/downloadMedia';
+import { Message } from '../models/Message';
+import { Sender } from '../models/Sender';
 
 
 export default function ChatPage() {
-    const [messages, setMessages] = React.useState<any[]>([]);
+    const [messages, setMessages] = React.useState<Message[]>([]);
     const [input, setInput] = React.useState('');
-    const [activeBot, setActiveBot] = React.useState<'Bot1' | 'Bot2'>('Bot1');
+    const [activeBot, setActiveBot] = React.useState<Sender>(Sender.User);
     const [sendingMessage, setSendingMessage] = React.useState(false);
     const [animateDialogOpen, setAnimateDialogOpen] = React.useState(false);
     const [selectedMessage, setSelectedMessage] = React.useState<any | null>(null);
@@ -34,7 +36,7 @@ export default function ChatPage() {
     const config = JSON.parse(process.env.CONFIG_JSON || '{}');
 
     const handleSendMessage = async () => {
-        const userMessage = input.trim() ? { sender: activeBot, text: input, image_prompt: null } : null;
+        const userMessage: Message | null = input.trim() ? { id: Date.now().toString(), sender: activeBot, text: input, timestamp: new Date() } : null;
         const updatedMessages = userMessage ? [...messages, userMessage] : messages;
 
         if (userMessage) {
@@ -53,10 +55,10 @@ export default function ChatPage() {
                     context: updatedMessages.map(msg => ({
                         message: msg.text,
                         turn: msg.sender === activeBot ? 'user' : 'bot',
-                        image_prompt: msg.image_prompt || undefined
+                        image_prompt: msg.prompt || undefined
                     })),
                     bot_profile: chatConfig.botProfiles[activeBot],
-                    user_profile: chatConfig.botProfiles[activeBot === 'Bot1' ? 'Bot2' : 'Bot1'],
+                    user_profile: chatConfig.botProfiles[activeBot === Sender.User ? Sender.Bot : Sender.User],
                     chat_settings: chatConfig.chatSettings,
                     image_settings: chatConfig.imageSettings,
                     output_audio: false,
@@ -66,14 +68,16 @@ export default function ChatPage() {
 
             const data = await response.json();
             if (response.ok && data.response) {
-                const botMessage = {
-                    sender: activeBot === 'Bot1' ? 'Bot2' : 'Bot1',
+                const botMessage: Message = {
+                    id: Date.now().toString(),
+                    sender: activeBot === Sender.Bot ? Sender.User : Sender.Bot,
                     text: data.response,
                     image: data.image_response?.bs64 || undefined,
-                    image_prompt: data.image_response?.prompt || undefined,
+                    prompt: data.image_response?.prompt || undefined,
+                    timestamp: new Date(),
                 };
                 setMessages(prev => [...prev, botMessage]);
-                setActiveBot(prev => (prev === 'Bot1' ? 'Bot2' : 'Bot1'));
+                setActiveBot(prev => (prev === Sender.User ? Sender.Bot : Sender.User));
             } else {
                 console.error('Error fetching chatbot response:', data);
             }
@@ -108,6 +112,18 @@ export default function ChatPage() {
 
     const getVideoUrlWithCacheBuster = (url: string) => `${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`;
 
+    const handleCompleteAnimation = (videoUrl?: string) => {
+        if (selectedMessage && videoUrl) {
+            setMessages((prevMessages) =>
+                prevMessages.map((msg) =>
+                    msg.id === selectedMessage.id ? { ...msg, videoUrl } : msg
+                )
+            );
+            setSelectedMessage(null);
+            setAnimateDialogOpen(false);
+        }
+    };
+
     return (
         <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'background.default', pb: 0.5 }}>
             <Typography variant="h6" gutterBottom sx={{ mb: 1, textAlign: 'center' }}>Conversation</Typography>
@@ -124,24 +140,24 @@ export default function ChatPage() {
                         key={index}
                         sx={{
                             display: 'flex',
-                            flexDirection: message.sender === 'Bot1' ? 'row-reverse' : 'row',
+                            flexDirection: message.sender === Sender.Bot ? 'row-reverse' : 'row',
                             alignItems: 'flex-end',
                             mb: 1.2,
-                            pl: message.sender === 'Bot1' ? 2.5 : 0,
-                            pr: message.sender === 'Bot1' ? 0 : 2.5,
+                            pl: message.sender === Sender.Bot ? 2.5 : 0,
+                            pr: message.sender === Sender.Bot ? 0 : 2.5,
                         }}
                     >
                         <Paper
                             elevation={1}
                             sx={{
                                 p: 1,
-                                bgcolor: message.sender === 'Bot1' ? 'primary.light' : 'grey.900',
-                                color: message.sender === 'Bot1' ? 'primary.contrastText' : 'text.primary',
+                                bgcolor: message.sender === Sender.Bot ? 'primary.light' : 'grey.900',
+                                color: message.sender === Sender.Bot ? 'primary.contrastText' : 'text.primary',
                                 borderRadius: 3,
                                 maxWidth: '90vw',
                                 minWidth: 40,
-                                ml: message.sender === 'Bot1' ? 0 : 0.5,
-                                mr: message.sender === 'Bot1' ? 0.5 : 0,
+                                ml: message.sender === Sender.Bot ? 0 : 0.5,
+                                mr: message.sender === Sender.User ? 0.5 : 0,
                                 position: 'relative',
                             }}
                         >
@@ -265,8 +281,8 @@ export default function ChatPage() {
                         size="small"
                         sx={{ minWidth: 80 }}
                     >
-                        <ToggleButton value="Bot1">Bot1</ToggleButton>
-                        <ToggleButton value="Bot2">Bot2</ToggleButton>
+                        <ToggleButton value={Sender.Bot}>Bot</ToggleButton>
+                        <ToggleButton value={Sender.User}>User</ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
             </Paper>
@@ -276,9 +292,8 @@ export default function ChatPage() {
                 onClose={handleCloseAnimateDialog}
                 message={selectedMessage}
                 onLoading={() => setVideoStatus('loading')}
-                onComplete={(videoUrl) => {
-                    selectedMessage.videoUrl = videoUrl;
-                }}            />
+                onComplete={handleCompleteAnimation}
+            />
         </Box>
     );
 }
