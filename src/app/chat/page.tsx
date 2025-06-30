@@ -16,7 +16,6 @@ import {
 import { Send as SendIcon } from '@mui/icons-material';
 import chatConfig from '../config/chat_config.json';
 import ChatAnimateDialog from '../components/ChatAnimateDialog';
-import { downloadMedia } from '../api/downloadMedia';
 import { Message } from '../models/Message';
 import { Sender } from '../models/Sender';
 
@@ -24,7 +23,7 @@ import { Sender } from '../models/Sender';
 export default function ChatPage() {
     const [messages, setMessages] = React.useState<Message[]>([]);
     const [input, setInput] = React.useState('');
-    const [activeBot, setActiveBot] = React.useState<Sender>(Sender.User);
+    const [sender, setSender] = React.useState<Sender>(Sender.User);
     const [sendingMessage, setSendingMessage] = React.useState(false);
     const [animateDialogOpen, setAnimateDialogOpen] = React.useState(false);
     const [selectedMessage, setSelectedMessage] = React.useState<any | null>(null);
@@ -33,12 +32,15 @@ export default function ChatPage() {
     const config = JSON.parse(process.env.CONFIG_JSON || '{}');
 
     const handleSendMessage = async () => {
-        const userMessage: Message | null = input.trim() ? { id: Date.now().toString(), sender: activeBot, text: input, timestamp: new Date() } : null;
+        const userMessage: Message | null = input.trim() ? { id: Date.now().toString(), sender: sender, text: input, timestamp: new Date() } : null;
         const updatedMessages = userMessage ? [...messages, userMessage] : messages;
+        var messageSender = sender;
 
         if (userMessage) {
             setMessages(updatedMessages);
             setInput('');
+            messageSender = sender === Sender.User ? Sender.Bot : Sender.User
+            setSender(messageSender);
         }
 
         try {
@@ -51,13 +53,13 @@ export default function ChatPage() {
                 body: JSON.stringify({
                     context: updatedMessages.map(msg => ({
                         message: msg.text,
-                        turn: msg.sender === activeBot ? 'user' : 'bot',
+                        turn: msg.sender === messageSender ? 'user' : 'bot',
                         image_prompt: msg.prompt || undefined
                     })),
-                    bot_profile: chatConfig.botProfiles[activeBot],
-                    user_profile: chatConfig.botProfiles[activeBot === Sender.User ? Sender.Bot : Sender.User],
+                    bot_profile: chatConfig.botProfiles[messageSender],
+                    user_profile: chatConfig.botProfiles[messageSender === Sender.User ? Sender.Bot : Sender.User],
                     chat_settings: chatConfig.chatSettings,
-                    image_settings: chatConfig.imageSettings[activeBot],
+                    image_settings: chatConfig.imageSettings[messageSender],
                     output_audio: false,
                     enable_proactive_photos: true,
                 }),
@@ -67,14 +69,14 @@ export default function ChatPage() {
             if (response.ok && data.response) {
                 const botMessage: Message = {
                     id: Date.now().toString(),
-                    sender: activeBot === Sender.Bot ? Sender.User : Sender.Bot,
+                    sender: messageSender === Sender.User ? Sender.User : Sender.Bot,
                     text: data.response,
                     image: data.image_response?.bs64 || undefined,
                     prompt: data.image_response?.prompt || undefined,
                     timestamp: new Date(),
                 };
                 setMessages(prev => [...prev, botMessage]);
-                setActiveBot(prev => (prev === Sender.User ? Sender.Bot : Sender.User));
+                setSender(prev => (prev === Sender.User ? Sender.Bot : Sender.User));
             } else {
                 console.error('Error fetching chatbot response:', data);
             }
@@ -123,24 +125,24 @@ export default function ChatPage() {
                         key={index}
                         sx={{
                             display: 'flex',
-                            flexDirection: message.sender === Sender.Bot ? 'row-reverse' : 'row',
-                            alignItems: 'flex-end',
-                            mb: 1.2,
-                            pl: message.sender === Sender.Bot ? 2.5 : 0,
-                            pr: message.sender === Sender.Bot ? 0 : 2.5,
+                            flexDirection: message.sender === Sender.User ? 'row-reverse' : 'row',
+                            alignItems: 'flex-start', // Adjust alignment for better readability
+                            mb: 1.5, // Increase margin for spacing
+                            pl: message.sender === Sender.User ? 3 : 0,
+                            pr: message.sender === Sender.Bot ? 0 : 3,
                         }}
                     >
                         <Paper
-                            elevation={1}
+                            elevation={2} // Increase elevation for better visibility
                             sx={{
-                                p: 1,
-                                bgcolor: message.sender === Sender.Bot ? 'primary.light' : 'grey.900',
-                                color: message.sender === Sender.Bot ? 'primary.contrastText' : 'text.primary',
-                                borderRadius: 3,
-                                maxWidth: '90vw',
-                                minWidth: 40,
-                                ml: message.sender === Sender.Bot ? 0 : 0.5,
-                                mr: message.sender === Sender.User ? 0.5 : 0,
+                                p: 1.5, // Increase padding for readability
+                                bgcolor: message.sender === Sender.User ? 'primary.light' : 'grey.700', // Different background for bot
+                                color: message.sender === Sender.User ? 'primary.contrastText' : 'text.secondary', // Different text color for bot
+                                borderRadius: 4, // Increase border radius for smoother edges
+                                maxWidth: '85vw', // Adjust max width for better layout
+                                minWidth: 50, // Increase minimum width
+                                ml: message.sender === Sender.User ? 0 : 1,
+                                mr: message.sender === Sender.Bot ? 1 : 0,
                                 position: 'relative',
                             }}
                         >
@@ -218,14 +220,14 @@ export default function ChatPage() {
                 <Box display="flex" alignItems="center" gap={1} mt={1}>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Active Role:</Typography>
                     <ToggleButtonGroup
-                        value={activeBot}
+                        value={sender}
                         exclusive
-                        onChange={(_e, val) => { if (val) setActiveBot(val); }}
+                        onChange={(_e, val) => { if (val) setSender(val); }}
                         size="small"
                         sx={{ minWidth: 80 }}
                     >
-                        <ToggleButton value={Sender.Bot}>Bot</ToggleButton>
                         <ToggleButton value={Sender.User}>User</ToggleButton>
+                        <ToggleButton value={Sender.Bot}>Bot</ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
             </Paper>

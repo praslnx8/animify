@@ -56,7 +56,7 @@
       "gender": "man",
       "skin_color": "pale",
       "allow_nsfw": true,
-      "usage_mode": "force",
+      "usage_mode": "off",
       "return_bs64": true
     }
   }
