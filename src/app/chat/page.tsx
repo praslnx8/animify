@@ -28,10 +28,7 @@ export default function ChatPage() {
     const [sendingMessage, setSendingMessage] = React.useState(false);
     const [animateDialogOpen, setAnimateDialogOpen] = React.useState(false);
     const [selectedMessage, setSelectedMessage] = React.useState<any | null>(null);
-    const [videoKey, setVideoKey] = React.useState(0);
-    const [videoStatus, setVideoStatus] = React.useState<'idle' | 'loading' | 'playing' | 'ended' | 'error'>('idle');
     const [videoError, setVideoError] = React.useState<string | null>(null);
-    const videoRef = React.useRef<HTMLVideoElement>(null);
 
     const config = JSON.parse(process.env.CONFIG_JSON || '{}');
 
@@ -97,21 +94,7 @@ export default function ChatPage() {
         setAnimateDialogOpen(false);
         setSelectedMessage(null);
     };
-
-    const handlePlayVideo = (message: any) => {
-        setVideoError(null);
-        setVideoStatus('loading');
-        setVideoKey((prev) => prev + 1);
-    };
-
-    const handleDownloadVideo = (message: any) => {
-        if (message.videoUrl) {
-            downloadMedia(message.videoUrl, message.id, true);
-        }
-    };
-
-    const getVideoUrlWithCacheBuster = (url: string) => `${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`;
-
+    
     const handleCompleteAnimation = (videoUrl?: string) => {
         if (selectedMessage && videoUrl) {
             setMessages((prevMessages) =>
@@ -188,58 +171,18 @@ export default function ChatPage() {
                             )}
                             {message.videoUrl && (
                                 <Box sx={{ mt: 1, textAlign: 'center', position: 'relative' }}>
-                                    {videoStatus === 'loading' && (
-                                        <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 2 }}>
-                                            <CircularProgress size={60} thickness={4} sx={{ color: '#58a6ff' }} />
-                                            <Typography variant="body2" color="white" mt={1}>Loading video...</Typography>
-                                        </Box>
-                                    )}
-                                    {videoStatus !== 'playing' && (
-                                        <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-                                            <img src={message.image} alt="Media" style={{ maxWidth: '100%', maxHeight: '100%' }} />
-                                            {['idle', 'ended', 'error'].includes(videoStatus) && (
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    onClick={() => handlePlayVideo(message)}
-                                                    sx={{ mt: 1 }}
-                                                >
-                                                    Play Video
-                                                </Button>
-                                            )}
-                                        </Box>
-                                    )}
-                                    {videoStatus === 'playing' && (
-                                        <video
-                                            key={videoKey}
-                                            ref={videoRef}
-                                            controls
-                                            playsInline
-                                            style={{ maxWidth: '100%', maxHeight: '100%' }}
-                                            src={getVideoUrlWithCacheBuster(message.videoUrl)}
-                                            onLoadedData={() => {
-                                                setVideoStatus('playing');
-                                                videoRef.current?.play();
-                                            }}
-                                            onError={() => {
-                                                setVideoStatus('error');
-                                                setVideoError('Video failed to load. Try again.');
-                                            }}
-                                            onEnded={() => setVideoStatus('ended')}
-                                        />
-                                    )}
                                     {videoError && (
                                         <Typography color="error" textAlign="center" p={1} sx={{ position: 'absolute', bottom: 0, width: '100%' }}>
                                             {videoError}
                                         </Typography>
                                     )}
                                     <Button
-                                        variant="outlined"
-                                        size="small"
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={() => navigator.clipboard.writeText(message.videoUrl || '')}
                                         sx={{ mt: 1 }}
-                                        onClick={() => handleDownloadVideo(message)}
                                     >
-                                        Download Video
+                                        Copy Video URL
                                     </Button>
                                 </Box>
                             )}
@@ -291,7 +234,7 @@ export default function ChatPage() {
                 open={animateDialogOpen}
                 onClose={handleCloseAnimateDialog}
                 message={selectedMessage}
-                onLoading={() => setVideoStatus('loading')}
+                onLoading={() => setVideoError('loading')}
                 onComplete={handleCompleteAnimation}
             />
         </Box>

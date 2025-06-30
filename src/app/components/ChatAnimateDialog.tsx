@@ -34,7 +34,7 @@ const ChatAnimateDialog: React.FC<ChatAnimateDialogProps> = ({
   onLoading,
   onComplete,
 }) => {
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState(message.prompt || '');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
