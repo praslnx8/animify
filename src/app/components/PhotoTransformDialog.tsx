@@ -310,17 +310,31 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
   );
 };
 
-// Moved silentPhotoTransform outside the component definition for proper export
+// Utility function for silent photo transform (for retry)
 export async function silentPhotoTransform({
   parentMediaItem,
   prompt,
   addMediaItem,
   updateMediaItem,
+  modelName = 'base',
+  style = 'anime',
+  gender = 'man',
+  bodyType = 'lean',
+  skinColor = 'pale',
+  autoDetectHairColor = true,
+  nsfwPolicy = 'filter',
 }: {
   parentMediaItem: MediaItem;
   prompt: string;
   addMediaItem: (item: MediaItem) => void;
   updateMediaItem: (item: MediaItem) => void;
+  modelName?: string;
+  style?: string;
+  gender?: string;
+  bodyType?: string;
+  skinColor?: string;
+  autoDetectHairColor?: boolean;
+  nsfwPolicy?: string;
 }) {
   const newMediaItem: MediaItem = {
     id: Date.now().toString(),
@@ -328,12 +342,26 @@ export async function silentPhotoTransform({
     loading: true,
     parent: parentMediaItem,
     prompt,
+    model_name: modelName,
+    style,
+    gender,
+    body_type: bodyType,
+    skin_color: skinColor,
+    auto_detect_hair_color: autoDetectHairColor,
+    nsfw_policy: nsfwPolicy,
   };
   addMediaItem(newMediaItem);
   try {
     const result = await generatePhoto({
       image_url: parentMediaItem.url || '',
       prompt,
+      model_name: modelName,
+      style,
+      gender,
+      body_type: bodyType,
+      skin_color: skinColor,
+      auto_detect_hair_color: autoDetectHairColor,
+      nsfw_policy: nsfwPolicy,
     });
     if (result.image_url) {
       updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });
