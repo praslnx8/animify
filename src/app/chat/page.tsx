@@ -34,13 +34,10 @@ export default function ChatPage() {
     const handleSendMessage = async () => {
         const userMessage: Message | null = input.trim() ? { id: Date.now().toString(), sender: sender, text: input, timestamp: new Date() } : null;
         const updatedMessages = userMessage ? [...messages, userMessage] : messages;
-        var messageSender = sender;
 
         if (userMessage) {
             setMessages(updatedMessages);
             setInput('');
-            messageSender = sender === Sender.User ? Sender.Bot : Sender.User
-            setSender(messageSender);
         }
 
         try {
@@ -53,13 +50,13 @@ export default function ChatPage() {
                 body: JSON.stringify({
                     context: updatedMessages.slice(-15).map(msg => ({
                         message: msg.text,
-                        turn: msg.sender === messageSender ? 'user' : 'bot',
+                        turn: msg.sender === Sender.User ? 'user' : 'bot',
                         image_prompt: msg.prompt || undefined
                     })),
-                    bot_profile: chatConfig.botProfiles[messageSender],
-                    user_profile: chatConfig.botProfiles[messageSender === Sender.User ? Sender.Bot : Sender.User],
+                    bot_profile: chatConfig.botProfiles[Sender.Bot],
+                    user_profile: chatConfig.botProfiles[Sender.User],
                     chat_settings: chatConfig.chatSettings,
-                    image_settings: chatConfig.imageSettings[messageSender],
+                    image_settings: chatConfig.imageSettings[Sender.Bot],
                     output_audio: false,
                     enable_proactive_photos: true,
                 }),
@@ -69,14 +66,13 @@ export default function ChatPage() {
             if (response.ok && data.response) {
                 const botMessage: Message = {
                     id: Date.now().toString(),
-                    sender: messageSender === Sender.User ? Sender.User : Sender.Bot,
+                    sender: Sender.Bot,
                     text: data.response,
                     image: data.image_response?.bs64 || undefined,
                     prompt: data.image_response?.prompt || undefined,
                     timestamp: new Date(),
                 };
                 setMessages(prev => [...prev, botMessage]);
-                setSender(prev => (prev === Sender.User ? Sender.Bot : Sender.User));
             } else {
                 console.error('Error fetching chatbot response:', data);
             }
@@ -217,7 +213,7 @@ export default function ChatPage() {
                         {sendingMessage ? <CircularProgress size={20} color="inherit" /> : <SendIcon fontSize="medium" />}
                     </IconButton>
                 </Box>
-                <Box display="flex" alignItems="center" gap={1} mt={1}>
+                <Box display="flex" alignItems="center" gap={1} mt={1} sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Active Role:</Typography>
                     <ToggleButtonGroup
                         value={sender}
