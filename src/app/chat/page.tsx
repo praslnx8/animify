@@ -50,23 +50,25 @@ export default function ChatPage() {
                 body: JSON.stringify({
                     context: updatedMessages.slice(-15).map(msg => ({
                         message: msg.text,
-                        turn: msg.sender === Sender.User ? 'user' : 'bot',
+                        turn: msg.sender == Sender.User ? 'bot' : 'user',
                         image_prompt: msg.prompt || undefined
                     })),
-                    bot_profile: chatConfig.botProfiles[Sender.Bot],
-                    user_profile: chatConfig.botProfiles[Sender.User],
+                    bot_profile: chatConfig.botProfiles[sender == Sender.Bot ? Sender.User : Sender.Bot],
+                    user_profile: chatConfig.botProfiles[sender == Sender.Bot ? Sender.Bot : Sender.User],
                     chat_settings: chatConfig.chatSettings,
-                    image_settings: chatConfig.imageSettings[Sender.Bot],
+                    image_settings: chatConfig.imageSettings[sender == Sender.Bot ? Sender.Bot : Sender.User],
                     output_audio: false,
                     enable_proactive_photos: true,
                 }),
             });
 
+
             const data = await response.json();
             if (response.ok && data.response) {
+                setSender(sender == Sender.Bot ? Sender.User : Sender.Bot);
                 const botMessage: Message = {
                     id: Date.now().toString(),
-                    sender: Sender.Bot,
+                    sender: sender,
                     text: data.response,
                     image: data.image_response?.bs64 || undefined,
                     prompt: data.image_response?.prompt || undefined,
