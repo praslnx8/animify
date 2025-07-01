@@ -16,16 +16,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'API token not configured on server' }, { status: 500 });
         }
 
-        const params = {
-            context: body.context,
-            bot_profile: body.bot_profile,
-            user_profile: body.user_profile,
-            chat_settings: body.chat_settings,
-            image_settings: body.image_settings,
-            output_audio: false,
-            enable_proactive_photos: true,
-        };
-
         const res = await fetch("https://api.exh.ai/chatbot/v3/response", {
             method: "POST",
             headers: {
@@ -33,7 +23,7 @@ export async function POST(req: NextRequest) {
                 "accept": "application/json",
                 "authorization": `Bearer ${apiToken}`,
             },
-            body: JSON.stringify(params),
+            body: JSON.stringify(body),
         });
 
         const data = await res.json();

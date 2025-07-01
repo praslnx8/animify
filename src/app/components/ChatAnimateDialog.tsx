@@ -11,16 +11,10 @@ import {
 } from "@mui/material";
 import { uploadBase64Image } from "../api/uploadBase64Image";
 import { generateVideo } from "../api/generateVideo";
+import { Message } from "../models/Message";
 
 interface ChatAnimateDialogProps {
-  message: {
-    id: string;
-    image: string;
-    prompt?: string;
-    url?: string;
-    loading?: boolean;
-    error?: string;
-  };
+  message: Message | null;
   open: boolean;
   onClose: () => void;
   onLoading: () => void;

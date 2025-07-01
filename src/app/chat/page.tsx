@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { Send as SendIcon } from '@mui/icons-material';
 import {
     Box,
     Button,
@@ -13,11 +13,11 @@ import {
     ToggleButtonGroup,
     Typography
 } from '@mui/material';
-import { Send as SendIcon } from '@mui/icons-material';
-import chatConfig from '../config/chat_config.json';
+import React from 'react';
 import ChatAnimateDialog from '../components/ChatAnimateDialog';
 import { Message } from '../models/Message';
 import { Sender } from '../models/Sender';
+import { sendChat } from '../api/sendChat';
 
 
 export default function ChatPage() {
@@ -26,10 +26,8 @@ export default function ChatPage() {
     const [sender, setSender] = React.useState<Sender>(Sender.User);
     const [sendingMessage, setSendingMessage] = React.useState(false);
     const [animateDialogOpen, setAnimateDialogOpen] = React.useState(false);
-    const [selectedMessage, setSelectedMessage] = React.useState<any | null>(null);
+    const [selectedMessage, setSelectedMessage] = React.useState<Message | null>(null);
     const [videoError, setVideoError] = React.useState<string | null>(null);
-
-    const config = JSON.parse(process.env.CONFIG_JSON || '{}');
 
     const handleSendMessage = async () => {
         const userMessage: Message | null = input.trim() ? { id: Date.now().toString(), sender: sender, text: input, timestamp: new Date() } : null;
@@ -42,50 +40,31 @@ export default function ChatPage() {
 
         try {
             setSendingMessage(true);
-            const response = await fetch('/api/chatbot', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    context: updatedMessages.slice(-15).map(msg => ({
-                        message: msg.text,
-                        turn: msg.sender == Sender.User ? 'bot' : 'user',
-                        image_prompt: msg.prompt || undefined
-                    })),
-                    bot_profile: chatConfig.botProfiles[sender == Sender.Bot ? Sender.User : Sender.Bot],
-                    user_profile: chatConfig.botProfiles[sender == Sender.Bot ? Sender.Bot : Sender.User],
-                    chat_settings: chatConfig.chatSettings,
-                    image_settings: chatConfig.imageSettings[sender == Sender.Bot ? Sender.User : Sender.Bot],
-                    output_audio: false,
-                    enable_proactive_photos: true,
-                }),
+            const response = await sendChat({
+                messages: updatedMessages,
+                sender: sender
             });
-
-
-            const data = await response.json();
-            if (response.ok && data.response) {
-                setSender(sender == Sender.Bot ? Sender.User : Sender.Bot);
+            if (response) {
                 const botMessage: Message = {
                     id: Date.now().toString(),
-                    sender: sender,
-                    text: data.response,
-                    image: data.image_response?.bs64 || undefined,
-                    prompt: data.image_response?.prompt || undefined,
+                    sender: response.sender,
+                    text: response.message,
+                    image: response.bs64 || undefined,
+                    prompt: response.prompt || undefined,
                     timestamp: new Date(),
                 };
+                setSender(response.sender);
                 setMessages(prev => [...prev, botMessage]);
-            } else {
-                console.error('Error fetching chatbot response:', data);
             }
         } catch (error) {
             console.error('Error occurred while sending message:', error);
+            setVideoError('An error occurred while processing your request.');
         } finally {
             setSendingMessage(false);
         }
     };
 
-    const handleOpenAnimateDialog = (message: any) => {
+    const handleOpenAnimateDialog = (message: Message) => {
         setSelectedMessage(message);
         setAnimateDialogOpen(true);
     };
@@ -94,7 +73,7 @@ export default function ChatPage() {
         setAnimateDialogOpen(false);
         setSelectedMessage(null);
     };
-    
+
     const handleCompleteAnimation = (videoUrl?: string) => {
         if (selectedMessage && videoUrl) {
             setMessages((prevMessages) =>

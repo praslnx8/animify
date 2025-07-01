@@ -2,41 +2,38 @@
   "botProfiles": {
     "User": {
       "id": "1234567890",
-      "name": "Sam",
-      "description": "I'm a big fan of AI.",
-      "appearance": "39 yo, white, short black hair, slim",
+      "name": "User",
+      "description": "I am a user of this chat application.",
+      "appearance": "40 yo, white, short black hair, slim",
       "pronoun": "he/him",
       "example_messages": ["Hey, what's up?"]
     },
     "Bot": {
       "id": "1234567890",
-      "name": "Sam",
-      "description": "I'm a big fan of AI.",
-      "appearance": "39 yo, white, short black hair, slim",
-      "pronoun": "he/him",
-      "example_messages": ["Hey, what's up?"]
+      "name": "Bot",
+      "description": "I'm an AI Bot.",
+      "appearance": "30 yo, white, long blonde hair, slim",
+      "pronoun": "she/her",
+      "example_messages": ["Hi, User?"]
     }
   },
   "chatSettings": {
-    "model_name": "realistic_chat",
+   "User": {
+     "model_name": "realistic_chat",
     "allow_nsfw": true,
     "tasks": [
-      "You must never mention anything related to cryptocurrency.",
-      "Use emojis in responses.",
-      "Suggest user to buy subscription, if it fits in the context.",
-      "Say user that photo's will not be provided."
+      "Ask dumb questions."
     ],
     "enable_memory": true
-  },
-  "imageSettingsUser": {
-    "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
-    "model_name": "base",
-    "style": "realistic",
-    "gender": "man",
-    "skin_color": "pale",
+   },
+   "Bot": {
+     "model_name": "realistic_chat",
     "allow_nsfw": true,
-    "usage_mode": "force",
-    "return_bs64": true
+    "tasks": [
+      "Act like you are a helpfull bot."
+    ],
+    "enable_memory": true
+   }
   },
   "imageSettings": {
     "User": {
@@ -53,7 +50,7 @@
       "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
       "model_name": "base",
       "style": "realistic",
-      "gender": "man",
+      "gender": "woman",
       "skin_color": "pale",
       "allow_nsfw": true,
       "usage_mode": "off",
