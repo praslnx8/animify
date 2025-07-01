@@ -42,4 +42,3 @@ next-env.d.ts
 
 /public/uploads/*
 
-/src/app/config/chat_config.json
