@@ -28,20 +28,14 @@ const ChatAnimateDialog: React.FC<ChatAnimateDialogProps> = ({
   onLoading,
   onComplete,
 }) => {
-  const [prompt, setPrompt] = useState(message?.prompt || '');
+  const [prompt, setPrompt] = useState<string>(message?.prompt || '');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!message.image) {
-      console.error("No image found in the message.");
-      return;
-    }
-
     onLoading();
 
     try {
-      const imageUrl = await uploadBase64Image(message.image);
+      const imageUrl = await uploadBase64Image(message?.image || '');
       const result = await generateVideo({ image_url: imageUrl, prompt });
 
       if (result.videoUrl) {
