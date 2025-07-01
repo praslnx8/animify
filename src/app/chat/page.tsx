@@ -204,6 +204,16 @@ export default function ChatPage() {
                         maxRows={4}
                         sx={{ flex: 1, bgcolor: 'background.default', borderRadius: 2 }}
                     />
+                    <ToggleButtonGroup
+                        value={sender}
+                        exclusive
+                        onChange={(_e, val) => { if (val) setSender(val); }}
+                        size="small"
+                        sx={{ ml: 0.5 }}
+                    >
+                        <ToggleButton value={Sender.User}>User</ToggleButton>
+                        <ToggleButton value={Sender.Bot}>Bot</ToggleButton>
+                    </ToggleButtonGroup>
                     <IconButton
                         aria-label="Send"
                         color="primary"
@@ -214,19 +224,6 @@ export default function ChatPage() {
                     >
                         {sendingMessage ? <CircularProgress size={20} color="inherit" /> : <SendIcon fontSize="medium" />}
                     </IconButton>
-                </Box>
-                <Box display="flex" alignItems="center" gap={1} mt={1} sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Active Role:</Typography>
-                    <ToggleButtonGroup
-                        value={sender}
-                        exclusive
-                        onChange={(_e, val) => { if (val) setSender(val); }}
-                        size="small"
-                        sx={{ minWidth: 80 }}
-                    >
-                        <ToggleButton value={Sender.User}>User</ToggleButton>
-                        <ToggleButton value={Sender.Bot}>Bot</ToggleButton>
-                    </ToggleButtonGroup>
                 </Box>
             </Paper>
 
