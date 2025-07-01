@@ -56,7 +56,7 @@ export default function ChatPage() {
                     bot_profile: chatConfig.botProfiles[sender == Sender.Bot ? Sender.User : Sender.Bot],
                     user_profile: chatConfig.botProfiles[sender == Sender.Bot ? Sender.Bot : Sender.User],
                     chat_settings: chatConfig.chatSettings,
-                    image_settings: chatConfig.imageSettings[sender == Sender.Bot ? Sender.Bot : Sender.User],
+                    image_settings: chatConfig.imageSettings[sender == Sender.Bot ? Sender.User : Sender.Bot],
                     output_audio: false,
                     enable_proactive_photos: true,
                 }),
