@@ -44,54 +44,14 @@ interface PhotoTransformDialogProps {
   updateMediaItem: (mediaItem: MediaItem) => void;
 }
 
-// Transform component interfaces
-interface TransformComponents {
-  scene: string;
-  setting: string;
-  clothing: string;
-  pose: string;
-  mood: string;
-  lighting: string;
-  style: string;
-  culturalElements: string;
-}
-
-interface SavedTransform {
-  id: string;
-  name: string;
-  prompt: string;
-  components: TransformComponents;
-  createdAt: string;
-}
-
 const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
   const [prompt, setPrompt] = useState(mediaItem.prompt || "");
   const [tabValue, setTabValue] = useState(0);
-  const [savedTransforms, setSavedTransforms] = useState<SavedTransform[]>(transformConfig.map((item, index) => ({
-    id: index.toString(),
-    name: `Transform ${index + 1}`,
-    prompt: item.prompt,
-    components: {
-      scene: "",
-      setting: "",
-      clothing: "",
-      pose: "",
-      mood: "",
-      lighting: "",
-      style: "",
-      culturalElements: ""
-    },
-    createdAt: new Date().toLocaleDateString()
-  })));
 
-  const loadSavedTransform = (savedTransform: SavedTransform) => {
-    setPrompt(savedTransform.prompt);
+  const loadSavedTransform = (savedTransform: string) => {
+    setPrompt(savedTransform);
   };
 
-  const deleteSavedTransform = (id: string) => {
-    const updated = savedTransforms.filter(t => t.id !== id);
-    setSavedTransforms(updated);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,9 +155,9 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
               <Stack spacing={2}>
                 {/* Saved Transforms List */}
                 <Typography variant="subtitle2" sx={{ fontSize: '0.9rem' }}>
-                  Saved Transforms ({savedTransforms.length})
+                  Saved Transforms ({transformConfig.transformations.length})
                 </Typography>
-                {savedTransforms.length === 0 ? (
+                {transformConfig.transformations.length === 0 ? (
                   <Typography variant="body2" color="text.secondary" sx={{
                     textAlign: 'center',
                     py: 3,
@@ -207,9 +167,8 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                   </Typography>
                 ) : (
                   <Stack spacing={1}>
-                    {savedTransforms.map((saved) => (
+                    {transformConfig.transformations.map((saved) => (
                       <Box
-                        key={saved.id}
                         sx={{
                           border: 1,
                           borderColor: 'divider',
@@ -219,7 +178,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                       >
                         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
                           <Typography variant="subtitle2" sx={{ fontSize: '0.9rem', fontWeight: 600 }}>
-                            {saved.name}
+                            {saved}
                           </Typography>
                           <Box display="flex" gap={0.5}>
                             <Button
@@ -235,14 +194,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                             >
                               Use
                             </Button>
-                            <IconButton
-                              size="small"
-                              onClick={() => deleteSavedTransform(saved.id)}
-                              color="error"
-                              sx={{ p: 0.5 }}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
                           </Box>
                         </Box>
                         <Typography
@@ -257,10 +208,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                             overflow: 'hidden'
                           }}
                         >
-                          {saved.prompt}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-                          {saved.createdAt}
+                          {saved}
                         </Typography>
                       </Box>
                     ))}

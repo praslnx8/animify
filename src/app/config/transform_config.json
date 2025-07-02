@@ -1,5 +1,8 @@
-[
-  {
-    "prompt": "A serene landscape with mountains in the background and a river flowing through the foreground."
-  }
-]
+{
+  "transformations": [
+    "A serene landscape with mountains in the background and a river flowing through the foreground."
+  ],
+  "animations": [
+    "A serene landscape with mountains in the background and a river flowing through the foreground."
+  ]
+}

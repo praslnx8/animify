@@ -1,38 +1,25 @@
 import {
+  Visibility as VisibilityIcon
+} from "@mui/icons-material";
+import {
+  Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Stack,
-  TextField,
-  Box,
-  Typography,
-  Tabs,
   Tab,
-  Chip,
-  Autocomplete,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Divider
+  Tabs,
+  TextField,
+  Typography
 } from "@mui/material";
-import {
-  ExpandMore as ExpandMoreIcon,
-  Save as SaveIcon,
-  Delete as DeleteIcon,
-  Visibility as VisibilityIcon
-} from "@mui/icons-material";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { generateVideo } from "../api/generateVideo";
+import animateConfig from '../config/transform_config.json';
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
-import animateConfig from '../config/animate_config.json';
 
 interface PhotoAnimateDialogProps {
   mediaItem: MediaItem;
@@ -42,59 +29,12 @@ interface PhotoAnimateDialogProps {
   updateMediaItem: (mediaItem: MediaItem) => void;
 }
 
-// Prompt component interfaces
-interface PromptComponents {
-  characters: string;
-  scene: string;
-  dialogue: string;
-  interactions: string;
-  setting: string;
-  camera: string;
-  style: string;
-  lighting: string;
-  duration: string;
-  seriesGenre: string;
-  culturalElements: string;
-}
-
-interface SavedPrompt {
-  id: string;
-  name: string;
-  prompt: string;
-  components: PromptComponents;
-  createdAt: string;
-}
-
 const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
   const [prompt, setPrompt] = useState(mediaItem.prompt || "");
   const [tabValue, setTabValue] = useState(0);
-  const [savedPrompts, setSavedPrompts] = useState<SavedPrompt[]>(animateConfig.map((item, index) => ({
-    id: index.toString(),
-    name: `Prompt ${index + 1}`,
-    prompt: item.prompt,
-    components: {
-      characters: "",
-      scene: "",
-      dialogue: "",
-      interactions: "",
-      setting: "",
-      camera: "",
-      style: "",
-      lighting: "",
-      duration: "",
-      seriesGenre: "",
-      culturalElements: ""
-    },
-    createdAt: new Date().toLocaleDateString()
-  })));
 
-  const loadSavedPrompt = (savedPrompt: SavedPrompt) => {
-    setPrompt(savedPrompt.prompt);
-  };
-
-  const deleteSavedPrompt = (id: string) => {
-    const updated = savedPrompts.filter(p => p.id !== id);
-    setSavedPrompts(updated);
+  const loadSavedPrompt = (savedPrompt: string) => {
+    setPrompt(savedPrompt);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -124,11 +64,11 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="sm" 
-      fullWidth 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
       fullScreen
       sx={{
         '& .MuiDialog-paper': {
@@ -144,7 +84,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
             Animate Photo
           </Typography>
           {prompt && (
-            <Chip 
+            <Chip
               icon={<VisibilityIcon />}
               label={`${prompt.length}`}
               size="small"
@@ -158,8 +98,8 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
         <DialogContent sx={{ px: 2, py: 1 }}>
           <Stack spacing={2}>
             {/* Tab Navigation */}
-            <Tabs 
-              value={tabValue} 
+            <Tabs
+              value={tabValue}
               onChange={(_, newValue) => setTabValue(newValue)}
               variant="fullWidth"
               sx={{
@@ -199,11 +139,11 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
               <Stack spacing={2}>
                 {/* Saved Prompts List */}
                 <Typography variant="subtitle2" sx={{ fontSize: '0.9rem' }}>
-                  Saved Templates ({savedPrompts.length})
+                  Saved Templates ({animateConfig.animations.length})
                 </Typography>
-                {savedPrompts.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary" sx={{ 
-                    textAlign: 'center', 
+                {animateConfig.animations.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary" sx={{
+                    textAlign: 'center',
                     py: 3,
                     fontSize: '0.85rem'
                   }}>
@@ -211,26 +151,25 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
                   </Typography>
                 ) : (
                   <Stack spacing={1}>
-                    {savedPrompts.map((saved) => (
+                    {animateConfig.animations.map((saved) => (
                       <Box
-                        key={saved.id}
-                        sx={{ 
-                          border: 1, 
-                          borderColor: 'divider', 
-                          borderRadius: 1, 
-                          p: 1.5 
+                        sx={{
+                          border: 1,
+                          borderColor: 'divider',
+                          borderRadius: 1,
+                          p: 1.5
                         }}
                       >
                         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
                           <Typography variant="subtitle2" sx={{ fontSize: '0.9rem', fontWeight: 600 }}>
-                            {saved.name}
+                            {saved}
                           </Typography>
                           <Box display="flex" gap={0.5}>
                             <Button
                               size="small"
                               onClick={() => loadSavedPrompt(saved)}
                               variant="contained"
-                              sx={{ 
+                              sx={{
                                 minWidth: 'auto',
                                 px: 2,
                                 py: 0.5,
@@ -239,20 +178,12 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
                             >
                               Use
                             </Button>
-                            <IconButton
-                              size="small"
-                              onClick={() => deleteSavedPrompt(saved.id)}
-                              color="error"
-                              sx={{ p: 0.5 }}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
                           </Box>
                         </Box>
-                        <Typography 
-                          variant="body2" 
-                          color="text.secondary" 
-                          sx={{ 
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
                             fontSize: '0.8rem',
                             lineHeight: 1.3,
                             display: '-webkit-box',
@@ -261,10 +192,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
                             overflow: 'hidden'
                           }}
                         >
-                          {saved.prompt}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-                          {saved.createdAt}
+                          {saved}
                         </Typography>
                       </Box>
                     ))}
@@ -274,9 +202,9 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
             )}
           </Stack>
         </DialogContent>
-        <DialogActions sx={{ 
-          px: 2, 
-          py: 1.5, 
+        <DialogActions sx={{
+          px: 2,
+          py: 1.5,
           gap: 1,
           position: 'sticky',
           bottom: 0,
@@ -284,10 +212,10 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
           borderTop: 1,
           borderColor: 'divider'
         }}>
-          <Button 
+          <Button
             onClick={onClose}
             size="large"
-            sx={{ 
+            sx={{
               flex: 1,
               py: 1.5,
               fontSize: '1rem'
@@ -295,12 +223,12 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
-            variant="contained" 
+          <Button
+            type="submit"
+            variant="contained"
             disabled={!prompt.trim()}
             size="large"
-            sx={{ 
+            sx={{
               flex: 2,
               py: 1.5,
               fontSize: '1rem'
