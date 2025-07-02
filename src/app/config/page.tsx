@@ -302,6 +302,12 @@ export default function ConfigPage() {
                                 <Box display="flex" flexDirection="column" gap={2}>
                                     <TextField
                                         fullWidth
+                                        label="Id"
+                                        value={profile.id}
+                                        onChange={(e) => updateBotProfile(senderKey, 'id', e.target.value)}
+                                    />
+                                    <TextField
+                                        fullWidth
                                         label="Name"
                                         value={profile.name}
                                         onChange={(e) => updateBotProfile(senderKey, 'name', e.target.value)}
@@ -328,6 +334,18 @@ export default function ConfigPage() {
                                         value={profile.pronoun}
                                         onChange={(e) => updateBotProfile(senderKey, 'pronoun', e.target.value)}
                                     />
+                                    <FormControl fullWidth>
+                                        <InputLabel>Pronoun</InputLabel>
+                                        <Select
+                                            value={profile.pronoun}
+                                            label="Pronoun"
+                                            onChange={(e) => updateBotProfile(senderKey, 'pronoun', e.target.value)}
+                                        >
+                                            <MenuItem value="he/him">He/Him</MenuItem>
+                                            <MenuItem value="she/her">She/Her</MenuItem>
+                                            <MenuItem value="they/them">They/Them</MenuItem>
+                                        </Select>
+                                    </FormControl>
                                     
                                     <Box>
                                         <Box display="flex" alignItems="center" gap={2} mb={2}>
@@ -370,12 +388,17 @@ export default function ConfigPage() {
                             </AccordionSummary>
                             <AccordionDetails>
                                 <Box display="flex" flexDirection="column" gap={2}>
-                                    <TextField
-                                        fullWidth
-                                        label="Model Name"
-                                        value={config.chatSettings[senderKey].model_name}
-                                        onChange={(e) => updateChatSettings(senderKey, 'model_name', e.target.value)}
-                                    />
+                                    <FormControl fullWidth>
+                                        <InputLabel>Model Name</InputLabel>
+                                        <Select
+                                            value={config.chatSettings[senderKey].model_name}
+                                            label="Model Name"
+                                            onChange={(e) => updateChatSettings(senderKey, 'model_name', e.target.value)}
+                                        >
+                                            <MenuItem value="base">Base</MenuItem>
+                                            <MenuItem value="realistic_chat">Realistic Chat</MenuItem>
+                                        </Select>
+                                    </FormControl>
                                     <FormControlLabel
                                         control={
                                             <Switch
@@ -442,12 +465,17 @@ export default function ConfigPage() {
                                         value={config.imageSettings[senderKey].identity_image_url}
                                         onChange={(e) => updateImageSettings(senderKey, 'identity_image_url', e.target.value)}
                                     />
-                                    <TextField
-                                        fullWidth
-                                        label="Model Name"
-                                        value={config.imageSettings[senderKey].model_name}
-                                        onChange={(e) => updateImageSettings(senderKey, 'model_name', e.target.value)}
-                                    />
+                                    <FormControl fullWidth>
+                                        <InputLabel>Model Name</InputLabel>
+                                        <Select
+                                            value={config.imageSettings[senderKey].model_name}
+                                            label="Model Name"
+                                            onChange={(e) => updateImageSettings(senderKey, 'model_name', e.target.value)}
+                                        >
+                                            <MenuItem value="base">Base</MenuItem>
+                                            <MenuItem value="large">Large</MenuItem>
+                                        </Select>
+                                    </FormControl>
                                     <FormControl fullWidth>
                                         <InputLabel>Style</InputLabel>
                                         <Select
@@ -456,7 +484,6 @@ export default function ConfigPage() {
                                             onChange={(e) => updateImageSettings(senderKey, 'style', e.target.value)}
                                         >
                                             <MenuItem value="realistic">Realistic</MenuItem>
-                                            <MenuItem value="cartoon">Cartoon</MenuItem>
                                             <MenuItem value="anime">Anime</MenuItem>
                                         </Select>
                                     </FormControl>
@@ -469,7 +496,6 @@ export default function ConfigPage() {
                                         >
                                             <MenuItem value="man">Man</MenuItem>
                                             <MenuItem value="woman">Woman</MenuItem>
-                                            <MenuItem value="non-binary">Non-binary</MenuItem>
                                         </Select>
                                     </FormControl>
                                     <FormControl fullWidth>
@@ -480,9 +506,8 @@ export default function ConfigPage() {
                                             onChange={(e) => updateImageSettings(senderKey, 'skin_color', e.target.value)}
                                         >
                                             <MenuItem value="pale">Pale</MenuItem>
-                                            <MenuItem value="light">Light</MenuItem>
-                                            <MenuItem value="medium">Medium</MenuItem>
-                                            <MenuItem value="dark">Dark</MenuItem>
+                                            <MenuItem value="white">White</MenuItem>
+                                            <MenuItem value="tanned">Tanned</MenuItem>
                                         </Select>
                                     </FormControl>
                                     <FormControl fullWidth>
@@ -494,7 +519,7 @@ export default function ConfigPage() {
                                         >
                                             <MenuItem value="off">Off</MenuItem>
                                             <MenuItem value="force">Force</MenuItem>
-                                            <MenuItem value="auto">Auto</MenuItem>
+                                            <MenuItem value="on_user_request">On User Request</MenuItem>
                                         </Select>
                                     </FormControl>
                                     <FormControlLabel
