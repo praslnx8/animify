@@ -2,6 +2,8 @@
 
 import { Send as SendIcon } from '@mui/icons-material';
 import {
+    AppBar,
+    Avatar,
     Box,
     Button,
     CircularProgress,
@@ -11,9 +13,16 @@ import {
     TextField,
     ToggleButton,
     ToggleButtonGroup,
+    Toolbar,
     Typography
 } from '@mui/material';
+import {
+    Home as HomeIcon,
+    Settings as SettingsIcon,
+    Chat as ChatIcon
+} from '@mui/icons-material';
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import ChatAnimateDialog from '../components/ChatAnimateDialog';
 import { Message } from '../models/Message';
 import { Sender } from '../models/Sender';
@@ -21,6 +30,7 @@ import { sendChat } from '../api/sendChat';
 
 
 export default function ChatPage() {
+    const router = useRouter();
     const [messages, setMessages] = React.useState<Message[]>([]);
     const [input, setInput] = React.useState('');
     const [sender, setSender] = React.useState<Sender>(Sender.User);
@@ -88,6 +98,19 @@ export default function ChatPage() {
 
     return (
         <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'background.default', pb: 6 }}>
+            <AppBar position="sticky" color="default">
+                <Toolbar>
+                    <Avatar sx={{ mr: 1 }}><ChatIcon color="primary" /></Avatar>
+                    <Typography variant="h6" sx={{ flexGrow: 1 }}>Chat</Typography>
+                    <IconButton onClick={() => router.push('/')} color="primary">
+                        <HomeIcon />
+                    </IconButton>
+                    <IconButton onClick={() => router.push('/config')} color="primary">
+                        <SettingsIcon />
+                    </IconButton>
+                </Toolbar>
+            </AppBar>
+            
             <Typography variant="h6" gutterBottom sx={{ mb: 1, textAlign: 'center' }}>Conversation</Typography>
             <Divider sx={{ mb: 1 }} />
 

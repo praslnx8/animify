@@ -1,6 +1,6 @@
 import { Message } from "../models/Message";
-import chatConfig from '../config/chat_config.json';
 import { Sender } from "../models/Sender";
+import { ChatConfigManager } from "../utils/ChatConfigManager";
 
 export interface ChatRequest {
   messages: Message[];
@@ -18,6 +18,8 @@ export interface ChatResponse {
 export async function sendChat(params: ChatRequest): Promise<ChatResponse> {
 
   try {
+    const chatConfig = ChatConfigManager.getConfigFromLocalStorage();
+    
     const res = await fetch('/api/chatbot', {
                   method: 'POST',
                   headers: {
