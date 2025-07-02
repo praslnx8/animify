@@ -110,7 +110,7 @@ export default function HomePage() {
       <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
 
       <Box
-        sx={{ flex: 1, position: 'relative', overflow: 'hidden' }}
+        sx={{ flex: 1, position: 'relative', overflow: 'hidden', pb: '56px' }}
         onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
         onTouchEnd={(e) => {
           if (touchStart !== null) handleSwipe(touchStart, e.changedTouches[0].clientX);
