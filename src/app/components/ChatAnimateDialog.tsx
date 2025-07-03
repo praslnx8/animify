@@ -60,7 +60,7 @@ const ChatAnimateDialog: React.FC<ChatAnimateDialogProps> = ({
           <Stack spacing={2}>
             <TextField
               label="Prompt"
-              value={prompt}
+              value={message?.prompt || prompt}
               onChange={(e) => setPrompt(e.target.value)}
               fullWidth
               multiline

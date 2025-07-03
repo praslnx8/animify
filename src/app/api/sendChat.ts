@@ -29,7 +29,7 @@ export async function sendChat(params: ChatRequest): Promise<ChatResponse> {
                       context: params.messages.slice(-29).map(msg => ({
                           message: msg.text,
                           turn: msg.sender == params.sender ? 'user' : 'bot',
-                          image_prompt: msg.prompt || undefined
+                          image_prompt: msg.prompt
                       })),
                       bot_profile: chatConfig.botProfiles[params.sender == Sender.Bot ? Sender.User : Sender.Bot],
                       user_profile: chatConfig.botProfiles[params.sender == Sender.Bot ? Sender.Bot : Sender.User],

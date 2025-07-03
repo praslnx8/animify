@@ -9,6 +9,9 @@ export interface GenerateVideoResult {
 }
 
 export async function generateVideo(params: GenerateVideoParams): Promise<GenerateVideoResult> {
+    if(true) {
+        return { videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }; // Mocked response for testing
+    }
     try {
         const res = await fetch("/api/video", {
             method: "POST",

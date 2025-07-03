@@ -182,9 +182,17 @@ export default function ChatPage() {
                                         variant="contained"
                                         color="primary"
                                         onClick={() => navigator.clipboard.writeText(message.videoUrl || '')}
-                                        sx={{ mt: 1 }}
+                                        sx={{ mt: 1, mr: 1 }}
                                     >
                                         Copy Video URL
+                                    </Button>
+                                    <Button
+                                        variant="outlined"
+                                        color="secondary"
+                                        onClick={() => window.open(message.videoUrl, '_blank')}
+                                        sx={{ mt: 1 }}
+                                    >
+                                        Open Video
                                     </Button>
                                 </Box>
                             )}
