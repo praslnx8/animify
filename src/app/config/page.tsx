@@ -46,6 +46,7 @@ import { ChatConfig, BotProfile, ChatSettings, ImageSettings } from '../models/C
 import { ChatConfigManager } from '../utils/ChatConfigManager';
 import { useChatConfig } from '../contexts/ChatConfigContext';
 import { Sender } from '../models/Sender';
+import { uploadBase64Image } from "../api/uploadBase64Image";
 
 export default function ConfigPage() {
     const router = useRouter();
@@ -214,6 +215,31 @@ export default function ConfigPage() {
             }
         };
         updateConfig(newConfig);
+    };
+
+    const handleImageUpload = (senderKey: string, updateImageSettings: Function) => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.onchange = async (event: any) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    const base64 = reader.result?.toString().split(",")[1];
+                    if (base64) {
+                        try {
+                            const imageUrl = await uploadBase64Image(base64);
+                            updateImageSettings(senderKey, "identity_image_url", imageUrl);
+                        } catch (error) {
+                            console.error("Image upload failed:", error);
+                        }
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        input.click();
     };
 
     if (loading || !config) {
@@ -465,6 +491,22 @@ export default function ConfigPage() {
                                         value={config.imageSettings[senderKey].identity_image_url}
                                         onChange={(e) => updateImageSettings(senderKey, 'identity_image_url', e.target.value)}
                                     />
+                                    <Box display="flex" alignItems="center" gap={2}>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={() => handleImageUpload(senderKey, updateImageSettings)}
+                                        >
+                                            Upload Image
+                                        </Button>
+                                        {config.imageSettings[senderKey].identity_image_url && (
+                                            <img
+                                                src={config.imageSettings[senderKey].identity_image_url}
+                                                alt="Identity Image"
+                                                style={{ maxWidth: "100px", maxHeight: "100px" }}
+                                            />
+                                        )}
+                                    </Box>
                                     <FormControl fullWidth>
                                         <InputLabel>Model Name</InputLabel>
                                         <Select
