@@ -64,7 +64,7 @@ const ChatAnimateDialog: React.FC<ChatAnimateDialogProps> = ({
               onChange={(e) => setPrompt(e.target.value)}
               fullWidth
               multiline
-              rows={4}
+              rows={6}
             />
           </Stack>
         </DialogContent>
