@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -30,6 +30,12 @@ const ChatAnimateDialog: React.FC<ChatAnimateDialogProps> = ({
 }) => {
   const [prompt, setPrompt] = useState<string>(message?.prompt || '');
 
+  useEffect(() => {
+    if (message) {
+      setPrompt(message.prompt || '');
+    }
+  }, [message]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     onLoading();
@@ -60,7 +66,7 @@ const ChatAnimateDialog: React.FC<ChatAnimateDialogProps> = ({
           <Stack spacing={2}>
             <TextField
               label="Prompt"
-              value={message?.prompt || prompt}
+              value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               fullWidth
               multiline
