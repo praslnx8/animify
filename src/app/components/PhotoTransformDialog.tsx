@@ -1,40 +1,25 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
+  Visibility as VisibilityIcon
+} from "@mui/icons-material";
+import {
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
-  MenuItem,
   Stack,
-  Switch,
-  TextField,
-  Typography,
-  Tabs,
   Tab,
-  Chip,
-  Autocomplete,
-  FormControl,
-  InputLabel,
-  Select,
-  IconButton,
-  Divider
+  Tabs,
+  TextField,
+  Typography
 } from "@mui/material";
-import {
-  Save as SaveIcon,
-  Delete as DeleteIcon,
-  Visibility as VisibilityIcon
-} from "@mui/icons-material";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { generatePhoto } from "../api/generatePhoto";
+import transformConfig from '../config/transform_config.json';
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
-import transformConfig from '../config/transform_config.json';
 
 interface PhotoTransformDialogProps {
   mediaItem: MediaItem;
@@ -68,6 +53,13 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
       const result = await generatePhoto({
         image_url: mediaItem.url || "",
         prompt,
+        model_name: "base",
+        style: "realistic",
+        gender: "woman",
+        body_type: "lean",
+        skin_color: "tanned",
+        auto_detect_hair_color: false,
+        nsfw_policy: "allow",
       });
       if (result.image_url) {
         updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });
@@ -265,12 +257,12 @@ export async function silentPhotoTransform({
   addMediaItem,
   updateMediaItem,
   modelName = 'base',
-  style = 'anime',
-  gender = 'man',
+  style = 'realistic',
+  gender = 'woman',
   bodyType = 'lean',
-  skinColor = 'pale',
-  autoDetectHairColor = true,
-  nsfwPolicy = 'filter',
+  skinColor = 'tanned',
+  autoDetectHairColor = false,
+  nsfwPolicy = 'allow',
 }: {
   parentMediaItem: MediaItem;
   prompt: string;

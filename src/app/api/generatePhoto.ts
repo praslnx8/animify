@@ -1,13 +1,13 @@
 export interface GeneratePhotoParams {
   image_url: string;
   prompt: string;
-  model_name?: string;
-  style?: string;
-  gender?: string;
-  body_type?: string;
-  skin_color?: string;
-  auto_detect_hair_color?: boolean;
-  nsfw_policy?: string;
+  model_name: string;
+  style: string;
+  gender: string;
+  body_type: string;
+  skin_color: string;
+  auto_detect_hair_color: boolean;
+  nsfw_policy: string;
 }
 
 export interface GeneratePhotoResult {
