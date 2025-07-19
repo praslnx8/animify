@@ -32,7 +32,7 @@ export async function sendChat(params: ChatRequest): Promise<ChatResponse> {
                           image_prompt: msg.prompt
                       })),
                       bot_profile: chatConfig.botProfiles[params.sender == Sender.Bot ? Sender.User : Sender.Bot],
-                      // user_profile: chatConfig.botProfiles[params.sender == Sender.Bot ? Sender.Bot : Sender.User],
+                      user_profile: chatConfig.botProfiles[params.sender == Sender.Bot ? Sender.Bot : Sender.User],
                       chat_settings: chatConfig.chatSettings[params.sender == Sender.Bot ? Sender.User : Sender.Bot],
                       image_settings: chatConfig.imageSettings[params.sender == Sender.Bot ? Sender.User : Sender.Bot],
                   }),
