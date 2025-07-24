@@ -9,7 +9,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
+  Switch,
   Tab,
   Tabs,
   TextField,
@@ -32,6 +38,13 @@ interface PhotoTransformDialogProps {
 const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
   const [prompt, setPrompt] = useState(mediaItem.prompt || "");
   const [tabValue, setTabValue] = useState(0);
+  const [modelName, setModelName] = useState(mediaItem.model_name || "base");
+  const [style, setStyle] = useState(mediaItem.style || "realistic");
+  const [gender, setGender] = useState(mediaItem.gender || "woman");
+  const [bodyType, setBodyType] = useState(mediaItem.body_type || "lean");
+  const [skinColor, setSkinColor] = useState(mediaItem.skin_color || "tanned");
+  const [autoDetectHairColor, setAutoDetectHairColor] = useState(mediaItem.auto_detect_hair_color || false);
+  const [nsfwPolicy, setNsfwPolicy] = useState(mediaItem.nsfw_policy || "allow");
 
   const loadSavedTransform = (savedTransform: string) => {
     setPrompt(savedTransform);
@@ -46,6 +59,13 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
       loading: true,
       parent: mediaItem,
       prompt: prompt,
+      model_name: modelName,
+      style,
+      gender,
+      body_type: bodyType,
+      skin_color: skinColor,
+      auto_detect_hair_color: autoDetectHairColor,
+      nsfw_policy: nsfwPolicy,
     };
     addMediaItem(newMediaItem);
 
@@ -53,13 +73,13 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
       const result = await generatePhoto({
         image_url: mediaItem.url || "",
         prompt,
-        model_name: "base",
-        style: "realistic",
-        gender: "woman",
-        body_type: "lean",
-        skin_color: "tanned",
-        auto_detect_hair_color: false,
-        nsfw_policy: "allow",
+        model_name: modelName,
+        style,
+        gender,
+        body_type: bodyType,
+        skin_color: skinColor,
+        auto_detect_hair_color: autoDetectHairColor,
+        nsfw_policy: nsfwPolicy,
       });
       if (result.image_url) {
         updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });
@@ -120,6 +140,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
             >
               <Tab label="Quick" />
               <Tab label="Saved" />
+              <Tab label="Advanced" />
             </Tabs>
 
             {/* Tab 0: Quick Transform Mode */}
@@ -206,6 +227,123 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                     ))}
                   </Stack>
                 )}
+              </Stack>
+            )}
+
+            {/* Tab 2: Advanced Settings */}
+            {tabValue === 2 && (
+              <Stack spacing={2}>
+                <Typography variant="subtitle2" sx={{ fontSize: '0.9rem' }}>
+                  Generation Settings
+                </Typography>
+                
+                <TextField
+                  label="Transformation Description"
+                  value={prompt}
+                  onChange={e => setPrompt(e.target.value)}
+                  fullWidth
+                  required
+                  multiline
+                  minRows={2}
+                  maxRows={4}
+                  variant="outlined"
+                  helperText="Describe how to transform the selfie"
+                  size="small"
+                />
+
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Model</InputLabel>
+                  <Select
+                    value={modelName}
+                    label="Model"
+                    onChange={e => setModelName(e.target.value)}
+                  >
+                    <MenuItem value="base">Base</MenuItem>
+                    <MenuItem value="premium">Premium</MenuItem>
+                    <MenuItem value="ultra">Ultra</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Style</InputLabel>
+                  <Select
+                    value={style}
+                    label="Style"
+                    onChange={e => setStyle(e.target.value)}
+                  >
+                    <MenuItem value="realistic">Realistic</MenuItem>
+                    <MenuItem value="artistic">Artistic</MenuItem>
+                    <MenuItem value="cartoon">Cartoon</MenuItem>
+                    <MenuItem value="anime">Anime</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Gender</InputLabel>
+                  <Select
+                    value={gender}
+                    label="Gender"
+                    onChange={e => setGender(e.target.value)}
+                  >
+                    <MenuItem value="woman">Woman</MenuItem>
+                    <MenuItem value="man">Man</MenuItem>
+                    <MenuItem value="non-binary">Non-binary</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Body Type</InputLabel>
+                  <Select
+                    value={bodyType}
+                    label="Body Type"
+                    onChange={e => setBodyType(e.target.value)}
+                  >
+                    <MenuItem value="lean">Lean</MenuItem>
+                    <MenuItem value="athletic">Athletic</MenuItem>
+                    <MenuItem value="curvy">Curvy</MenuItem>
+                    <MenuItem value="plus-size">Plus Size</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Skin Color</InputLabel>
+                  <Select
+                    value={skinColor}
+                    label="Skin Color"
+                    onChange={e => setSkinColor(e.target.value)}
+                  >
+                    <MenuItem value="fair">Fair</MenuItem>
+                    <MenuItem value="light">Light</MenuItem>
+                    <MenuItem value="medium">Medium</MenuItem>
+                    <MenuItem value="tanned">Tanned</MenuItem>
+                    <MenuItem value="dark">Dark</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl size="small" fullWidth>
+                  <InputLabel>NSFW Policy</InputLabel>
+                  <Select
+                    value={nsfwPolicy}
+                    label="NSFW Policy"
+                    onChange={e => setNsfwPolicy(e.target.value)}
+                  >
+                    <MenuItem value="allow">Allow</MenuItem>
+                    <MenuItem value="moderate">Moderate</MenuItem>
+                    <MenuItem value="strict">Strict</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={autoDetectHairColor}
+                      onChange={e => setAutoDetectHairColor(e.target.checked)}
+                      size="small"
+                    />
+                  }
+                  label="Auto-detect hair color"
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
+                />
               </Stack>
             )}
           </Stack>
