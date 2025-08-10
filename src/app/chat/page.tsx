@@ -8,6 +8,7 @@ import {
     Button,
     CircularProgress,
     Divider,
+    Fab,
     IconButton,
     Paper,
     TextField,
@@ -251,7 +252,7 @@ export default function ChatPage() {
                         minRows={1}
                         maxRows={4}
                         sx={{ 
-                            flexGrow: 0.6, // Make text field smaller in proportion
+                            flex: 1,
                             bgcolor: 'background.default', 
                             borderRadius: 2 
                         }}
@@ -266,23 +267,25 @@ export default function ChatPage() {
                         <ToggleButton value={Sender.User}>User</ToggleButton>
                         <ToggleButton value={Sender.Bot}>Bot</ToggleButton>
                     </ToggleButtonGroup>
-                    <Button
-                        variant="text"
-                        color="primary"
-                        onClick={handleSendMessage}
-                        disabled={sendingMessage}
-                        startIcon={sendingMessage ? <CircularProgress size={16} color="inherit" /> : <SendIcon />}
-                        sx={{ 
-                            ml: 0.5, 
-                            minWidth: 'auto',
-                            textTransform: 'none',
-                            fontWeight: 600
-                        }}
-                    >
-                        {sendingMessage ? 'Sending...' : 'Send'}
-                    </Button>
                 </Box>
             </Paper>
+
+            {/* Floating Action Button for Send */}
+            <Fab
+                color="primary"
+                onClick={handleSendMessage}
+                disabled={sendingMessage || !input.trim()}
+                sx={{
+                    position: 'fixed',
+                    bottom: 80, // Position above the input area
+                    right: 16,
+                    zIndex: 1001,
+                    width: 56,
+                    height: 56
+                }}
+            >
+                {sendingMessage ? <CircularProgress size={24} color="inherit" /> : <SendIcon />}
+            </Fab>
 
             <ChatAnimateDialog
                 open={animateDialogOpen}
