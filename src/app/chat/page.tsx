@@ -274,11 +274,11 @@ export default function ChatPage() {
             <Fab
                 color="primary"
                 onClick={handleSendMessage}
-                disabled={sendingMessage || !input.trim()}
+                disabled={sendingMessage}
                 sx={{
                     position: 'fixed',
-                    bottom: 80, // Position above the input area
-                    right: 16,
+                    bottom: 100, // Position above the input area
+                    right: 24,
                     zIndex: 1001,
                     width: 56,
                     height: 56
