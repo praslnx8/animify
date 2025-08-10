@@ -7,6 +7,9 @@ import {
     Box,
     Button,
     CircularProgress,
+    Dialog,
+    DialogContent,
+    DialogTitle,
     Divider,
     Fab,
     IconButton,
@@ -39,6 +42,8 @@ export default function ChatPage() {
     const [animateDialogOpen, setAnimateDialogOpen] = React.useState(false);
     const [selectedMessage, setSelectedMessage] = React.useState<Message | null>(null);
     const [videoError, setVideoError] = React.useState<string | null>(null);
+    const [videoPreviewOpen, setVideoPreviewOpen] = React.useState(false);
+    const [previewVideoUrl, setPreviewVideoUrl] = React.useState<string | null>(null);
     const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -104,6 +109,16 @@ export default function ChatPage() {
             setSelectedMessage(null);
             setAnimateDialogOpen(false);
         }
+    };
+
+    const handleVideoPreview = (videoUrl: string) => {
+        setPreviewVideoUrl(videoUrl);
+        setVideoPreviewOpen(true);
+    };
+
+    const handleCloseVideoPreview = () => {
+        setVideoPreviewOpen(false);
+        setPreviewVideoUrl(null);
     };
 
     return (
@@ -213,10 +228,10 @@ export default function ChatPage() {
                                     <Button
                                         variant="outlined"
                                         color="secondary"
-                                        onClick={() => window.open(message.videoUrl, '_blank')}
+                                        onClick={() => handleVideoPreview(message.videoUrl || '')}
                                         sx={{ mt: 1 }}
                                     >
-                                        Open Video
+                                        Preview Video
                                     </Button>
                                 </Box>
                             )}
@@ -294,6 +309,36 @@ export default function ChatPage() {
                 onLoading={() => setVideoError('loading')}
                 onComplete={handleCompleteAnimation}
             />
+
+            {/* Video Preview Dialog */}
+            <Dialog
+                open={videoPreviewOpen}
+                onClose={handleCloseVideoPreview}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    sx: { bgcolor: 'background.paper', borderRadius: 2 }
+                }}
+            >
+                <DialogTitle>Video Preview</DialogTitle>
+                <DialogContent>
+                    {previewVideoUrl && (
+                        <video
+                            controls
+                            autoPlay
+                            style={{
+                                width: '100%',
+                                height: 'auto',
+                                borderRadius: 8,
+                                backgroundColor: '#000'
+                            }}
+                        >
+                            <source src={previewVideoUrl} type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    )}
+                </DialogContent>
+            </Dialog>
         </Box>
     );
 }
