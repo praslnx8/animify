@@ -246,12 +246,15 @@ export default function ChatPage() {
                         label="Message"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        fullWidth
                         size="small"
                         multiline
                         minRows={1}
                         maxRows={4}
-                        sx={{ flex: 1, bgcolor: 'background.default', borderRadius: 2 }}
+                        sx={{ 
+                            flexGrow: 0.6, // Make text field smaller in proportion
+                            bgcolor: 'background.default', 
+                            borderRadius: 2 
+                        }}
                     />
                     <ToggleButtonGroup
                         value={sender}
@@ -263,16 +266,21 @@ export default function ChatPage() {
                         <ToggleButton value={Sender.User}>User</ToggleButton>
                         <ToggleButton value={Sender.Bot}>Bot</ToggleButton>
                     </ToggleButtonGroup>
-                    <IconButton
-                        aria-label="Send"
+                    <Button
+                        variant="text"
                         color="primary"
                         onClick={handleSendMessage}
                         disabled={sendingMessage}
-                        sx={{ ml: 0.2, bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.main', color: 'white' }, p: 0.75 }}
-                        size="medium"
+                        startIcon={sendingMessage ? <CircularProgress size={16} color="inherit" /> : <SendIcon />}
+                        sx={{ 
+                            ml: 0.5, 
+                            minWidth: 'auto',
+                            textTransform: 'none',
+                            fontWeight: 600
+                        }}
                     >
-                        {sendingMessage ? <CircularProgress size={20} color="inherit" /> : <SendIcon fontSize="medium" />}
-                    </IconButton>
+                        {sendingMessage ? 'Sending...' : 'Send'}
+                    </Button>
                 </Box>
             </Paper>
 
