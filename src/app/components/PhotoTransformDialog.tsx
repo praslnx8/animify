@@ -259,8 +259,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                     onChange={e => setModelName(e.target.value)}
                   >
                     <MenuItem value="base">Base</MenuItem>
-                    <MenuItem value="premium">Premium</MenuItem>
-                    <MenuItem value="ultra">Ultra</MenuItem>
+                    <MenuItem value="Large">large</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -272,9 +271,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                     onChange={e => setStyle(e.target.value)}
                   >
                     <MenuItem value="realistic">Realistic</MenuItem>
-                    <MenuItem value="artistic">Artistic</MenuItem>
-                    <MenuItem value="cartoon">Cartoon</MenuItem>
-                    <MenuItem value="anime">Anime</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -286,8 +282,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                     onChange={e => setGender(e.target.value)}
                   >
                     <MenuItem value="woman">Woman</MenuItem>
-                    <MenuItem value="man">Man</MenuItem>
-                    <MenuItem value="non-binary">Non-binary</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -298,10 +292,11 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                     label="Body Type"
                     onChange={e => setBodyType(e.target.value)}
                   >
+                    <MenuItem value="skinny">Skinny</MenuItem>
                     <MenuItem value="lean">Lean</MenuItem>
-                    <MenuItem value="athletic">Athletic</MenuItem>
+                    <MenuItem value="muscular">Muscular</MenuItem>
                     <MenuItem value="curvy">Curvy</MenuItem>
-                    <MenuItem value="plus-size">Plus Size</MenuItem>
+                    <MenuItem value="heavyset">Heavyset</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -312,11 +307,10 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                     label="Skin Color"
                     onChange={e => setSkinColor(e.target.value)}
                   >
-                    <MenuItem value="fair">Fair</MenuItem>
-                    <MenuItem value="light">Light</MenuItem>
-                    <MenuItem value="medium">Medium</MenuItem>
+                    <MenuItem value="pale">Pale</MenuItem>
+                    <MenuItem value="white">White</MenuItem>
                     <MenuItem value="tanned">Tanned</MenuItem>
-                    <MenuItem value="dark">Dark</MenuItem>
+                    <MenuItem value="black">Black</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -328,8 +322,8 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                     onChange={e => setNsfwPolicy(e.target.value)}
                   >
                     <MenuItem value="allow">Allow</MenuItem>
-                    <MenuItem value="moderate">Moderate</MenuItem>
-                    <MenuItem value="strict">Strict</MenuItem>
+                    <MenuItem value="blur">Blur</MenuItem>
+                    <MenuItem value="filter">Filter</MenuItem>
                   </Select>
                 </FormControl>
 

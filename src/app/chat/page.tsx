@@ -38,6 +38,15 @@ export default function ChatPage() {
     const [animateDialogOpen, setAnimateDialogOpen] = React.useState(false);
     const [selectedMessage, setSelectedMessage] = React.useState<Message | null>(null);
     const [videoError, setVideoError] = React.useState<string | null>(null);
+    const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    React.useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     const handleSendMessage = async () => {
         const userMessage: Message | null = input.trim() ? { id: Date.now().toString(), sender: sender, text: input, timestamp: new Date() } : null;
@@ -97,7 +106,14 @@ export default function ChatPage() {
     };
 
     return (
-        <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'background.default', pb: 6 }}>
+        <Box sx={{ 
+            minHeight: '100vh', 
+            height: '100dvh', // Use dynamic viewport height for better mobile support
+            display: 'flex', 
+            flexDirection: 'column', 
+            background: 'background.default',
+            position: 'relative'
+        }}>
             <AppBar position="sticky" color="default">
                 <Toolbar>
                     <Avatar sx={{ mr: 1 }}><ChatIcon color="primary" /></Avatar>
@@ -114,7 +130,14 @@ export default function ChatPage() {
             <Typography variant="h6" gutterBottom sx={{ mb: 1, textAlign: 'center' }}>Conversation</Typography>
             <Divider sx={{ mb: 1 }} />
 
-            <Box sx={{ flex: 1, overflowY: 'auto', p: 2, borderRadius: 2 }}>
+            <Box sx={{ 
+                flex: 1, 
+                overflowY: 'auto', 
+                p: 2, 
+                borderRadius: 2,
+                mb: 1, // Add margin bottom to prevent overlap with input
+                paddingBottom: '120px' // Extra padding to ensure content is visible above input
+            }}>
                 {messages.length === 0 && (
                     <Typography color="text.secondary" align="center" sx={{ mt: 2 }}>
                         No messages yet. Start the conversation below!
@@ -199,9 +222,25 @@ export default function ChatPage() {
                         </Paper>
                     </Box>
                 ))}
+                <div ref={messagesEndRef} />
             </Box>
 
-            <Paper elevation={2} sx={{ p: 1, borderRadius: 3, bgcolor: 'background.paper', mx: 0.5 }}>
+            <Paper elevation={2} sx={{ 
+                p: 1, 
+                borderRadius: 3, 
+                bgcolor: 'background.paper', 
+                mx: 0.5,
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 1000,
+                boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+                // Add safe area padding for mobile devices
+                paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
+                paddingLeft: 'max(4px, env(safe-area-inset-left))',
+                paddingRight: 'max(4px, env(safe-area-inset-right))'
+            }}>
                 <Box display="flex" alignItems="center" gap={0.5}>
                     <TextField
                         label="Message"
