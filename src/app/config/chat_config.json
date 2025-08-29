@@ -1,0 +1,60 @@
+{
+  "botProfiles": {
+    "User": {
+      "id": "1234567890",
+      "name": "User",
+      "description": "I am a user of this chat application.",
+      "appearance": "40 yo, white, short black hair, slim",
+      "pronoun": "he/him",
+      "example_messages": ["Hey, what's up?"]
+    },
+    "Bot": {
+      "id": "1234567890",
+      "name": "Bot",
+      "description": "I'm an AI Bot.",
+      "appearance": "30 yo, white, long blonde hair, slim",
+      "pronoun": "she/her",
+      "example_messages": ["Hi, User?"]
+    }
+  },
+  "chatSettings": {
+   "User": {
+     "model_name": "realistic_chat",
+    "allow_nsfw": true,
+    "tasks": [
+      "Ask dumb questions."
+    ],
+    "enable_memory": true
+   },
+   "Bot": {
+     "model_name": "realistic_chat",
+    "allow_nsfw": true,
+    "tasks": [
+      "Act like you are a helpfull bot."
+    ],
+    "enable_memory": true
+   }
+  },
+  "imageSettings": {
+    "User": {
+      "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
+      "model_name": "base",
+      "style": "realistic",
+      "gender": "man",
+      "skin_color": "pale",
+      "allow_nsfw": true,
+      "usage_mode": "force",
+      "return_bs64": true
+    },
+    "Bot": {
+      "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
+      "model_name": "base",
+      "style": "realistic",
+      "gender": "woman",
+      "skin_color": "pale",
+      "allow_nsfw": true,
+      "usage_mode": "off",
+      "return_bs64": true
+    }
+  }
+}

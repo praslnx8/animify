@@ -9,9 +9,12 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   CloudUpload as CloudUploadIcon,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Settings as SettingsIcon,
+  Chat as ChatIcon
 } from '@mui/icons-material';
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { uploadBase64Image } from './api/uploadBase64Image';
 import MediaItemComponent from './components/MediaItemComponent';
 import { MediaItem } from './models/MediaItem';
@@ -23,6 +26,7 @@ import {
 } from './utils/localStorage-utils';
 
 export default function HomePage() {
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -90,6 +94,12 @@ export default function HomePage() {
         <Toolbar>
           <Avatar sx={{ mr: 1 }}><ImageIcon color="primary" /></Avatar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>Animify</Typography>
+          <IconButton onClick={() => router.push('/chat')} color="primary" disabled={isUploading}>
+            <ChatIcon />
+          </IconButton>
+          <IconButton onClick={() => router.push('/config')} color="primary" disabled={isUploading}>
+            <SettingsIcon />
+          </IconButton>
           <IconButton onClick={handleAddPhotoClick} color="primary" disabled={isUploading}>
             <AddIcon />
           </IconButton>
@@ -100,7 +110,7 @@ export default function HomePage() {
       <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
 
       <Box
-        sx={{ flex: 1, position: 'relative', overflow: 'hidden' }}
+        sx={{ flex: 1, position: 'relative', overflow: 'hidden', pb: '56px' }}
         onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
         onTouchEnd={(e) => {
           if (touchStart !== null) handleSwipe(touchStart, e.changedTouches[0].clientX);

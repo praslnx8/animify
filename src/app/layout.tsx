@@ -1,6 +1,7 @@
 "use client";
 
 import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
+import { ChatConfigProvider } from "./contexts/ChatConfigContext";
 
 const theme = createTheme({
   palette: {
@@ -61,7 +62,9 @@ export default function RootLayout({
       }}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          {children}
+          <ChatConfigProvider>
+            {children}
+          </ChatConfigProvider>
         </ThemeProvider>
       </body>
     </html>
