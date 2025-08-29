@@ -8,11 +8,12 @@ This is a simple Next.js application using Material UI (MUI) for material design
    ```sh
    npm install
    ```
-2. Run the development server:
+2. Update .env
+3. Run the development server:
    ```sh
    npm run dev
    ```
-3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Features
 - Next.js with TypeScript
