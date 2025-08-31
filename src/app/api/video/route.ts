@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
         const randomUserID = Math.floor(1000 + Math.random() * 9000).toString();
         const randomBotID = Math.floor(1000 + Math.random() * 9000).toString();
 
-        const apiPayload = { ...params, user_id: randomUserID, bot_id: randomBotID, model_id, duration, nsfw, allow_nsfw };
+        const apiPayload = { ...params, user_id: randomUserID, bot_id: randomBotID, model_id, duration };
         console.log(apiPayload);
         const res = await fetch("https://api.exh.ai/chat_media_manager/v2/submit_video_generation_task", {
             method: "POST",
