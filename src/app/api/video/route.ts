@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
             body: JSON.stringify(apiPayload)
         });
 
+        console.log(res);
         const data = await res.json();
         if (res.ok && data.media_url) {
             return NextResponse.json({ videoUrl: data.media_url });
