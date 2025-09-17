@@ -11,7 +11,8 @@ import {
   CloudUpload as CloudUploadIcon,
   Image as ImageIcon,
   Settings as SettingsIcon,
-  Chat as ChatIcon
+  Chat as ChatIcon,
+  SwapHoriz as SwapHorizIcon
 } from '@mui/icons-material';
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -94,6 +95,9 @@ export default function HomePage() {
         <Toolbar>
           <Avatar sx={{ mr: 1 }}><ImageIcon color="primary" /></Avatar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>Animify</Typography>
+          <IconButton onClick={() => router.push('/faceswap')} color="primary" disabled={isUploading}>
+            <SwapHorizIcon />
+          </IconButton>
           <IconButton onClick={() => router.push('/chat')} color="primary" disabled={isUploading}>
             <ChatIcon />
           </IconButton>
