@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation';
 import { fileToBase64 } from '../utils/base64-utils';
 
 interface FaceSwapResult {
-  result_image_b64: string;
+  image_b64: string;
 }
 
 export default function FaceSwapPage() {
@@ -89,7 +89,7 @@ export default function FaceSwapPage() {
       }
 
       const data: FaceSwapResult = await response.json();
-      setResultImage(`data:image/jpeg;base64,${data.result_image_b64}`);
+      setResultImage(`data:image/jpeg;base64,${data.image_b64}`);
       setSuccess('Face swap completed successfully!');
     } catch (error) {
       setError('Failed to perform face swap. Please try again.');
