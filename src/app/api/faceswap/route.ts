@@ -29,23 +29,7 @@ export async function POST(request: NextRequest) {
     console.log("Face swap request started");
     console.log("API URL: https://api.exh.ai/image/v1/generate_faceswap_image");
     console.log("Request body keys:", Object.keys(requestBody));
-    console.log("Source image length:", source_image_b64.length);
-    console.log("Target image length:", target_image_b64.length);
     
-    // Print equivalent curl command (with truncated base64 for readability)
-    const curlCommand = `curl --request POST \\
-     --url https://api.exh.ai/image/v1/generate_faceswap_image \\
-     --header 'accept: application/json' \\
-     --header 'authorization: Bearer ${apiToken}' \\
-     --header 'content-type: application/json' \\
-     --data '{
-  "nsfw_policy": "allow",
-  "source_image_b64": "${source_image_b64.substring(0, 50)}...",
-  "target_image_b64": "${target_image_b64.substring(0, 50)}..."
-}'`;
-    
-    console.log("Equivalent curl command:");
-    console.log(curlCommand);
 
     // Call the external API
     const response = await fetch(
@@ -54,7 +38,8 @@ export async function POST(request: NextRequest) {
         method: "POST",
         headers: {
           "authorization": `Bearer ${apiToken}`,
-          "content-type": "application/json",
+          "accept": "application/json",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
       }
@@ -93,7 +78,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     });
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Our backend server error" },
       { status: 500 }
     );
   }
