@@ -42,6 +42,8 @@ export default function FaceSwapPage() {
   
   const [sourceImage, setSourceImage] = useState<string>('');
   const [targetImage, setTargetImage] = useState<string>('');
+  const [sourceBase64, setSourceBase64] = useState<string>('');
+  const [targetBase64, setTargetBase64] = useState<string>('');
   const [resultImage, setResultImage] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string>('');
@@ -52,6 +54,7 @@ export default function FaceSwapPage() {
     if (file) {
       try {
         const base64 = await fileToBase64(file);
+        setSourceBase64(base64);
         setSourceImage(`data:image/${file.type.split('/')[1]};base64,${base64}`);
       } catch (error) {
         setError('Failed to process source image');
@@ -64,6 +67,7 @@ export default function FaceSwapPage() {
     if (file) {
       try {
         const base64 = await fileToBase64(file);
+        setTargetBase64(base64);
         setTargetImage(`data:image/${file.type.split('/')[1]};base64,${base64}`);
       } catch (error) {
         setError('Failed to process target image');
@@ -72,7 +76,7 @@ export default function FaceSwapPage() {
   };
 
   const handleFaceSwap = async () => {
-    if (!sourceImage || !targetImage) {
+    if (!sourceBase64 || !targetBase64) {
       setError('Please select both source and target images');
       return;
     }
@@ -87,8 +91,8 @@ export default function FaceSwapPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          source_image_b64: extractBase64(sourceImage),
-          target_image_b64: extractBase64(targetImage),
+          source_image_b64: sourceBase64,
+          target_image_b64: targetBase64,
         }),
       });
 
