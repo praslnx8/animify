@@ -44,7 +44,7 @@ export default function FaceSwapPage() {
     if (file) {
       try {
         const base64 = await fileToBase64(file);
-        setSourceImage(`data:image/${file.type.split('/')[1]};base64,${base64}`);
+        setSourceImage(base64);
       } catch (error) {
         setError('Failed to process source image');
       }
@@ -56,7 +56,7 @@ export default function FaceSwapPage() {
     if (file) {
       try {
         const base64 = await fileToBase64(file);
-        setTargetImage(`data:image/${file.type.split('/')[1]};base64,${base64}`);
+        setTargetImage(base64);
       } catch (error) {
         setError('Failed to process target image');
       }
