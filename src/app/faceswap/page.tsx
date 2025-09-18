@@ -22,6 +22,7 @@ import {
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fileToBase64 } from '../utils/base64-utils';
+import { uploadBase64Image } from '../api/uploadBase64Image';
 
 
 interface FaceSwapResult {
@@ -54,7 +55,8 @@ export default function FaceSwapPage() {
     if (file) {
       try {
         const base64 = await fileToBase64(file);
-        setSourceBase64(base64);
+        const url = await uploadBase64Image(base64);
+        setSourceBase64(url);
         setSourceImage(`data:image/${file.type.split('/')[1]};base64,${base64}`);
       } catch (error) {
         setError('Failed to process source image');
@@ -67,7 +69,8 @@ export default function FaceSwapPage() {
     if (file) {
       try {
         const base64 = await fileToBase64(file);
-        setTargetBase64(base64);
+        const url = await uploadBase64Image(base64);
+        setTargetBase64(url);
         setTargetImage(`data:image/${file.type.split('/')[1]};base64,${base64}`);
       } catch (error) {
         setError('Failed to process target image');

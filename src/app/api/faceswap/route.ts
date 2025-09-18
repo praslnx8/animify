@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { urlToBase64 } from "../_utils/base64-server-utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,8 +23,8 @@ export async function POST(request: NextRequest) {
 
     const requestBody = {
       nsfw_policy: "allow",
-      source_image_b64,
-      target_image_b64,
+      source_image_b64: await urlToBase64(source_image_b64),
+      target_image_b64: await urlToBase64(target_image_b64),
     };
 
     console.log("Face swap request started");
