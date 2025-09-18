@@ -23,8 +23,16 @@ import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fileToBase64 } from '../utils/base64-utils';
 
+
 interface FaceSwapResult {
   image_b64: string;
+}
+
+// Utility to extract base64 from data URL or return as-is if already plain
+function extractBase64(data: string): string {
+  if (!data) return '';
+  const commaIdx = data.indexOf(',');
+  return commaIdx !== -1 ? data.slice(commaIdx + 1) : data;
 }
 
 export default function FaceSwapPage() {
@@ -44,7 +52,7 @@ export default function FaceSwapPage() {
     if (file) {
       try {
         const base64 = await fileToBase64(file);
-        setSourceImage(base64);
+        setSourceImage(`data:image/${file.type.split('/')[1]};base64,${base64}`);
       } catch (error) {
         setError('Failed to process source image');
       }
@@ -56,7 +64,7 @@ export default function FaceSwapPage() {
     if (file) {
       try {
         const base64 = await fileToBase64(file);
-        setTargetImage(base64);
+        setTargetImage(`data:image/${file.type.split('/')[1]};base64,${base64}`);
       } catch (error) {
         setError('Failed to process target image');
       }
@@ -79,8 +87,8 @@ export default function FaceSwapPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          source_image_b64: sourceImage.split(',')[1],
-          target_image_b64: targetImage.split(',')[1],
+          source_image_b64: extractBase64(sourceImage),
+          target_image_b64: extractBase64(targetImage),
         }),
       });
 
