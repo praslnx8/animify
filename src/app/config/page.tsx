@@ -516,6 +516,7 @@ export default function ConfigPage() {
                                         >
                                             <MenuItem value="base">Base</MenuItem>
                                             <MenuItem value="large">Large</MenuItem>
+                                            <MenuItem value="persona">Persona</MenuItem>
                                         </Select>
                                     </FormControl>
                                     <FormControl fullWidth>
