@@ -26,7 +26,7 @@ export async function sendChat(params: ChatRequest): Promise<ChatResponse> {
                       'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({
-                      context: params.messages.slice(-29).map(msg => ({
+                      context: params.messages.slice(-39).map(msg => ({
                           message: msg.text,
                           turn: msg.sender == params.sender ? 'user' : 'bot',
                           image_prompt: msg.prompt
