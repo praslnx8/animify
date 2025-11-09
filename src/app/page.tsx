@@ -141,8 +141,12 @@ export default function HomePage() {
               <MediaItemComponent
                 mediaItem={mediaItems[currentIdx]}
                 addMediaItem={item => {
-                  setMediaItems(prev => [...prev, item]);
-                  setCurrentIdx(mediaItems.length);
+                  setMediaItems(prev => [
+                    ...prev.slice(0, currentIdx + 1),
+                    item,
+                    ...prev.slice(currentIdx + 1)
+                  ]);
+                  setCurrentIdx(currentIdx + 1);
                 }}
                 updateMediaItem={updateMediaItem}
                 onDelete={handleDelete}
