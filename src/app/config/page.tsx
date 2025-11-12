@@ -415,7 +415,7 @@ export default function ConfigPage() {
                                             label="Model Name"
                                             onChange={(e) => updateChatSettings(senderKey, 'model_name', e.target.value)}
                                         >
-                                            <MenuItem value="role_play">Role Play</MenuItem>
+                                            <MenuItem value="roleplay">Role Play</MenuItem>
                                             <MenuItem value="realistic_chat">Realistic Chat</MenuItem>
                                             <MenuItem value="instruct">Instruct</MenuItem>
                                         </Select>
