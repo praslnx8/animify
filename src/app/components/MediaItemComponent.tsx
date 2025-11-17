@@ -153,10 +153,10 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
     <>
       <Card sx={cardStyle}>
         <Box sx={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          {isVideo && timeElapsed && <Chip label={timeElapsed} size="small" sx={{ position: 'absolute', top: 8, left: 8, zIndex: 10, bgcolor: 'rgba(0,0,0,0.7)', color: '#fff' }} />}
           <Box sx={mediaBoxStyle}>{renderMedia()}</Box>
           {mediaItem.prompt && <Box px={2} py={1} bgcolor="rgba(0,0,0,0.8)" textAlign="center"><Typography variant="body2" noWrap title={mediaItem.prompt} color="#fff" fontSize="0.875rem">{mediaItem.prompt}</Typography></Box>}
           {isVideo && videoStatus !== VideoStatus.Idle && <Chip label={videoStatus} color={videoStatus === VideoStatus.Error ? 'error' : videoStatus === VideoStatus.Playing ? 'success' : 'default'} size="small" sx={{ position: 'absolute', top: 8, right: 8, zIndex: 10 }} />}
-          {isVideo && timeElapsed && <Chip label={timeElapsed} size="small" sx={{ position: 'absolute', top: 8, left: 8, zIndex: 10, bgcolor: 'rgba(0,0,0,0.7)', color: '#fff' }} />}
         </Box>
         <Box sx={{ p: 2, borderTop: 1, borderColor: '#333', bgcolor: '#0d1117' }}>{/* Actions */}
           <Box display="flex" flexDirection="column" width="100%" gap={1}>
