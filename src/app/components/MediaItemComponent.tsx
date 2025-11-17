@@ -43,7 +43,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
   const [videoKey, setVideoKey] = useState(0);
   const [videoStatus, setVideoStatus] = useState<VideoStatus>(VideoStatus.Idle);
   const [videoError, setVideoError] = useState<string | null>(null);
-  const [timeElapsed, setTimeElapsed] = useState<string>('');
+  const [timeElapsed, setTimeElapsed] = useState<string>('00:00');
 
   const isVideo = mediaItem.type === MediaType.Video;
 
