@@ -1,18 +1,11 @@
 #!/bin/bash
 set -e
 
-# Install packages without asking
-sudo yum install -y git
-sudo yum install -y npm
-
-# Clone the repo only if not already present
-if [ ! -d "animify" ]; then
-    git clone https://github.com/praslnx8/animify
-fi
-
-cd animify
 git checkout cred
 mv .env.sample .env
+
+# Install packages without asking
+sudo yum install -y npm
 
 # Install dependencies
 npm install
