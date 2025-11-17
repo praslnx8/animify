@@ -73,7 +73,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
     };
 
     updateTimeElapsed();
-    const interval = setInterval(updateTimeElapsed, 10000); // Update every 10 seconds
+    const interval = setInterval(updateTimeElapsed, 1000); // Update every 1 second
     return () => clearInterval(interval);
   }, [isVideo, mediaItem.createdAt]);
 

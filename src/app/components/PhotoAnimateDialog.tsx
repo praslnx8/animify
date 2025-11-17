@@ -221,6 +221,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
       loading: true,
       prompt,
       parent: mediaItem,
+      createdAt: Date.now(),
     };
     addMediaItem(videoMediaItem);
     try {
@@ -769,6 +770,7 @@ export async function silentPhotoAnimate({
     loading: true,
     prompt,
     parent: parentMediaItem,
+    createdAt: Date.now(),
   };
   addMediaItem(videoMediaItem);
   try {
