@@ -11,6 +11,7 @@ if [ ! -d "animify" ]; then
 fi
 
 cd animify
+git checkout cred
 mv .env.sample .env
 
 # Install dependencies
