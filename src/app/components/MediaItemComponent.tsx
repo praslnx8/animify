@@ -43,6 +43,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
   const [videoKey, setVideoKey] = useState(0);
   const [videoStatus, setVideoStatus] = useState<VideoStatus>(VideoStatus.Idle);
   const [videoError, setVideoError] = useState<string | null>(null);
+  const [timeElapsed, setTimeElapsed] = useState<string>('');
 
   const isVideo = mediaItem.type === MediaType.Video;
 
@@ -53,6 +54,28 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
   }, [mediaItem.id]);
 
   useEffect(() => { if (videoError) setShowError(true); }, [videoError]);
+
+  useEffect(() => {
+    if (!isVideo || !mediaItem.createdAt) return;
+
+    const updateTimeElapsed = () => {
+      const now = Date.now();
+      const diff = now - mediaItem.createdAt!;
+      const seconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+
+      if (days > 0) setTimeElapsed(`${days}d ago`);
+      else if (hours > 0) setTimeElapsed(`${hours}h ago`);
+      else if (minutes > 0) setTimeElapsed(`${minutes}m ago`);
+      else setTimeElapsed(`${seconds}s ago`);
+    };
+
+    updateTimeElapsed();
+    const interval = setInterval(updateTimeElapsed, 100000); // Update every 100 seconds
+    return () => clearInterval(interval);
+  }, [isVideo, mediaItem.createdAt]);
 
   const handlePlay = () => {
     setVideoError(null);
@@ -67,10 +90,24 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
 
   const handleRetry = async () => {
     if (!mediaItem.parent || !mediaItem.prompt) return;
-    const commonProps = { parentMediaItem: mediaItem.parent, prompt: mediaItem.prompt, addMediaItem, updateMediaItem };
-    mediaItem.type === MediaType.Image
-      ? await silentPhotoTransform({ ...commonProps, modelName: mediaItem.model_name, style: mediaItem.style, gender: mediaItem.gender, bodyType: mediaItem.body_type, skinColor: mediaItem.skin_color, autoDetectHairColor: mediaItem.auto_detect_hair_color, nsfwPolicy: mediaItem.nsfw_policy })
-      : await silentPhotoAnimate(commonProps);
+    
+    if (mediaItem.type === MediaType.Video) {
+      // For videos, open the animate dialog with the prompt
+      setAnimateOpen(true);
+    } else {
+      // For images, retry silently with same parameters
+      const commonProps = { parentMediaItem: mediaItem.parent, prompt: mediaItem.prompt, addMediaItem, updateMediaItem };
+      await silentPhotoTransform({ 
+        ...commonProps, 
+        modelName: mediaItem.model_name, 
+        style: mediaItem.style, 
+        gender: mediaItem.gender, 
+        bodyType: mediaItem.body_type, 
+        skinColor: mediaItem.skin_color, 
+        autoDetectHairColor: mediaItem.auto_detect_hair_color, 
+        nsfwPolicy: mediaItem.nsfw_policy 
+      });
+    }
   };
 
   const getVideoUrlWithCacheBuster = () => `${mediaItem.url}${mediaItem.url!.includes('?') ? '&' : '?'}t=${Date.now()}`;
@@ -119,6 +156,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
           <Box sx={mediaBoxStyle}>{renderMedia()}</Box>
           {mediaItem.prompt && <Box px={2} py={1} bgcolor="rgba(0,0,0,0.8)" textAlign="center"><Typography variant="body2" noWrap title={mediaItem.prompt} color="#fff" fontSize="0.875rem">{mediaItem.prompt}</Typography></Box>}
           {isVideo && videoStatus !== VideoStatus.Idle && <Chip label={videoStatus} color={videoStatus === VideoStatus.Error ? 'error' : videoStatus === VideoStatus.Playing ? 'success' : 'default'} size="small" sx={{ position: 'absolute', top: 8, right: 8, zIndex: 10 }} />}
+          {isVideo && timeElapsed && <Chip label={timeElapsed} size="small" sx={{ position: 'absolute', top: 8, left: 8, zIndex: 10, bgcolor: 'rgba(0,0,0,0.7)', color: '#fff' }} />}
         </Box>
         <Box sx={{ p: 2, borderTop: 1, borderColor: '#333', bgcolor: '#0d1117' }}>{/* Actions */}
           <Box display="flex" flexDirection="column" width="100%" gap={1}>
@@ -149,7 +187,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
       </Snackbar>
 
       <PhotoTransformDialog open={transformOpen} onClose={() => setTransformOpen(false)} mediaItem={mediaItem} addMediaItem={item => { addMediaItem(item); setTransformOpen(false); }} updateMediaItem={item => { updateMediaItem(item); setTransformOpen(false); }} />
-      <PhotoAnimateDialog open={animateOpen} onClose={() => setAnimateOpen(false)} mediaItem={mediaItem} addMediaItem={item => { addMediaItem(item); setAnimateOpen(false); }} updateMediaItem={item => { updateMediaItem(item); setAnimateOpen(false); }} />
+      <PhotoAnimateDialog open={animateOpen} onClose={() => setAnimateOpen(false)} mediaItem={isVideo && mediaItem.parent ? mediaItem.parent : mediaItem} addMediaItem={item => { addMediaItem(item); setAnimateOpen(false); }} updateMediaItem={item => { updateMediaItem(item); setAnimateOpen(false); }} />
       <AnimateStoryDialog open={animateStoryOpen} onClose={() => setAnimateStoryOpen(false)} mediaItem={mediaItem} addMediaItem={item => { addMediaItem(item); setAnimateStoryOpen(false); }} updateMediaItem={item => { updateMediaItem(item); setAnimateStoryOpen(false); }} />
     </>
   );

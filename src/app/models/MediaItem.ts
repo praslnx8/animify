@@ -8,6 +8,7 @@ export interface MediaItem {
     url?: string;
     loading?: boolean;
     error?: string;
+    createdAt?: number; // Timestamp in milliseconds
 
     // Advanced params for transform/animate
     model_name?: string;
