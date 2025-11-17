@@ -40,10 +40,10 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
   const [showError, setShowError] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const timerRef = useRef<HTMLSpanElement>(null);
   const [videoKey, setVideoKey] = useState(0);
   const [videoStatus, setVideoStatus] = useState<VideoStatus>(VideoStatus.Idle);
   const [videoError, setVideoError] = useState<string | null>(null);
-  const [timeElapsed, setTimeElapsed] = useState<string>('');
 
   const isVideo = mediaItem.type === MediaType.Video;
 
@@ -56,7 +56,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
   useEffect(() => { if (videoError) setShowError(true); }, [videoError]);
 
   useEffect(() => {
-    if (!isVideo || !mediaItem.createdAt) return;
+    if (!isVideo || !mediaItem.createdAt || !timerRef.current) return;
 
     const updateTimeElapsed = () => {
       const now = Date.now();
@@ -68,7 +68,11 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
       // Always show MM:SS format
       const formattedMinutes = String(minutes).padStart(2, '0');
       const formattedSeconds = String(seconds).padStart(2, '0');
-      setTimeElapsed(`${formattedMinutes}:${formattedSeconds}`);
+      
+      // Update DOM directly without causing re-render
+      if (timerRef.current) {
+        timerRef.current.textContent = `${formattedMinutes}:${formattedSeconds}`;
+      }
     };
 
     updateTimeElapsed();
@@ -152,9 +156,9 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
     <>
       <Card sx={cardStyle}>
         <Box sx={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          {isVideo && timeElapsed && (
+          {isVideo && mediaItem.createdAt && (
             <Chip 
-              label={timeElapsed} 
+              label={<span ref={timerRef}>00:00</span>}
               size="small" 
               sx={{ 
                 position: 'absolute', 
