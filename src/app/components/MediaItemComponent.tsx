@@ -43,7 +43,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
   const [videoKey, setVideoKey] = useState(0);
   const [videoStatus, setVideoStatus] = useState<VideoStatus>(VideoStatus.Idle);
   const [videoError, setVideoError] = useState<string | null>(null);
-  const [timeElapsed, setTimeElapsed] = useState<string>('00:00');
+  const [timeElapsed, setTimeElapsed] = useState<string>('');
 
   const isVideo = mediaItem.type === MediaType.Video;
 
@@ -61,15 +61,14 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
     const updateTimeElapsed = () => {
       const now = Date.now();
       const diff = now - mediaItem.createdAt!;
-      const seconds = Math.floor(diff / 1000);
-      const minutes = Math.floor(seconds / 60);
-      const hours = Math.floor(minutes / 60);
-      const days = Math.floor(hours / 24);
+      const totalSeconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
 
-      if (days > 0) setTimeElapsed(`${days}d ago`);
-      else if (hours > 0) setTimeElapsed(`${hours}h ago`);
-      else if (minutes > 0) setTimeElapsed(`${minutes}m ago`);
-      else setTimeElapsed(`${seconds}s ago`);
+      // Always show MM:SS format
+      const formattedMinutes = String(minutes).padStart(2, '0');
+      const formattedSeconds = String(seconds).padStart(2, '0');
+      setTimeElapsed(`${formattedMinutes}:${formattedSeconds}`);
     };
 
     updateTimeElapsed();
@@ -153,7 +152,20 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
     <>
       <Card sx={cardStyle}>
         <Box sx={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          {isVideo && timeElapsed && <Chip label={timeElapsed} size="small" sx={{ position: 'absolute', top: 8, left: 8, zIndex: 10, bgcolor: 'rgba(0,0,0,0.7)', color: '#fff' }} />}
+          {isVideo && timeElapsed && (
+            <Chip 
+              label={timeElapsed} 
+              size="small" 
+              sx={{ 
+                position: 'absolute', 
+                top: 8, 
+                left: 8, 
+                zIndex: 10, 
+                bgcolor: 'rgba(0,0,0,0.7)', 
+                color: '#fff'
+              }} 
+            />
+          )}
           <Box sx={mediaBoxStyle}>{renderMedia()}</Box>
           {mediaItem.prompt && <Box px={2} py={1} bgcolor="rgba(0,0,0,0.8)" textAlign="center"><Typography variant="body2" noWrap title={mediaItem.prompt} color="#fff" fontSize="0.875rem">{mediaItem.prompt}</Typography></Box>}
           {isVideo && videoStatus !== VideoStatus.Idle && <Chip label={videoStatus} color={videoStatus === VideoStatus.Error ? 'error' : videoStatus === VideoStatus.Playing ? 'success' : 'default'} size="small" sx={{ position: 'absolute', top: 8, right: 8, zIndex: 10 }} />}
