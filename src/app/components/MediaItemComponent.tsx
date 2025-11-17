@@ -162,7 +162,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
               size="small" 
               sx={{ 
                 position: 'absolute', 
-                top: 16, 
+                top: 56, 
                 left: 8, 
                 zIndex: 10, 
                 bgcolor: 'rgba(0,0,0,0.7)', 
