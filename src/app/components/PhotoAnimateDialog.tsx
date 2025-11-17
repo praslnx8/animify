@@ -33,10 +33,11 @@ interface PhotoAnimateDialogProps {
   onClose: () => void;
   addMediaItem: (mediaItem: MediaItem) => void;
   updateMediaItem: (mediaItem: MediaItem) => void;
+  initialPrompt?: string;
 }
 
-const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
-  const [prompt, setPrompt] = useState(mediaItem.prompt || "");
+const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem, initialPrompt }) => {
+  const [prompt, setPrompt] = useState(initialPrompt || mediaItem.prompt || "");
   const [tabValue, setTabValue] = useState(0);
 
   // Template Builder State
@@ -68,6 +69,11 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
   const [customStyle, setCustomStyle] = useState("");
 
   const templateConfig = animateConfig.templateBuilder;
+
+  // Update prompt when initialPrompt or mediaItem changes
+  useEffect(() => {
+    setPrompt(initialPrompt || mediaItem.prompt || "");
+  }, [initialPrompt, mediaItem.prompt, open]);
 
   // Build prompt from template selections
   useEffect(() => {

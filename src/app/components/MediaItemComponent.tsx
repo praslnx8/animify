@@ -73,7 +73,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
     };
 
     updateTimeElapsed();
-    const interval = setInterval(updateTimeElapsed, 100000); // Update every 100 seconds
+    const interval = setInterval(updateTimeElapsed, 10000); // Update every 10 seconds
     return () => clearInterval(interval);
   }, [isVideo, mediaItem.createdAt]);
 
@@ -187,7 +187,14 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
       </Snackbar>
 
       <PhotoTransformDialog open={transformOpen} onClose={() => setTransformOpen(false)} mediaItem={mediaItem} addMediaItem={item => { addMediaItem(item); setTransformOpen(false); }} updateMediaItem={item => { updateMediaItem(item); setTransformOpen(false); }} />
-      <PhotoAnimateDialog open={animateOpen} onClose={() => setAnimateOpen(false)} mediaItem={isVideo && mediaItem.parent ? mediaItem.parent : mediaItem} addMediaItem={item => { addMediaItem(item); setAnimateOpen(false); }} updateMediaItem={item => { updateMediaItem(item); setAnimateOpen(false); }} />
+      <PhotoAnimateDialog 
+        open={animateOpen} 
+        onClose={() => setAnimateOpen(false)} 
+        mediaItem={isVideo && mediaItem.parent ? mediaItem.parent : mediaItem} 
+        initialPrompt={isVideo ? mediaItem.prompt : undefined}
+        addMediaItem={item => { addMediaItem(item); setAnimateOpen(false); }} 
+        updateMediaItem={item => { updateMediaItem(item); setAnimateOpen(false); }} 
+      />
       <AnimateStoryDialog open={animateStoryOpen} onClose={() => setAnimateStoryOpen(false)} mediaItem={mediaItem} addMediaItem={item => { addMediaItem(item); setAnimateStoryOpen(false); }} updateMediaItem={item => { updateMediaItem(item); setAnimateStoryOpen(false); }} />
     </>
   );
