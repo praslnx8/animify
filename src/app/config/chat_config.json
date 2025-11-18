@@ -39,7 +39,7 @@
   },
   "imageSettings": {
     "User": {
-      "identity_image_url": "",
+      "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
       "model_name": "base",
       "style": "realistic",
       "gender": "man",
@@ -49,7 +49,7 @@
       "return_bs64": false
     },
     "Bot": {
-      "identity_image_url": "",
+      "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
       "model_name": "base",
       "style": "realistic",
       "gender": "man",
