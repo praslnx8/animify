@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GenerateVideoParams } from '../generateVideo';
+import { GenerateVideoParams, BotConfig } from '../generateVideo';
 
 export const runtime = 'nodejs';
 
-async function convertPromptUsingChatbot(userPrompt: string): Promise<string> {
+async function convertPromptUsingChatbot(userPrompt: string, botConfig: BotConfig): Promise<string> {
     try {
         const chatbotPayload = {
             context: [
@@ -13,40 +13,10 @@ async function convertPromptUsingChatbot(userPrompt: string): Promise<string> {
                     turn: "user"
                 }
             ],
-            bot_profile: {
-                id: "video_prompt_bot",
-                description: "I am a video prompt optimizer that converts user descriptions into detailed, effective prompts for video generation",
-                appearance: "bot",
-                pronoun: "he/him",
-                example_messages: [
-                    "A man smiling while wearing a red shirt, standing on a sunlit beach with waves in the background"
-                ],
-                name: "Video Prompt Bot"
-            },
-            user_profile: {
-                id: "video_user",
-                name: "User",
-                description: "User who wants to get an optimized prompt for video generation",
-                appearance: "user",
-                pronoun: "they/them"
-            },
-            chat_settings: {
-                model_name: "roleplay",
-                allow_nsfw: true,
-                tasks: [
-                    "Your role is to convert the given user description into an efficient, detailed prompt optimized for video generation. Focus on visual details, actions, camera angles, lighting, and motion. Keep the prompt concise but descriptive."
-                ],
-                enable_memory: false
-            },
-            image_settings: {
-                model_name: "base",
-                style: "realistic",
-                gender: "man",
-                skin_color: "pale",
-                allow_nsfw: true,
-                usage_mode: "off",
-                return_bs64: false
-            }
+            bot_profile: botConfig.bot_profile,
+            user_profile: botConfig.user_profile,
+            chat_settings: botConfig.chat_settings,
+            image_settings: botConfig.image_settings
         };
 
         // Use the internal chatbot route
@@ -78,10 +48,14 @@ async function convertPromptUsingChatbot(userPrompt: string): Promise<string> {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { image_url, prompt, model_id = "aura", duration = 10 } = body;
+        const { image_url, prompt, model_id = "aura", duration = 10, botConfig } = body;
 
         if (!image_url || !prompt) {
             return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+        }
+
+        if (!botConfig) {
+            return NextResponse.json({ error: 'Bot config is required' }, { status: 400 });
         }
 
         const apiToken = process.env.EXH_AI_API_TOKEN;
@@ -90,7 +64,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Convert the user prompt to an optimized video prompt using chatbot
-        const optimizedPrompt = await convertPromptUsingChatbot(prompt);
+        const optimizedPrompt = await convertPromptUsingChatbot(prompt, botConfig);
 
         const params: GenerateVideoParams = {
             image_url,
