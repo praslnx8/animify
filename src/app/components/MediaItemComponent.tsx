@@ -150,10 +150,18 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
       const showThumbnail = videoStatus === VideoStatus.Idle || videoStatus === VideoStatus.Ended || videoStatus === VideoStatus.Error;
       
       return (
-        <Box sx={{ ...mediaContainer, bgcolor: '#000', position: 'relative' }}>
+        <Box sx={{ 
+          width: '100%', 
+          height: '100%', 
+          bgcolor: '#000', 
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
           {/* Thumbnail layer */}
           {showThumbnail && mediaItem.parent?.url && (
-            <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <>
               <img src={mediaItem.parent.url} alt="Video thumbnail" style={imgStyle} />
               <Fab 
                 color="primary" 
@@ -163,10 +171,10 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
               >
                 <PlayArrowIcon sx={{ fontSize: 32 }} />
               </Fab>
-            </Box>
+            </>
           )}
 
-          {/* Video layer */}
+          {/* Loading layer */}
           {videoStatus === VideoStatus.Loading && (
             <Box sx={loadingOverlay}>
               <CircularProgress size={60} thickness={4} sx={{ color: '#58a6ff' }} />
@@ -176,25 +184,34 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
             </Box>
           )}
 
+          {/* Video layer */}
           {(videoStatus === VideoStatus.Loading || videoStatus === VideoStatus.Playing) && (
-            <video
-              key={videoKey}
-              ref={videoRef}
-              controls
-              playsInline
-              autoPlay
-              style={{
-                ...imgStyle,
-                display: videoStatus === VideoStatus.Playing ? 'block' : 'none',
-              }}
-              src={getVideoUrlWithCacheBuster()}
-              onLoadedData={() => setVideoStatus(VideoStatus.Playing)}
-              onError={() => {
-                setVideoStatus(VideoStatus.Error);
-                setVideoError('Failed to load video. Please try again.');
-              }}
-              onEnded={() => setVideoStatus(VideoStatus.Ended)}
-            />
+            <Box sx={{
+              position: videoStatus === VideoStatus.Playing ? 'relative' : 'absolute',
+              width: '100%',
+              height: '100%',
+              display: videoStatus === VideoStatus.Playing ? 'flex' : 'none',
+              alignItems: 'center',
+              justifyContent: 'center',
+              top: 0,
+              left: 0,
+            }}>
+              <video
+                key={videoKey}
+                ref={videoRef}
+                controls
+                playsInline
+                autoPlay
+                style={imgStyle}
+                src={getVideoUrlWithCacheBuster()}
+                onLoadedData={() => setVideoStatus(VideoStatus.Playing)}
+                onError={() => {
+                  setVideoStatus(VideoStatus.Error);
+                  setVideoError('Failed to load video. Please try again.');
+                }}
+                onEnded={() => setVideoStatus(VideoStatus.Ended)}
+              />
+            </Box>
           )}
         </Box>
       );
@@ -293,7 +310,15 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
         </Box>
 
         {/* Actions section */}
-        <Box sx={{ borderTop: 1, borderColor: '#30363d', bgcolor: '#0d1117' }}>
+        <Box sx={{ 
+          borderTop: 1, 
+          borderColor: '#30363d', 
+          bgcolor: '#0d1117',
+          flexShrink: 0,
+          overflow: 'auto',
+          maxHeight: '40vh',
+          paddingBottom: 'max(8px, env(safe-area-inset-bottom))'
+        }}>
           {/* Primary actions */}
           <Box sx={{ p: 1.5 }}>
             <Box display="flex" gap={1}>
@@ -305,7 +330,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
                     startIcon={<AutoFixHighIcon />} 
                     onClick={() => setTransformOpen(true)} 
                     sx={btnGreen}
-                    size="large"
                   >
                     Edit
                   </Button>
@@ -315,7 +339,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
                     startIcon={<AnimationIcon />} 
                     onClick={() => setAnimateOpen(true)} 
                     sx={btnPurple}
-                    size="large"
                   >
                     Animate
                   </Button>
@@ -330,7 +353,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
                       onClick={handleRetry}
                       disabled={retrying}
                       sx={btnOutlinedBlue}
-                      size="large"
                     >
                       {retrying ? 'Retrying...' : 'Retry'}
                     </Button>
@@ -342,7 +364,6 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
                       startIcon={<DownloadIcon />} 
                       onClick={handleDownload}
                       sx={btnOutlinedGreen}
-                      size="large"
                     >
                       Download
                     </Button>
@@ -386,6 +407,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
                         startIcon={<AutoStoriesIcon />} 
                         onClick={() => setAnimateStoryOpen(true)} 
                         sx={btnOutlinedBlue}
+                        size="small"
                       >
                         Create Story
                       </Button>
@@ -397,6 +419,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
                           onClick={handleRetry}
                           disabled={retrying}
                           sx={btnOutlinedGreen}
+                          size="small"
                         >
                           {retrying ? 'Retrying...' : 'Retry Generation'}
                         </Button>
@@ -408,6 +431,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
                         onClick={() => onDelete(mediaItem)}
                         sx={btnOutlinedRed}
                         color="error"
+                        size="small"
                       >
                         Delete
                       </Button>
@@ -430,6 +454,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
                   onClick={() => onDelete(mediaItem)}
                   sx={btnOutlinedRed}
                   color="error"
+                  size="small"
                 >
                   Delete
                 </Button>
@@ -509,10 +534,12 @@ const loadingOverlay = {
 
 const cardStyle = { 
   width: '100%', 
-  height: '100%', 
+  maxWidth: '100%',
+  height: '100%',
+  maxHeight: '100%',
   bgcolor: '#161b22', 
-  display: 'grid', 
-  gridTemplateRows: '1fr auto', 
+  display: 'flex',
+  flexDirection: 'column',
   overflow: 'hidden', 
   border: '1px solid #30363d',
   borderRadius: 2
@@ -529,28 +556,34 @@ const mediaBoxStyle = {
 };
 
 const btnGreen = { 
-  minHeight: 44, 
+  minHeight: 40, 
   bgcolor: '#238636', 
   color: 'white', 
   fontWeight: 600,
+  fontSize: '0.875rem',
+  py: 1,
   '&:hover': { bgcolor: '#2ea043' },
   '&:disabled': { bgcolor: '#238636', opacity: 0.5 }
 };
 
 const btnPurple = { 
-  minHeight: 44, 
+  minHeight: 40, 
   bgcolor: '#8957e5', 
   color: 'white', 
   fontWeight: 600,
+  fontSize: '0.875rem',
+  py: 1,
   '&:hover': { bgcolor: '#a475f9' },
   '&:disabled': { bgcolor: '#8957e5', opacity: 0.5 }
 };
 
 const btnOutlinedBlue = { 
-  minHeight: 44, 
+  minHeight: 40, 
   borderColor: '#30363d', 
   color: '#58a6ff', 
   fontWeight: 600,
+  fontSize: '0.875rem',
+  py: 1,
   '&:hover': { 
     borderColor: '#58a6ff', 
     bgcolor: 'rgba(88, 166, 255, 0.1)' 
@@ -563,10 +596,12 @@ const btnOutlinedBlue = {
 };
 
 const btnOutlinedGreen = { 
-  minHeight: 44, 
+  minHeight: 40, 
   borderColor: '#30363d', 
   color: '#3fb950', 
   fontWeight: 600,
+  fontSize: '0.875rem',
+  py: 1,
   '&:hover': { 
     borderColor: '#3fb950', 
     bgcolor: 'rgba(63, 185, 80, 0.1)' 
@@ -579,10 +614,12 @@ const btnOutlinedGreen = {
 };
 
 const btnOutlinedRed = { 
-  minHeight: 40, 
+  minHeight: 36, 
   borderColor: '#30363d', 
   color: '#f85149', 
   fontWeight: 600,
+  fontSize: '0.813rem',
+  py: 0.75,
   '&:hover': { 
     borderColor: '#f85149', 
     bgcolor: 'rgba(248, 81, 73, 0.1)' 
