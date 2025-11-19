@@ -31,6 +31,15 @@ export async function generateVideo(params: GenerateVideoParams, botConfig?: Bot
             };
         }
 
+        // Update the identity_image_url in image_settings with the current image being animated
+        config = {
+            ...config,
+            image_settings: {
+                ...config.image_settings,
+                identity_image_url: params.image_url
+            }
+        };
+
         const res = await fetch("/api/video", {
             method: "POST",
             headers: {
