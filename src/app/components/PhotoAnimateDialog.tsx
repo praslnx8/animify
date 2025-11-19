@@ -231,7 +231,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
       }
       const result = await generateVideo({ image_url: mediaItem.url, prompt });
       if (result.videoUrl) {
-        updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl });
+        updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl, prompt: result.convertedPrompt || prompt });
       } else {
         updateMediaItem({ ...videoMediaItem, loading: false, error: result.error || "Failed to generate video" });
       }
@@ -780,7 +780,7 @@ export async function silentPhotoAnimate({
     }
     const result = await generateVideo({ image_url: parentMediaItem.url, prompt });
     if (result.videoUrl) {
-      updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl });
+      updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl, prompt: result.convertedPrompt || prompt });
     } else {
       updateMediaItem({ ...videoMediaItem, loading: false, error: result.error || 'Failed to generate video' });
     }

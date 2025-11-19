@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         console.log(res);
         const data = await res.json();
         if (res.ok && data.media_url) {
-            return NextResponse.json({ videoUrl: data.media_url });
+            return NextResponse.json({ videoUrl: data.media_url, convertedPrompt: optimizedPrompt });
         } else {
             console.error('Error response from API:', data);
             return NextResponse.json({ error: data.error || "Response has error" }, { status: res.status || 500 });

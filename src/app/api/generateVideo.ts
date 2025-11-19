@@ -15,6 +15,7 @@ export interface BotConfig {
 
 export interface GenerateVideoResult {
     videoUrl?: string;
+    convertedPrompt?: string;
     error?: string;
 }
 
@@ -50,7 +51,7 @@ export async function generateVideo(params: GenerateVideoParams, botConfig?: Bot
         const data = await res.json();
 
         if (res.ok && data.videoUrl) {
-            return { videoUrl: data.videoUrl };
+            return { videoUrl: data.videoUrl, convertedPrompt: data.convertedPrompt };
         } else {
             throw new Error(data.error || `Error: ${res.status}`);
         }
