@@ -39,6 +39,7 @@ interface PhotoAnimateDialogProps {
 const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem, initialPrompt }) => {
   const [prompt, setPrompt] = useState(initialPrompt || mediaItem.prompt || "");
   const [tabValue, setTabValue] = useState(0);
+  const [numberOfVideos, setNumberOfVideos] = useState(1);
 
   // Template Builder State
   const [selectedSubject, setSelectedSubject] = useState("single");
@@ -215,29 +216,40 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const videoMediaItem: MediaItem = {
-      id: Date.now().toString(),
-      type: MediaType.Video,
-      loading: true,
-      prompt,
-      parent: mediaItem,
-      createdAt: Date.now(),
-    };
-    addMediaItem(videoMediaItem);
-    try {
-      if (!mediaItem.url) {
-        updateMediaItem({ ...videoMediaItem, loading: false, error: "Image URL is missing" });
-        return;
-      }
-      const result = await generateVideo({ image_url: mediaItem.url, prompt });
-      if (result.videoUrl) {
-        updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl, prompt: result.convertedPrompt || prompt });
-      } else {
-        updateMediaItem({ ...videoMediaItem, loading: false, error: result.error || "Failed to generate video" });
-      }
-    } catch (err: any) {
-      updateMediaItem({ ...videoMediaItem, loading: false, error: err.message || "An error occurred" });
+    
+    // Create multiple videos based on numberOfVideos
+    for (let i = 0; i < numberOfVideos; i++) {
+      const videoMediaItem: MediaItem = {
+        id: `${Date.now()}-${i}`,
+        type: MediaType.Video,
+        loading: true,
+        prompt,
+        parent: mediaItem,
+        createdAt: Date.now() + i,
+      };
+      addMediaItem(videoMediaItem);
+      
+      // Generate video asynchronously (don't await to create all at once)
+      (async () => {
+        try {
+          if (!mediaItem.url) {
+            updateMediaItem({ ...videoMediaItem, loading: false, error: "Image URL is missing" });
+            return;
+          }
+          const result = await generateVideo({ image_url: mediaItem.url, prompt });
+          if (result.videoUrl) {
+            updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl, prompt: result.convertedPrompt || prompt });
+          } else {
+            updateMediaItem({ ...videoMediaItem, loading: false, error: result.error || "Failed to generate video" });
+          }
+        } catch (err: any) {
+          updateMediaItem({ ...videoMediaItem, loading: false, error: err.message || "An error occurred" });
+        }
+      })();
     }
+    
+    // Close dialog after initiating all video generations
+    onClose();
   };
 
   return (
@@ -296,6 +308,16 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
             {tabValue === 0 && (
               <Stack spacing={2}>
                 <TextField
+                  label="Number of Videos"
+                  type="number"
+                  value={numberOfVideos}
+                  onChange={e => setNumberOfVideos(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+                  fullWidth
+                  size="small"
+                  inputProps={{ min: 1, max: 10 }}
+                  helperText="Generate 1-10 videos (each will have slight variations)"
+                />
+                <TextField
                   label="Prompt"
                   value={prompt}
                   onChange={e => setPrompt(e.target.value)}
@@ -315,6 +337,16 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
             {/* Tab 1: Template Builder */}
             {tabValue === 1 && (
               <Stack spacing={2}>
+                <TextField
+                  label="Number of Videos"
+                  type="number"
+                  value={numberOfVideos}
+                  onChange={e => setNumberOfVideos(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+                  fullWidth
+                  size="small"
+                  inputProps={{ min: 1, max: 10 }}
+                  helperText="Generate 1-10 videos (each will have slight variations)"
+                />
                 {/* Subject Selection */}
                 <FormControl fullWidth size="small">
                   <InputLabel>Number of People</InputLabel>
@@ -647,6 +679,16 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
             {/* Tab 2: Saved Prompts */}
             {tabValue === 2 && (
               <Stack spacing={2}>
+                <TextField
+                  label="Number of Videos"
+                  type="number"
+                  value={numberOfVideos}
+                  onChange={e => setNumberOfVideos(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+                  fullWidth
+                  size="small"
+                  inputProps={{ min: 1, max: 10 }}
+                  helperText="Generate 1-10 videos (each will have slight variations)"
+                />
                 {/* Saved Prompts List */}
                 <Typography variant="subtitle2" sx={{ fontSize: '0.9rem' }}>
                   Saved Templates ({animateConfig.animations.length})
@@ -744,7 +786,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
               fontSize: '1rem'
             }}
           >
-            Generate Video
+            Generate {numberOfVideos > 1 ? `${numberOfVideos} Videos` : 'Video'}
           </Button>
         </DialogActions>
       </form>
