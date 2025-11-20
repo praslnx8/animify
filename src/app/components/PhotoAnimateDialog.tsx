@@ -16,6 +16,7 @@ import {
   Paper,
   Select,
   Stack,
+  Switch,
   Tab,
   Tabs,
   TextField,
@@ -40,6 +41,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
   const [prompt, setPrompt] = useState(initialPrompt || mediaItem.prompt || "");
   const [tabValue, setTabValue] = useState(0);
   const [numberOfVideos, setNumberOfVideos] = useState(1);
+  const [convertPrompt, setConvertPrompt] = useState(true);
 
   // Template Builder State
   const [selectedSubject, setSelectedSubject] = useState("single");
@@ -236,7 +238,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
             updateMediaItem({ ...videoMediaItem, loading: false, error: "Image URL is missing" });
             return;
           }
-          const result = await generateVideo({ image_url: mediaItem.url, prompt });
+          const result = await generateVideo({ image_url: mediaItem.url, prompt, convertPrompt });
           if (result.videoUrl) {
             updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl, prompt: result.convertedPrompt || prompt });
           } else {
@@ -317,6 +319,16 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
                   inputProps={{ min: 1, max: 10 }}
                   helperText="Generate 1-10 videos (each will have slight variations)"
                 />
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+                    Convert prompt using chatbot
+                  </Typography>
+                  <Switch
+                    checked={convertPrompt}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConvertPrompt(e.target.checked)}
+                    size="small"
+                  />
+                </Box>
                 <TextField
                   label="Prompt"
                   value={prompt}
@@ -347,7 +359,17 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
                   inputProps={{ min: 1, max: 10 }}
                   helperText="Generate 1-10 videos (each will have slight variations)"
                 />
-                {/* Subject Selection */}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+                    Convert prompt using chatbot
+                  </Typography>
+                  <Switch
+                    checked={convertPrompt}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConvertPrompt(e.target.checked)}
+                    size="small"
+                  />
+                </Box>
+                {/* Subject Selection */
                 <FormControl fullWidth size="small">
                   <InputLabel>Number of People</InputLabel>
                   <Select
@@ -689,6 +711,16 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
                   inputProps={{ min: 1, max: 10 }}
                   helperText="Generate 1-10 videos (each will have slight variations)"
                 />
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+                    Convert prompt using chatbot
+                  </Typography>
+                  <Switch
+                    checked={convertPrompt}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConvertPrompt(e.target.checked)}
+                    size="small"
+                  />
+                </Box>
                 {/* Saved Prompts List */}
                 <Typography variant="subtitle2" sx={{ fontSize: '0.9rem' }}>
                   Saved Templates ({animateConfig.animations.length})
@@ -800,11 +832,13 @@ export async function silentPhotoAnimate({
   prompt,
   addMediaItem,
   updateMediaItem,
+  convertPrompt = true,
 }: {
   parentMediaItem: MediaItem;
   prompt: string;
   addMediaItem: (item: MediaItem) => void;
   updateMediaItem: (item: MediaItem) => void;
+  convertPrompt?: boolean;
 }) {
   const videoMediaItem: MediaItem = {
     id: Date.now().toString(),
@@ -820,7 +854,7 @@ export async function silentPhotoAnimate({
       updateMediaItem({ ...videoMediaItem, loading: false, error: 'Image URL is missing' });
       return;
     }
-    const result = await generateVideo({ image_url: parentMediaItem.url, prompt });
+    const result = await generateVideo({ image_url: parentMediaItem.url, prompt, convertPrompt });
     if (result.videoUrl) {
       updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl, prompt: result.convertedPrompt || prompt });
     } else {

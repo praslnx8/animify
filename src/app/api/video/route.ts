@@ -48,7 +48,7 @@ async function convertPromptUsingChatbot(userPrompt: string, botConfig: BotConfi
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { image_url, prompt, model_id = "aura", duration = 10, botConfig } = body;
+        const { image_url, prompt, model_id = "aura", duration = 10, botConfig, convertPrompt = true } = body;
 
         if (!image_url || !prompt) {
             return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
@@ -63,8 +63,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'API token not configured on server' }, { status: 500 });
         }
 
-        // Convert the user prompt to an optimized video prompt using chatbot
-        const optimizedPrompt = await convertPromptUsingChatbot(prompt, botConfig);
+        // Convert the user prompt to an optimized video prompt using chatbot (if enabled)
+        const optimizedPrompt = convertPrompt ? await convertPromptUsingChatbot(prompt, botConfig) : prompt;
 
         const params: GenerateVideoParams = {
             image_url,

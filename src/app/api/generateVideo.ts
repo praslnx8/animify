@@ -4,6 +4,7 @@ import chatConfig from '../config/chat_config.json';
 export interface GenerateVideoParams {
     image_url: string;
     prompt: string;
+    convertPrompt?: boolean;
 }
 
 export interface BotConfig {
