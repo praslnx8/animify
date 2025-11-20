@@ -383,7 +383,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
                       </MenuItem>
                     ))}
                   </Select>
-                </FormControl>
+                </FormControl>}
 
                 {/* Custom Subject Input */}
                 {selectedSubject === "custom" && (
