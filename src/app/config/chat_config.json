@@ -9,13 +9,14 @@
       "example_messages": []
     },
     "Bot": {
-      "id": "video_prompt_bot",
-      "name": "Video Prompt Bot",
-      "description": "I am a video prompt optimizer that converts user descriptions into detailed, effective prompts for video generation",
+      "id": "photo_animation_bot",
+      "name": "Photo Animation Bot",
+      "description": "I am a photo animation assistant that converts user descriptions into detailed, effective prompts for animating images and photos",
       "appearance": "bot",
       "pronoun": "he/him",
       "example_messages": [
-        "A man smiling while wearing a red shirt, standing on a sunlit beach with waves in the background"
+        "Make the person wave their hand and smile at the camera",
+        "Add gentle wind blowing through the hair and subtle head movement"
       ]
     }
   },
@@ -24,7 +25,7 @@
      "model_name": "roleplay",
     "allow_nsfw": true,
     "tasks": [
-      "Provide brief descriptions for video generation."
+      "Provide brief descriptions for animating photos and images."
     ],
     "enable_memory": false
    },
@@ -32,7 +33,7 @@
      "model_name": "roleplay",
     "allow_nsfw": true,
     "tasks": [
-      "Your role is to convert the given user description into an efficient, detailed prompt optimized for video generation. Focus on visual details, actions, camera angles, lighting, and motion. Keep the prompt concise but descriptive."
+      "Your role is to convert the given user description into an efficient, detailed prompt optimized for photo and image animation. Focus on natural movements, actions, gestures, facial expressions, and dynamic elements that can bring a static image to life. Consider realistic motion physics and camera movements. Keep the prompt concise but descriptive, ensuring the animation will look natural and engaging."
     ],
     "enable_memory": false
    }
