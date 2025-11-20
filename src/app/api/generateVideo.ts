@@ -5,6 +5,7 @@ export interface GenerateVideoParams {
     image_url: string;
     prompt: string;
     convertPrompt?: boolean;
+    model_id?: "aura" | "ultra" | "pro";
 }
 
 export interface BotConfig {
@@ -47,7 +48,7 @@ export async function generateVideo(params: GenerateVideoParams, botConfig?: Bot
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ ...params, botConfig: config }),
+            body: JSON.stringify({ ...params, botConfig: config, model_id: params.model_id }),
         });
         const data = await res.json();
 

@@ -42,6 +42,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
   const [tabValue, setTabValue] = useState(0);
   const [numberOfVideos, setNumberOfVideos] = useState(1);
   const [convertPrompt, setConvertPrompt] = useState(true);
+  const [modelId, setModelId] = useState<"aura" | "ultra" | "pro">("aura");
 
   // Template Builder State
   const [selectedSubject, setSelectedSubject] = useState("single");
@@ -238,7 +239,7 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
             updateMediaItem({ ...videoMediaItem, loading: false, error: "Image URL is missing" });
             return;
           }
-          const result = await generateVideo({ image_url: mediaItem.url, prompt, convertPrompt });
+          const result = await generateVideo({ image_url: mediaItem.url, prompt, convertPrompt, model_id: modelId });
           if (result.videoUrl) {
             updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl, prompt: result.convertedPrompt || prompt });
           } else {
@@ -319,6 +320,18 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
                   inputProps={{ min: 1, max: 10 }}
                   helperText="Generate 1-10 videos (each will have slight variations)"
                 />
+                <FormControl fullWidth size="small">
+                  <InputLabel>Model</InputLabel>
+                  <Select
+                    value={modelId}
+                    label="Model"
+                    onChange={e => setModelId(e.target.value as "aura" | "ultra" | "pro")}
+                  >
+                    <MenuItem value="aura">Aura (Fast)</MenuItem>
+                    <MenuItem value="ultra">Ultra (Balanced)</MenuItem>
+                    <MenuItem value="pro">Pro (High Quality)</MenuItem>
+                  </Select>
+                </FormControl>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
                     Convert prompt using chatbot
@@ -359,6 +372,18 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
                   inputProps={{ min: 1, max: 10 }}
                   helperText="Generate 1-10 videos (each will have slight variations)"
                 />
+                <FormControl fullWidth size="small">
+                  <InputLabel>Model</InputLabel>
+                  <Select
+                    value={modelId}
+                    label="Model"
+                    onChange={e => setModelId(e.target.value as "aura" | "ultra" | "pro")}
+                  >
+                    <MenuItem value="aura">Aura (Fast)</MenuItem>
+                    <MenuItem value="ultra">Ultra (Balanced)</MenuItem>
+                    <MenuItem value="pro">Pro (High Quality)</MenuItem>
+                  </Select>
+                </FormControl>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
                     Convert prompt using chatbot
@@ -711,6 +736,18 @@ const PhotoAnimateDialog: React.FC<PhotoAnimateDialogProps> = ({ mediaItem, open
                   inputProps={{ min: 1, max: 10 }}
                   helperText="Generate 1-10 videos (each will have slight variations)"
                 />
+                <FormControl fullWidth size="small">
+                  <InputLabel>Model</InputLabel>
+                  <Select
+                    value={modelId}
+                    label="Model"
+                    onChange={e => setModelId(e.target.value as "aura" | "ultra" | "pro")}
+                  >
+                    <MenuItem value="aura">Aura (Fast)</MenuItem>
+                    <MenuItem value="ultra">Ultra (Balanced)</MenuItem>
+                    <MenuItem value="pro">Pro (High Quality)</MenuItem>
+                  </Select>
+                </FormControl>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
                     Convert prompt using chatbot
@@ -833,12 +870,14 @@ export async function silentPhotoAnimate({
   addMediaItem,
   updateMediaItem,
   convertPrompt = true,
+  model_id = "aura",
 }: {
   parentMediaItem: MediaItem;
   prompt: string;
   addMediaItem: (item: MediaItem) => void;
   updateMediaItem: (item: MediaItem) => void;
   convertPrompt?: boolean;
+  model_id?: "aura" | "ultra" | "pro";
 }) {
   const videoMediaItem: MediaItem = {
     id: Date.now().toString(),
@@ -854,7 +893,7 @@ export async function silentPhotoAnimate({
       updateMediaItem({ ...videoMediaItem, loading: false, error: 'Image URL is missing' });
       return;
     }
-    const result = await generateVideo({ image_url: parentMediaItem.url, prompt, convertPrompt });
+    const result = await generateVideo({ image_url: parentMediaItem.url, prompt, convertPrompt, model_id });
     if (result.videoUrl) {
       updateMediaItem({ ...videoMediaItem, loading: false, url: result.videoUrl, prompt: result.convertedPrompt || prompt });
     } else {
