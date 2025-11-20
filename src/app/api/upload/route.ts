@@ -14,7 +14,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'No image uploaded' }, { status: 400 });
         }
 
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+        // Store uploads outside public folder for production compatibility
+        const uploadDir = path.join(process.cwd(), 'uploads');
         await fs.mkdir(uploadDir, { recursive: true });
 
         const ext = (file as File).type.split('/').pop() || 'png';
@@ -25,7 +26,8 @@ export async function POST(req: NextRequest) {
         await fs.writeFile(filepath, Buffer.from(arrayBuffer));
 
         // Build a publicly accessible URL using our utility function
-        const imagePath = `/uploads/${filename}`;
+        // Point to the API route that will serve the file
+        const imagePath = `/api/uploads/${filename}`;
         const imageUrl = buildPublicUrl(req, imagePath);
             
         return NextResponse.json({ imageUrl });
