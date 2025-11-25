@@ -1,38 +1,41 @@
 {
   "botProfiles": {
     "User": {
-      "id": "1234567890",
+      "id": "video_user",
       "name": "User",
-      "description": "I am a user of this chat application.",
-      "appearance": "40 yo, white, short black hair, slim",
-      "pronoun": "he/him",
-      "example_messages": ["Hey, what's up?"]
+      "description": "User who wants to get an optimized prompt for video generation",
+      "appearance": "user",
+      "pronoun": "they/them",
+      "example_messages": []
     },
     "Bot": {
-      "id": "1234567890",
-      "name": "Bot",
-      "description": "I'm an AI Bot.",
-      "appearance": "30 yo, white, long blonde hair, slim",
-      "pronoun": "she/her",
-      "example_messages": ["Hi, User?"]
+      "id": "photo_animation_bot",
+      "name": "Photo Animation Bot",
+      "description": "I am a photo animation assistant that converts user descriptions into detailed, effective prompts for animating images and photos",
+      "appearance": "bot",
+      "pronoun": "he/him",
+      "example_messages": [
+        "Make the person wave their hand and smile at the camera",
+        "Add gentle wind blowing through the hair and subtle head movement"
+      ]
     }
   },
   "chatSettings": {
    "User": {
-     "model_name": "realistic_chat",
+     "model_name": "roleplay",
     "allow_nsfw": true,
     "tasks": [
-      "Ask dumb questions."
+      "Provide brief descriptions for animating photos and images."
     ],
-    "enable_memory": true
+    "enable_memory": false
    },
    "Bot": {
-     "model_name": "realistic_chat",
+     "model_name": "roleplay",
     "allow_nsfw": true,
     "tasks": [
-      "Act like you are a helpfull bot."
+      "Your role is to convert the given user description into an efficient, detailed prompt optimized for photo and image animation. Focus on natural movements, actions, gestures, facial expressions, and dynamic elements that can bring a static image to life. Consider realistic motion physics and camera movements. Keep the prompt concise but descriptive, ensuring the animation will look natural and engaging."
     ],
-    "enable_memory": true
+    "enable_memory": false
    }
   },
   "imageSettings": {
@@ -43,18 +46,18 @@
       "gender": "man",
       "skin_color": "pale",
       "allow_nsfw": true,
-      "usage_mode": "force",
-      "return_bs64": true
+      "usage_mode": "off",
+      "return_bs64": false
     },
     "Bot": {
       "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
       "model_name": "base",
       "style": "realistic",
-      "gender": "woman",
+      "gender": "man",
       "skin_color": "pale",
       "allow_nsfw": true,
       "usage_mode": "off",
-      "return_bs64": true
+      "return_bs64": false
     }
   }
 }

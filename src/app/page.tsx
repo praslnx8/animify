@@ -114,7 +114,7 @@ export default function HomePage() {
       <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
 
       <Box
-        sx={{ flex: 1, position: 'relative', overflow: 'hidden', pb: '56px' }}
+        sx={{ flex: 1, position: 'relative', overflow: 'hidden' }}
         onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
         onTouchEnd={(e) => {
           if (touchStart !== null) handleSwipe(touchStart, e.changedTouches[0].clientX);
@@ -137,19 +137,33 @@ export default function HomePage() {
               ><ChevronRightIcon /></IconButton>
             )}
 
-            <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box sx={{ 
+              height: '100%', 
+              width: '100%',
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              maxWidth: '600px',
+              margin: '0 auto',
+              p: { xs: 1, sm: 2 },
+              pb: { xs: '60px', sm: '80px' }
+            }}>
               <MediaItemComponent
                 mediaItem={mediaItems[currentIdx]}
                 addMediaItem={item => {
-                  setMediaItems(prev => [...prev, item]);
-                  setCurrentIdx(mediaItems.length);
+                  setMediaItems(prev => [
+                    ...prev.slice(0, currentIdx + 1),
+                    item,
+                    ...prev.slice(currentIdx + 1)
+                  ]);
+                  setCurrentIdx(currentIdx + 1);
                 }}
                 updateMediaItem={updateMediaItem}
                 onDelete={handleDelete}
               />
             </Box>
 
-            <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+            <Box sx={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
               <Chip label={`${currentIdx + 1} / ${mediaItems.length}`} size="small" sx={chipStyle} />
             </Box>
 

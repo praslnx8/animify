@@ -4,5 +4,102 @@
   ],
   "animations": [
     "A serene landscape with mountains in the background and a river flowing through the foreground."
-  ]
+  ],
+  "templateBuilder": {
+    "subjects": [
+      { "id": "single", "label": "Single Person", "value": "person in photo" },
+      { "id": "couple", "label": "Two People", "value": "two people in photo" },
+      { "id": "group", "label": "Group of People", "value": "group of people in photo" },
+      { "id": "custom", "label": "Custom", "value": "" }
+    ],
+    "actions": {
+      "single": [
+        { "id": "none", "label": "No Action", "value": "" },
+        { "id": "walking", "label": "Walking Forward", "value": "walking forward naturally" },
+        { "id": "waving", "label": "Waving Hand", "value": "waving hand at camera" },
+        { "id": "smiling", "label": "Smiling", "value": "breaking into a warm smile" },
+        { "id": "laughing", "label": "Laughing", "value": "laughing joyfully" },
+        { "id": "turning", "label": "Turning Head", "value": "slowly turning head to look around" },
+        { "id": "dancing", "label": "Dancing", "value": "dancing with graceful movements" },
+        { "id": "jumping", "label": "Jumping", "value": "jumping up excitedly" },
+        { "id": "running", "label": "Running", "value": "running forward with energy" },
+        { "id": "sitting", "label": "Sitting Down", "value": "sitting down calmly" },
+        { "id": "talking", "label": "Talking", "value": "talking expressively" },
+        { "id": "thinking", "label": "Thinking", "value": "looking thoughtful and contemplative" },
+        { "id": "custom", "label": "✏️ Custom Action", "value": "" }
+      ],
+      "multiple": [
+        { "id": "none", "label": "No Action", "value": "" },
+        { "id": "talking", "label": "Talking to Each Other", "value": "talking and interacting with each other" },
+        { "id": "laughing", "label": "Laughing Together", "value": "laughing together joyfully" },
+        { "id": "hugging", "label": "Hugging", "value": "embracing in a warm hug" },
+        { "id": "highfive", "label": "High Five", "value": "giving each other a high five" },
+        { "id": "walking", "label": "Walking Together", "value": "walking together side by side" },
+        { "id": "dancing", "label": "Dancing Together", "value": "dancing together in sync" },
+        { "id": "pointing", "label": "Pointing at Something", "value": "pointing and looking at something together" },
+        { "id": "celebrating", "label": "Celebrating", "value": "celebrating with excitement" },
+        { "id": "arguing", "label": "Having a Discussion", "value": "having an animated discussion" },
+        { "id": "posing", "label": "Posing Together", "value": "posing together for the camera" },
+        { "id": "custom", "label": "✏️ Custom Action", "value": "" }
+      ]
+    },
+    "sequenceConnectors": [
+      { "id": "then", "label": "then", "value": "then" },
+      { "id": "and_then", "label": "and then", "value": "and then" },
+      { "id": "before", "label": "before", "value": "before" },
+      { "id": "while", "label": "while", "value": "while" },
+      { "id": "as", "label": "as", "value": "as" }
+    ],
+    "individualPersonLabels": [
+      { "id": "personA", "label": "Person on Left" },
+      { "id": "personB", "label": "Person on Right" },
+      { "id": "personC", "label": "Person in Center" },
+      { "id": "person1", "label": "First Person" },
+      { "id": "person2", "label": "Second Person" }
+    ],
+    "environments": [
+      { "id": "none", "label": "No Environment", "value": "" },
+      { "id": "wind", "label": "Windy Scene", "value": "wind gently blowing" },
+      { "id": "rain", "label": "Light Rain", "value": "light rain falling softly" },
+      { "id": "sunset", "label": "Sunset Glow", "value": "warm sunset light in background" },
+      { "id": "sunrise", "label": "Sunrise Light", "value": "soft sunrise light emerging" },
+      { "id": "snow", "label": "Falling Snow", "value": "snowflakes falling gently" },
+      { "id": "leaves", "label": "Falling Leaves", "value": "autumn leaves falling around" },
+      { "id": "bokeh", "label": "Bokeh Lights", "value": "beautiful bokeh lights in background" },
+      { "id": "sparkles", "label": "Sparkles", "value": "magical sparkles floating around" },
+      { "id": "fog", "label": "Light Fog", "value": "soft fog rolling in" },
+      { "id": "clouds", "label": "Moving Clouds", "value": "clouds slowly moving overhead" },
+      { "id": "water", "label": "Near Water", "value": "water rippling in background" },
+      { "id": "city", "label": "City Lights", "value": "city lights twinkling" },
+      { "id": "nature", "label": "Nature Setting", "value": "lush nature surrounding" },
+      { "id": "custom", "label": "✏️ Custom Environment", "value": "" }
+    ],
+    "cameraMovements": [
+      { "id": "none", "label": "Static Camera", "value": "" },
+      { "id": "zoomin", "label": "Zoom In", "value": "camera slowly zooming in" },
+      { "id": "zoomout", "label": "Zoom Out", "value": "camera slowly zooming out" },
+      { "id": "panleft", "label": "Pan Left", "value": "camera panning left" },
+      { "id": "panright", "label": "Pan Right", "value": "camera panning right" },
+      { "id": "tiltup", "label": "Tilt Up", "value": "camera tilting upward" },
+      { "id": "tiltdown", "label": "Tilt Down", "value": "camera tilting downward" },
+      { "id": "dolly", "label": "Dolly Forward", "value": "camera moving forward smoothly" },
+      { "id": "orbit", "label": "Orbit Around", "value": "camera orbiting around subject" },
+      { "id": "handheld", "label": "Handheld Feel", "value": "subtle handheld camera movement" },
+      { "id": "steady", "label": "Steady Smooth", "value": "smooth steady camera work" },
+      { "id": "custom", "label": "✏️ Custom Camera", "value": "" }
+    ],
+    "styles": [
+      { "id": "cinematic", "label": "Cinematic", "value": "cinematic style" },
+      { "id": "natural", "label": "Natural", "value": "natural realistic style" },
+      { "id": "dramatic", "label": "Dramatic", "value": "dramatic lighting and mood" },
+      { "id": "dreamy", "label": "Dreamy", "value": "soft dreamy aesthetic" },
+      { "id": "vibrant", "label": "Vibrant", "value": "vibrant and colorful" },
+      { "id": "moody", "label": "Moody", "value": "moody atmospheric feel" },
+      { "id": "vintage", "label": "Vintage", "value": "vintage film look" },
+      { "id": "modern", "label": "Modern", "value": "modern clean aesthetic" },
+      { "id": "artistic", "label": "Artistic", "value": "artistic creative style" },
+      { "id": "documentary", "label": "Documentary", "value": "documentary realism" },
+      { "id": "custom", "label": "✏️ Custom Style", "value": "" }
+    ]
+  }
 }

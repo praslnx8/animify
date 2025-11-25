@@ -354,12 +354,6 @@ export default function ConfigPage() {
                                         value={profile.appearance}
                                         onChange={(e) => updateBotProfile(senderKey, 'appearance', e.target.value)}
                                     />
-                                    <TextField
-                                        fullWidth
-                                        label="Pronoun"
-                                        value={profile.pronoun}
-                                        onChange={(e) => updateBotProfile(senderKey, 'pronoun', e.target.value)}
-                                    />
                                     <FormControl fullWidth>
                                         <InputLabel>Pronoun</InputLabel>
                                         <Select
@@ -421,8 +415,9 @@ export default function ConfigPage() {
                                             label="Model Name"
                                             onChange={(e) => updateChatSettings(senderKey, 'model_name', e.target.value)}
                                         >
-                                            <MenuItem value="base">Base</MenuItem>
+                                            <MenuItem value="roleplay">Role Play</MenuItem>
                                             <MenuItem value="realistic_chat">Realistic Chat</MenuItem>
+                                            <MenuItem value="instruct">Instruct</MenuItem>
                                         </Select>
                                     </FormControl>
                                     <FormControlLabel
@@ -516,6 +511,7 @@ export default function ConfigPage() {
                                         >
                                             <MenuItem value="base">Base</MenuItem>
                                             <MenuItem value="large">Large</MenuItem>
+                                            <MenuItem value="persona">Persona</MenuItem>
                                         </Select>
                                     </FormControl>
                                     <FormControl fullWidth>

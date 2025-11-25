@@ -45,6 +45,12 @@ export default function ChatPage() {
     const [videoPreviewOpen, setVideoPreviewOpen] = React.useState(false);
     const [previewVideoUrl, setPreviewVideoUrl] = React.useState<string | null>(null);
     const messagesEndRef = React.useRef<HTMLDivElement>(null);
+    
+    // Auto-conversation state
+    const [autoTurns, setAutoTurns] = React.useState<number>(0);
+    const [remainingTurns, setRemainingTurns] = React.useState<number>(0);
+    const [isAutoRunning, setIsAutoRunning] = React.useState(false);
+    const [turnsDialogOpen, setTurnsDialogOpen] = React.useState(false);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,7 +60,7 @@ export default function ChatPage() {
         scrollToBottom();
     }, [messages]);
 
-    const handleSendMessage = async () => {
+    const handleSendMessage = async (isAutoContinue: boolean = false) => {
         const userMessage: Message | null = input.trim() ? { id: Date.now().toString(), sender: sender, text: input, timestamp: new Date() } : null;
         const updatedMessages = userMessage ? [...messages, userMessage] : messages;
 
@@ -80,16 +86,50 @@ export default function ChatPage() {
                 };
                 setSender(response.sender);
                 setMessages(prev => [...prev, botMessage]);
+                
+                // If auto-running, continue to next turn
+                if (isAutoContinue && remainingTurns > 1) {
+                    setRemainingTurns(prev => prev - 1);
+                } else if (isAutoContinue) {
+                    setIsAutoRunning(false);
+                    setRemainingTurns(0);
+                }
             }
         } catch (error) {
             console.error('Error occurred while sending message:', error);
             setVideoError('An error occurred while processing your request.');
+            if (isAutoContinue) {
+                setIsAutoRunning(false);
+                setRemainingTurns(0);
+            }
         } finally {
             setSendingMessage(false);
         }
     };
 
-    const handleOpenAnimateDialog = (message: Message) => {
+    // Effect to handle auto-conversation
+    React.useEffect(() => {
+        if (isAutoRunning && remainingTurns > 0 && !sendingMessage) {
+            const timer = setTimeout(() => {
+                handleSendMessage(true);
+            }, 1000); // Wait 1 second between messages
+            
+            return () => clearTimeout(timer);
+        }
+    }, [isAutoRunning, remainingTurns, sendingMessage]);
+
+    const handleStartAutoConversation = () => {
+        if (autoTurns > 0) {
+            setRemainingTurns(autoTurns);
+            setIsAutoRunning(true);
+            setTurnsDialogOpen(false);
+        }
+    };
+
+    const handleStopAutoConversation = () => {
+        setIsAutoRunning(false);
+        setRemainingTurns(0);
+    };    const handleOpenAnimateDialog = (message: Message) => {
         setSelectedMessage(message);
         setAnimateDialogOpen(true);
     };
@@ -266,6 +306,7 @@ export default function ChatPage() {
                         multiline
                         minRows={1}
                         maxRows={4}
+                        placeholder={sendingMessage ? "Waiting for response..." : isAutoRunning ? "Auto conversation running..." : "Type your message..."}
                         sx={{ 
                             flex: 1,
                             bgcolor: 'background.default', 
@@ -277,6 +318,7 @@ export default function ChatPage() {
                         exclusive
                         onChange={(_e, val) => { if (val) setSender(val); }}
                         size="small"
+                        disabled={sendingMessage || isAutoRunning}
                         sx={{ ml: 0.5 }}
                     >
                         <ToggleButton value={Sender.User}>User</ToggleButton>
@@ -285,22 +327,60 @@ export default function ChatPage() {
                 </Box>
             </Paper>
 
-            {/* Floating Action Button for Send */}
-            <Fab
-                color="primary"
-                onClick={handleSendMessage}
-                disabled={sendingMessage}
-                sx={{
-                    position: 'fixed',
-                    bottom: 100, // Position above the input area
-                    right: 24,
-                    zIndex: 1001,
-                    width: 56,
-                    height: 56
-                }}
-            >
-                {sendingMessage ? <CircularProgress size={24} color="inherit" /> : <SendIcon />}
-            </Fab>
+            {/* Floating Action Buttons */}
+            <Box sx={{ position: 'fixed', bottom: 100, right: 24, zIndex: 1001, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {/* Auto-run Button */}
+                {!isAutoRunning ? (
+                    <Fab
+                        color="secondary"
+                        onClick={() => setTurnsDialogOpen(true)}
+                        disabled={sendingMessage}
+                        size="small"
+                        sx={{ width: 48, height: 48 }}
+                    >
+                        <Typography variant="caption" fontWeight="bold">Auto</Typography>
+                    </Fab>
+                ) : (
+                    <Fab
+                        color="error"
+                        onClick={handleStopAutoConversation}
+                        size="small"
+                        sx={{ width: 48, height: 48 }}
+                    >
+                        <Typography variant="caption" fontWeight="bold">Stop</Typography>
+                    </Fab>
+                )}
+                
+                {/* Send Button */}
+                <Fab
+                    color="primary"
+                    onClick={() => handleSendMessage(false)}
+                    disabled={sendingMessage || isAutoRunning}
+                    sx={{ width: 56, height: 56 }}
+                >
+                    {sendingMessage ? <CircularProgress size={24} color="inherit" /> : <SendIcon />}
+                </Fab>
+            </Box>
+            
+            {/* Turns remaining indicator */}
+            {isAutoRunning && (
+                <Paper
+                    elevation={3}
+                    sx={{
+                        position: 'fixed',
+                        top: 80,
+                        right: 24,
+                        p: 1.5,
+                        zIndex: 1001,
+                        bgcolor: 'primary.main',
+                        color: 'primary.contrastText'
+                    }}
+                >
+                    <Typography variant="body2" fontWeight="bold">
+                        Turns remaining: {remainingTurns}
+                    </Typography>
+                </Paper>
+            )}
 
             <ChatAnimateDialog
                 open={animateDialogOpen}
@@ -309,6 +389,46 @@ export default function ChatPage() {
                 onLoading={() => setVideoError('loading')}
                 onComplete={handleCompleteAnimation}
             />
+
+            {/* Auto-Conversation Turns Dialog */}
+            <Dialog
+                open={turnsDialogOpen}
+                onClose={() => setTurnsDialogOpen(false)}
+                maxWidth="xs"
+                fullWidth
+                PaperProps={{
+                    sx: { bgcolor: 'background.paper', borderRadius: 2 }
+                }}
+            >
+                <DialogTitle>Auto Conversation</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        Enter the number of conversation turns to run automatically:
+                    </Typography>
+                    <TextField
+                        label="Number of Turns"
+                        type="number"
+                        fullWidth
+                        value={autoTurns}
+                        onChange={(e) => setAutoTurns(Math.max(1, parseInt(e.target.value) || 0))}
+                        inputProps={{ min: 1, max: 100 }}
+                        sx={{ mb: 2 }}
+                    />
+                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                        <Button onClick={() => setTurnsDialogOpen(false)} color="inherit">
+                            Cancel
+                        </Button>
+                        <Button 
+                            onClick={handleStartAutoConversation} 
+                            variant="contained" 
+                            color="primary"
+                            disabled={autoTurns < 1}
+                        >
+                            Start
+                        </Button>
+                    </Box>
+                </DialogContent>
+            </Dialog>
 
             {/* Video Preview Dialog */}
             <Dialog
