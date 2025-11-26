@@ -16,7 +16,8 @@ export async function GET(
             return NextResponse.json({ error: 'Invalid filename' }, { status: 400 });
         }
 
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+        // Files are stored in uploads/ at project root (outside public for production compatibility)
+        const uploadDir = path.join(process.cwd(), 'uploads');
         const filepath = path.join(uploadDir, filename);
 
         // Check if file exists

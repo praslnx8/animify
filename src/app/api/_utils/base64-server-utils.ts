@@ -39,7 +39,8 @@ export async function saveBase64ToFile(base64Data: string): Promise<string> {
     const { v4: uuidv4 } = await import('uuid');
     
     // Create uploads directory if it doesn't exist
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+    // Store uploads outside public folder for production compatibility
+    const uploadDir = path.join(process.cwd(), 'uploads');
     await fs.mkdir(uploadDir, { recursive: true });
     
     // Generate unique filename
@@ -49,8 +50,8 @@ export async function saveBase64ToFile(base64Data: string): Promise<string> {
     // Write the file
     await fs.writeFile(filepath, Buffer.from(base64Data, 'base64'));
     
-    // Return the URL path (just the path, not the full URL)
-    return `/uploads/${filename}`;
+    // Return the URL path pointing to the API route that serves the file
+    return `/api/uploads/${filename}`;
   } catch (error) {
     console.error('Error saving base64 to file:', error);
     throw error;
