@@ -45,6 +45,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
   const [skinColor, setSkinColor] = useState(mediaItem.skin_color || "tanned");
   const [autoDetectHairColor, setAutoDetectHairColor] = useState(mediaItem.auto_detect_hair_color || false);
   const [nsfwPolicy, setNsfwPolicy] = useState(mediaItem.nsfw_policy || "allow");
+  const [convertPrompt, setConvertPrompt] = useState(mediaItem.convert_prompt !== false);
 
   const loadSavedTransform = (savedTransform: string) => {
     setPrompt(savedTransform);
@@ -66,6 +67,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
       skin_color: skinColor,
       auto_detect_hair_color: autoDetectHairColor,
       nsfw_policy: nsfwPolicy,
+      convert_prompt: convertPrompt,
     };
     addMediaItem(newMediaItem);
 
@@ -80,6 +82,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
         skin_color: skinColor,
         auto_detect_hair_color: autoDetectHairColor,
         nsfw_policy: nsfwPolicy,
+        convert_prompt: convertPrompt,
       });
       if (result.image_url) {
         updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });
@@ -159,6 +162,17 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                   variant="outlined"
                   helperText="Describe how to transform the selfie"
                   size="small"
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={convertPrompt}
+                      onChange={e => setConvertPrompt(e.target.checked)}
+                      size="small"
+                    />
+                  }
+                  label="Optimize prompt with AI"
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                 />
               </Stack>
             )}
@@ -339,6 +353,18 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                   label="Auto-detect hair color"
                   sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                 />
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={convertPrompt}
+                      onChange={e => setConvertPrompt(e.target.checked)}
+                      size="small"
+                    />
+                  }
+                  label="Optimize prompt with AI"
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
+                />
               </Stack>
             )}
           </Stack>
@@ -396,6 +422,7 @@ export async function silentPhotoTransform({
   skinColor = 'tanned',
   autoDetectHairColor = false,
   nsfwPolicy = 'allow',
+  convertPrompt = true,
 }: {
   parentMediaItem: MediaItem;
   prompt: string;
@@ -408,6 +435,7 @@ export async function silentPhotoTransform({
   skinColor?: string;
   autoDetectHairColor?: boolean;
   nsfwPolicy?: string;
+  convertPrompt?: boolean;
 }) {
   const newMediaItem: MediaItem = {
     id: Date.now().toString(),
@@ -422,6 +450,7 @@ export async function silentPhotoTransform({
     skin_color: skinColor,
     auto_detect_hair_color: autoDetectHairColor,
     nsfw_policy: nsfwPolicy,
+    convert_prompt: convertPrompt,
   };
   addMediaItem(newMediaItem);
   try {
@@ -435,6 +464,7 @@ export async function silentPhotoTransform({
       skin_color: skinColor,
       auto_detect_hair_color: autoDetectHairColor,
       nsfw_policy: nsfwPolicy,
+      convert_prompt: convertPrompt,
     });
     if (result.image_url) {
       updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });

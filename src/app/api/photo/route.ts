@@ -78,7 +78,7 @@ async function convertPromptUsingChatbot(userPrompt: string): Promise<string> {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { image_url, prompt, model_name, style, gender, body_type, skin_color, auto_detect_hair_color, nsfw_policy } = body;
+        const { image_url, prompt, model_name, style, gender, body_type, skin_color, auto_detect_hair_color, nsfw_policy, convert_prompt = true } = body;
 
         if (!image_url || !prompt) {
             return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
@@ -89,8 +89,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'API token not configured on server' }, { status: 500 });
         }
 
-        // Convert the user prompt to an optimized photo prompt using chatbot
-        const optimizedPrompt = await convertPromptUsingChatbot(prompt);
+        // Convert the user prompt to an optimized photo prompt using chatbot (if enabled)
+        const optimizedPrompt = convert_prompt ? await convertPromptUsingChatbot(prompt) : prompt;
 
         const identity_image_b64 = await urlToBase64(image_url);
 

@@ -8,6 +8,7 @@ export interface GeneratePhotoParams {
   skin_color: string;
   auto_detect_hair_color: boolean;
   nsfw_policy: string;
+  convert_prompt: boolean;
 }
 
 export interface GeneratePhotoResult {
