@@ -38,6 +38,7 @@ interface PhotoTransformDialogProps {
 const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
   const [prompt, setPrompt] = useState(mediaItem.prompt || "");
   const [tabValue, setTabValue] = useState(0);
+  const [numberOfTransformations, setNumberOfTransformations] = useState(1);
   const [modelName, setModelName] = useState(mediaItem.model_name || "base");
   const [style, setStyle] = useState(mediaItem.style || "realistic");
   const [gender, setGender] = useState(mediaItem.gender || "woman");
@@ -54,27 +55,15 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newMediaItem: MediaItem = {
-      id: Date.now().toString(),
-      type: MediaType.Image,
-      loading: true,
-      parent: mediaItem,
-      prompt: prompt,
-      model_name: modelName,
-      style,
-      gender,
-      body_type: bodyType,
-      skin_color: skinColor,
-      auto_detect_hair_color: autoDetectHairColor,
-      nsfw_policy: nsfwPolicy,
-      convert_prompt: convertPrompt,
-    };
-    addMediaItem(newMediaItem);
-
-    try {
-      const result = await generatePhoto({
-        image_url: mediaItem.url || "",
-        prompt,
+    
+    // Create multiple transformations based on numberOfTransformations
+    for (let i = 0; i < numberOfTransformations; i++) {
+      const newMediaItem: MediaItem = {
+        id: `${Date.now()}-${i}`,
+        type: MediaType.Image,
+        loading: true,
+        parent: mediaItem,
+        prompt: prompt,
         model_name: modelName,
         style,
         gender,
@@ -83,15 +72,38 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
         auto_detect_hair_color: autoDetectHairColor,
         nsfw_policy: nsfwPolicy,
         convert_prompt: convertPrompt,
-      });
-      if (result.image_url) {
-        updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });
-      } else {
-        updateMediaItem({ ...newMediaItem, loading: false, error: result.error || "Failed to generate image" });
-      }
-    } catch (err: any) {
-      updateMediaItem({ ...newMediaItem, loading: false, error: err.message || "Network error" });
+        createdAt: Date.now() + i,
+      };
+      addMediaItem(newMediaItem);
+
+      // Generate photo asynchronously (don't await to create all at once)
+      (async () => {
+        try {
+          const result = await generatePhoto({
+            image_url: mediaItem.url || "",
+            prompt,
+            model_name: modelName,
+            style,
+            gender,
+            body_type: bodyType,
+            skin_color: skinColor,
+            auto_detect_hair_color: autoDetectHairColor,
+            nsfw_policy: nsfwPolicy,
+            convert_prompt: convertPrompt,
+          });
+          if (result.image_url) {
+            updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });
+          } else {
+            updateMediaItem({ ...newMediaItem, loading: false, error: result.error || "Failed to generate image" });
+          }
+        } catch (err: any) {
+          updateMediaItem({ ...newMediaItem, loading: false, error: err.message || "Network error" });
+        }
+      })();
     }
+    
+    // Close dialog after initiating all transformations
+    onClose();
   };
 
   return (
@@ -150,6 +162,16 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
             {tabValue === 0 && (
               <Stack spacing={2}>
                 <TextField
+                  label="Number of Transformations"
+                  type="number"
+                  value={numberOfTransformations}
+                  onChange={e => setNumberOfTransformations(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+                  fullWidth
+                  size="small"
+                  inputProps={{ min: 1, max: 10 }}
+                  helperText="Generate 1-10 images (each will have slight variations)"
+                />
+                <TextField
                   label="Transformation Description"
                   value={prompt}
                   onChange={e => setPrompt(e.target.value)}
@@ -180,6 +202,16 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
             {/* Tab 1: Saved Transforms */}
             {tabValue === 1 && (
               <Stack spacing={2}>
+                <TextField
+                  label="Number of Transformations"
+                  type="number"
+                  value={numberOfTransformations}
+                  onChange={e => setNumberOfTransformations(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+                  fullWidth
+                  size="small"
+                  inputProps={{ min: 1, max: 10 }}
+                  helperText="Generate 1-10 images (each will have slight variations)"
+                />
                 {/* Saved Transforms List */}
                 <Typography variant="subtitle2" sx={{ fontSize: '0.9rem' }}>
                   Saved Transforms ({transformConfig.transformations.length})
@@ -247,6 +279,17 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
             {/* Tab 2: Advanced Settings */}
             {tabValue === 2 && (
               <Stack spacing={2}>
+                <TextField
+                  label="Number of Transformations"
+                  type="number"
+                  value={numberOfTransformations}
+                  onChange={e => setNumberOfTransformations(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+                  fullWidth
+                  size="small"
+                  inputProps={{ min: 1, max: 10 }}
+                  helperText="Generate 1-10 images (each will have slight variations)"
+                />
+                
                 <Typography variant="subtitle2" sx={{ fontSize: '0.9rem' }}>
                   Generation Settings
                 </Typography>
@@ -401,7 +444,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
               fontSize: '1rem'
             }}
           >
-            Transform Photo
+            {numberOfTransformations > 1 ? `Transform ${numberOfTransformations} Photos` : 'Transform Photo'}
           </Button>
         </DialogActions>
       </form>
