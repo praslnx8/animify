@@ -28,27 +28,31 @@ async function convertPromptUsingChatbot(userPrompt: string, storyParams?: Story
 
 ${previousContext}Your task is to convert the user's description into a detailed photo prompt for step ${story_step}.
 
-IMPORTANT GUIDELINES:
+CRITICAL RULES (MUST FOLLOW):
+- NEVER modify, describe, or suggest changes to facial features, face shape, or facial identity
+- Do NOT include any facial descriptions (eyes, nose, lips, skin tone, face shape) in your output
+- The face must remain identical to the source image - only describe body, pose, and scene
+
+STORY GUIDELINES:
 - Break down the overall action into this specific step (${story_step}/${story_total})
 - Step 1 should show the beginning/preparation of the action
 - Middle steps should show progression
 - Final step should show the completion/result
 - Maintain visual consistency (same person, clothing, setting)
 - Focus on the specific moment in the sequence
-- Describe pose, hand positions, facial expression for this exact moment
+- Describe pose, hand positions, body language for this exact moment
 - Keep the same lighting, background, and style throughout
-- Keep the face style same and do not modify face details from original image
 
 For example, if the action is "picking up a cup and drinking":
-- Step 1/3: Hand reaching toward the cup, eyes looking at cup
+- Step 1/3: Hand reaching toward the cup, looking at cup
 - Step 2/3: Hand gripping cup, lifting it toward mouth
-- Step 3/3: Cup at lips, drinking pose, eyes closed
+- Step 3/3: Cup at lips, drinking pose
 
-Output ONLY the optimized prompt for step ${story_step}, nothing else.`;
+Output ONLY the scene/action prompt for step ${story_step} without any facial descriptions.`;`
 
             contextMessage = `Create step ${story_step} of ${story_total} for this action: ${userPrompt}`;
         } else {
-            task = "Your role is to convert the given user description into an efficient, detailed prompt optimized for photo generation. Focus on visual details, clothing, pose, lighting, composition, and background, without changing facial details. Keep the prompt concise but descriptive.";
+            task = "CRITICAL: Do NOT modify, alter, or change any facial features, face shape, skin texture, or facial identity from the original image. Your role is to convert the given user description into a detailed prompt optimized for photo generation. Focus ONLY on: clothing, pose, body position, lighting, composition, background, and setting. The face and facial features must remain exactly as they appear in the source image. Never describe or suggest changes to eyes, nose, lips, face shape, or skin tone. Output ONLY the scene/action description without any facial details.";
             contextMessage = userPrompt;
         }
 

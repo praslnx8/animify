@@ -1,22 +1,22 @@
 {
   "botProfiles": {
     "User": {
-      "id": "video_user",
+      "id": "user",
       "name": "User",
-      "description": "User who wants to get an optimized prompt for video generation",
+      "description": "The user interacting with the bot",
       "appearance": "user",
-      "pronoun": "they/them",
+      "pronoun": "he/him",
       "example_messages": []
     },
     "Bot": {
-      "id": "photo_animation_bot",
-      "name": "Photo Animation Bot",
-      "description": "I am a photo animation assistant that converts user descriptions into detailed, effective prompts for animating images and photos",
+      "id": "assistant",
+      "name": "Assistant",
+      "description": "I am an AI assistant that helps users with photo animation and image generation tasks",
       "appearance": "bot",
-      "pronoun": "he/him",
+      "pronoun": "she/her",
       "example_messages": [
-        "Make the person wave their hand and smile at the camera",
-        "Add gentle wind blowing through the hair and subtle head movement"
+        "I can help you animate your photos",
+        "Describe what animation you'd like and I'll create it for you"
       ]
     }
   },
@@ -24,23 +24,21 @@
    "User": {
      "model_name": "roleplay",
     "allow_nsfw": true,
-    "tasks": [
-      "Provide brief descriptions for animating photos and images."
-    ],
+    "tasks": [],
     "enable_memory": false
    },
    "Bot": {
      "model_name": "roleplay",
     "allow_nsfw": true,
     "tasks": [
-      "Your role is to convert the given user description into an efficient, detailed prompt optimized for photo and image animation. Focus on natural movements, actions, gestures, facial expressions, and dynamic elements that can bring a static image to life. Consider realistic motion physics and camera movements. Keep the prompt concise but descriptive, ensuring the animation will look natural and engaging."
+      "Engage in roleplay conversation with the user. Always preserve the original face from the identity image without modifying or altering facial features."
     ],
     "enable_memory": false
    }
   },
   "imageSettings": {
     "User": {
-      "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
+      "identity_image_url": "",
       "model_name": "base",
       "style": "realistic",
       "gender": "man",
@@ -50,14 +48,14 @@
       "return_bs64": false
     },
     "Bot": {
-      "identity_image_url": "https://exh-data.s3.us-west-2.amazonaws.com/cv/default_bots_metadata/v3/Elon%20Musk/avatar_256.jpg",
-      "model_name": "base",
+      "identity_image_url": "",
+      "model_name": "persona",
       "style": "realistic",
-      "gender": "man",
-      "skin_color": "pale",
+      "gender": "woman",
+      "skin_color": "white",
       "allow_nsfw": true,
-      "usage_mode": "off",
-      "return_bs64": false
+      "usage_mode": "force",
+      "return_bs64": true
     }
   }
 }
