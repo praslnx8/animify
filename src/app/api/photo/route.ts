@@ -3,19 +3,67 @@ import { buildPublicUrl, saveBase64ToFile, urlToBase64 } from '../_utils/base64-
 
 export const runtime = 'nodejs';
 
-async function convertPromptUsingChatbot(userPrompt: string): Promise<string> {
+interface StoryModeParams {
+    story_mode: boolean;
+    story_step: number;
+    story_total: number;
+    previous_prompts: string[];
+}
+
+async function convertPromptUsingChatbot(userPrompt: string, storyParams?: StoryModeParams): Promise<string> {
     try {
+        // Build the task based on whether it's story mode or not
+        let task: string;
+        let contextMessage: string;
+
+        if (storyParams?.story_mode) {
+            const { story_step, story_total, previous_prompts } = storyParams;
+            
+            // Build context from previous prompts
+            const previousContext = previous_prompts.length > 0 
+                ? `Previous steps in the story:\n${previous_prompts.map((p, i) => `Step ${i + 1}: ${p}`).join('\n')}\n\n`
+                : '';
+
+            task = `You are creating a visual story sequence. This is step ${story_step} of ${story_total}.
+
+${previousContext}Your task is to convert the user's description into a detailed photo prompt for step ${story_step}.
+
+IMPORTANT GUIDELINES:
+- Break down the overall action into this specific step (${story_step}/${story_total})
+- Step 1 should show the beginning/preparation of the action
+- Middle steps should show progression
+- Final step should show the completion/result
+- Maintain visual consistency (same person, clothing, setting)
+- Focus on the specific moment in the sequence
+- Describe pose, hand positions, facial expression for this exact moment
+- Keep the same lighting, background, and style throughout
+
+For example, if the action is "picking up a cup and drinking":
+- Step 1/3: Hand reaching toward the cup, eyes looking at cup
+- Step 2/3: Hand gripping cup, lifting it toward mouth
+- Step 3/3: Cup at lips, drinking pose, eyes closed
+
+Output ONLY the optimized prompt for step ${story_step}, nothing else.`;
+
+            contextMessage = `Create step ${story_step} of ${story_total} for this action: ${userPrompt}`;
+        } else {
+            task = "Your role is to convert the given user description into an efficient, detailed prompt optimized for photo generation. Focus on visual details, clothing, pose, lighting, composition, and background. Keep the prompt concise but descriptive.";
+            contextMessage = userPrompt;
+        }
+
         const chatbotPayload = {
             context: [
                 {
                     image_prompt: null,
-                    message: userPrompt,
+                    message: contextMessage,
                     turn: "user"
                 }
             ],
             bot_profile: {
                 id: "photo_prompt_bot",
-                description: "I am a photo prompt optimizer that converts user descriptions into detailed, effective prompts for photo generation",
+                description: storyParams?.story_mode 
+                    ? "I am a visual story prompt creator that breaks down actions into sequential photo prompts"
+                    : "I am a photo prompt optimizer that converts user descriptions into detailed, effective prompts for photo generation",
                 appearance: "bot",
                 pronoun: "he/him",
                 example_messages: [
@@ -33,9 +81,7 @@ async function convertPromptUsingChatbot(userPrompt: string): Promise<string> {
             chat_settings: {
                 model_name: "roleplay",
                 allow_nsfw: true,
-                tasks: [
-                    "Your role is to convert the given user description into an efficient, detailed prompt optimized for photo generation. Focus on visual details, clothing, pose, lighting, composition, and background. Keep the prompt concise but descriptive."
-                ],
+                tasks: [task],
                 enable_memory: false
             },
             image_settings: {
@@ -78,7 +124,23 @@ async function convertPromptUsingChatbot(userPrompt: string): Promise<string> {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { image_url, prompt, model_name, style, gender, body_type, skin_color, auto_detect_hair_color, nsfw_policy, convert_prompt = true } = body;
+        const { 
+            image_url, 
+            prompt, 
+            model_name, 
+            style, 
+            gender, 
+            body_type, 
+            skin_color, 
+            auto_detect_hair_color, 
+            nsfw_policy, 
+            convert_prompt = true,
+            // Story mode parameters
+            story_mode = false,
+            story_step = 1,
+            story_total = 1,
+            previous_prompts = []
+        } = body;
 
         if (!image_url || !prompt) {
             return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
@@ -89,8 +151,22 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'API token not configured on server' }, { status: 500 });
         }
 
+        // Build story params if in story mode
+        const storyParams = story_mode ? {
+            story_mode,
+            story_step,
+            story_total,
+            previous_prompts
+        } : undefined;
+
         // Convert the user prompt to an optimized photo prompt using chatbot (if enabled)
-        const optimizedPrompt = convert_prompt ? await convertPromptUsingChatbot(prompt) : prompt;
+        const optimizedPrompt = convert_prompt 
+            ? await convertPromptUsingChatbot(prompt, storyParams) 
+            : prompt;
+
+        console.log('Story mode:', story_mode, 'Step:', story_step, '/', story_total);
+        console.log('Original prompt:', prompt);
+        console.log('Optimized prompt:', optimizedPrompt);
 
         const identity_image_b64 = await urlToBase64(image_url);
 
@@ -127,7 +203,10 @@ export async function POST(req: NextRequest) {
 
             const imageUrl = buildPublicUrl(req, imagePath);
 
-            return NextResponse.json({ image_url: imageUrl });
+            return NextResponse.json({ 
+                image_url: imageUrl,
+                converted_prompt: optimizedPrompt // Return the converted prompt for story continuity
+            });
         } else {
             console.error('Error response from API:', data);
             return NextResponse.json({

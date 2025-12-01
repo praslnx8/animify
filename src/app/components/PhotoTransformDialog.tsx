@@ -90,20 +90,15 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
       // Generate images sequentially in the background
       (async () => {
         let currentSourceUrl = mediaItem.url || "";
-        let promptHistory = "";
+        const previousPrompts: string[] = [];
 
         for (let i = 0; i < numberOfTransformations; i++) {
           const currentItem = storyMediaItems[i];
-          
-          // Build the prompt with history for continuity
-          const storyPrompt = promptHistory 
-            ? `Continue the story. Previous: ${promptHistory}. Now: Step ${i + 1} of ${numberOfTransformations} - ${prompt}`
-            : `Start of story. Step ${i + 1} of ${numberOfTransformations} - ${prompt}`;
 
           try {
             const result = await generatePhoto({
               image_url: currentSourceUrl,
-              prompt: storyPrompt,
+              prompt: prompt, // Send the original prompt, let the server break it down
               model_name: modelName,
               style,
               gender,
@@ -112,6 +107,11 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
               auto_detect_hair_color: autoDetectHairColor,
               nsfw_policy: nsfwPolicy,
               convert_prompt: convertPrompt,
+              // Story mode parameters
+              story_mode: true,
+              story_step: i + 1,
+              story_total: numberOfTransformations,
+              previous_prompts: previousPrompts,
             });
 
             if (result.image_url) {
@@ -121,16 +121,17 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                 url: result.image_url, 
                 loading: false,
                 parent: i === 0 ? mediaItem : storyMediaItems[i - 1],
+                prompt: result.converted_prompt || `[Step ${i + 1}/${numberOfTransformations}] ${prompt}`,
               };
               updateMediaItem(updatedItem);
               storyMediaItems[i] = updatedItem;
 
               // Use this image as source for the next one
               currentSourceUrl = result.image_url;
-              // Add to prompt history for context
-              promptHistory = promptHistory 
-                ? `${promptHistory} -> Step ${i + 1}` 
-                : `Step ${i + 1}`;
+              // Track the converted prompt for context in next steps
+              if (result.converted_prompt) {
+                previousPrompts.push(result.converted_prompt);
+              }
             } else {
               updateMediaItem({ 
                 ...currentItem, 

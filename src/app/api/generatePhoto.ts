@@ -9,10 +9,16 @@ export interface GeneratePhotoParams {
   auto_detect_hair_color: boolean;
   nsfw_policy: string;
   convert_prompt: boolean;
+  // Story mode parameters
+  story_mode?: boolean;
+  story_step?: number;
+  story_total?: number;
+  previous_prompts?: string[];
 }
 
 export interface GeneratePhotoResult {
   image_url?: string;
+  converted_prompt?: string;
   error?: string;
 }
 
@@ -28,7 +34,10 @@ export async function generatePhoto(params: GeneratePhotoParams): Promise<Genera
     const data = await res.json();
 
     if (res.ok && data.image_url) {
-      return { image_url: data.image_url };
+      return { 
+        image_url: data.image_url,
+        converted_prompt: data.converted_prompt 
+      };
     } else {
       throw new Error(data.error || `Status: ${res.status} ${res.statusText}. Response: ${JSON.stringify(data)}`);
     }
