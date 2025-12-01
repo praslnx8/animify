@@ -48,7 +48,7 @@ For example, if the action is "picking up a cup and drinking":
 - Step 2/3: Hand gripping cup, lifting it toward mouth
 - Step 3/3: Cup at lips, drinking pose
 
-Output ONLY the scene/action prompt for step ${story_step} without any facial descriptions.`;`
+Output ONLY the scene/action prompt for step ${story_step} without any facial descriptions.`;
 
             contextMessage = `Create step ${story_step} of ${story_total} for this action: ${userPrompt}`;
         } else {
