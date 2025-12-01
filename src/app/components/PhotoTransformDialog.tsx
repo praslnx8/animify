@@ -61,9 +61,10 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
       // Story Mode: Generate images sequentially, each building on the previous
       // First, create all placeholder media items
       const storyMediaItems: MediaItem[] = [];
+      const baseTimestamp = Date.now();
       for (let i = 0; i < numberOfTransformations; i++) {
         const storyMediaItem: MediaItem = {
-          id: `${Date.now()}-story-${i}`,
+          id: `${baseTimestamp}-story-${i}`,
           type: MediaType.Image,
           loading: true,
           parent: i === 0 ? mediaItem : undefined, // Will be updated for subsequent items
@@ -76,7 +77,9 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
           auto_detect_hair_color: autoDetectHairColor,
           nsfw_policy: nsfwPolicy,
           convert_prompt: convertPrompt,
-          createdAt: Date.now() + i,
+          // Use reverse offset so step 1 appears first (highest timestamp if sorted descending)
+          // Or if sorted ascending, step 1 will have lowest timestamp
+          createdAt: baseTimestamp + (numberOfTransformations - i),
           story_sequence: i + 1,
           story_total: numberOfTransformations,
         };
@@ -89,18 +92,21 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
 
       // Generate images sequentially in the background
       (async () => {
-        let currentSourceUrl = mediaItem.url || "";
-        let currentSourceBase64: string | undefined = undefined; // Will be populated after first generation
+        let currentSourceUrl: string | undefined = mediaItem.url || undefined;
+        let currentSourceBase64: string | undefined = undefined;
         const previousPrompts: string[] = [];
 
         for (let i = 0; i < numberOfTransformations; i++) {
           const currentItem = storyMediaItems[i];
 
+          console.log(`Story Step ${i + 1}: Using base64=${!!currentSourceBase64}, url=${currentSourceUrl?.substring(0, 50)}`);
+
           try {
-            const result = await generatePhoto({
-              image_url: currentSourceBase64 ? undefined : currentSourceUrl, // Use URL only for first image
-              image_base64: currentSourceBase64, // Use base64 for subsequent images (more reliable)
-              prompt: prompt, // Send the original prompt, let the server break it down
+            // For step 1, use URL. For subsequent steps, use base64 from previous result
+            const requestParams = {
+              image_url: i === 0 ? currentSourceUrl : undefined, // Only use URL for first step
+              image_base64: i > 0 ? currentSourceBase64 : undefined, // Use base64 for subsequent steps
+              prompt: prompt,
               model_name: modelName,
               style,
               gender,
@@ -109,12 +115,13 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
               auto_detect_hair_color: autoDetectHairColor,
               nsfw_policy: nsfwPolicy,
               convert_prompt: convertPrompt,
-              // Story mode parameters
               story_mode: true,
               story_step: i + 1,
               story_total: numberOfTransformations,
               previous_prompts: previousPrompts,
-            });
+            };
+
+            const result = await generatePhoto(requestParams);
 
             if (result.image_url) {
               // Update current item with the result
@@ -128,9 +135,12 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
               updateMediaItem(updatedItem);
               storyMediaItems[i] = updatedItem;
 
-              // Use the returned base64 for the next image generation (more reliable than URL)
+              // IMPORTANT: Update the base64 for the NEXT iteration
+              // This must happen AFTER we use the current values
               currentSourceBase64 = result.image_base64;
-              currentSourceUrl = result.image_url; // Fallback
+              currentSourceUrl = result.image_url;
+              
+              console.log(`Story Step ${i + 1} complete: Got base64=${!!result.image_base64}, length=${result.image_base64?.length || 0}`);
               
               // Track the converted prompt for context in next steps
               if (result.converted_prompt) {
@@ -142,7 +152,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
                 loading: false, 
                 error: result.error || "Failed to generate image" 
               });
-              // Stop the sequence on error
               break;
             }
           } catch (err: any) {
@@ -151,7 +160,6 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
               loading: false, 
               error: err.message || "Network error" 
             });
-            // Stop the sequence on error
             break;
           }
         }
