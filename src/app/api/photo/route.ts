@@ -126,6 +126,7 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { 
             image_url, 
+            image_base64, // Accept base64 directly for chaining
             prompt, 
             model_name, 
             style, 
@@ -142,8 +143,8 @@ export async function POST(req: NextRequest) {
             previous_prompts = []
         } = body;
 
-        if (!image_url || !prompt) {
-            return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+        if ((!image_url && !image_base64) || !prompt) {
+            return NextResponse.json({ error: 'Missing required parameters (need image_url or image_base64, and prompt)' }, { status: 400 });
         }
 
         const apiToken = process.env.EXH_AI_API_TOKEN;
@@ -168,7 +169,8 @@ export async function POST(req: NextRequest) {
         console.log('Original prompt:', prompt);
         console.log('Optimized prompt:', optimizedPrompt);
 
-        const identity_image_b64 = await urlToBase64(image_url);
+        // Use provided base64 or convert from URL
+        const identity_image_b64 = image_base64 || await urlToBase64(image_url);
 
         const params = {
             identity_image_b64,
@@ -205,6 +207,7 @@ export async function POST(req: NextRequest) {
 
             return NextResponse.json({ 
                 image_url: imageUrl,
+                image_base64: data.image_b64, // Return base64 for story mode chaining
                 converted_prompt: optimizedPrompt // Return the converted prompt for story continuity
             });
         } else {

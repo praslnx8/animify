@@ -1,5 +1,6 @@
 export interface GeneratePhotoParams {
-  image_url: string;
+  image_url?: string;
+  image_base64?: string; // Base64 image data (without data: prefix)
   prompt: string;
   model_name: string;
   style: string;
@@ -18,6 +19,7 @@ export interface GeneratePhotoParams {
 
 export interface GeneratePhotoResult {
   image_url?: string;
+  image_base64?: string; // Base64 of generated image for chaining
   converted_prompt?: string;
   error?: string;
 }
@@ -36,6 +38,7 @@ export async function generatePhoto(params: GeneratePhotoParams): Promise<Genera
     if (res.ok && data.image_url) {
       return { 
         image_url: data.image_url,
+        image_base64: data.image_base64,
         converted_prompt: data.converted_prompt 
       };
     } else {

@@ -90,6 +90,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
       // Generate images sequentially in the background
       (async () => {
         let currentSourceUrl = mediaItem.url || "";
+        let currentSourceBase64: string | undefined = undefined; // Will be populated after first generation
         const previousPrompts: string[] = [];
 
         for (let i = 0; i < numberOfTransformations; i++) {
@@ -97,7 +98,8 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
 
           try {
             const result = await generatePhoto({
-              image_url: currentSourceUrl,
+              image_url: currentSourceBase64 ? undefined : currentSourceUrl, // Use URL only for first image
+              image_base64: currentSourceBase64, // Use base64 for subsequent images (more reliable)
               prompt: prompt, // Send the original prompt, let the server break it down
               model_name: modelName,
               style,
@@ -126,8 +128,10 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
               updateMediaItem(updatedItem);
               storyMediaItems[i] = updatedItem;
 
-              // Use this image as source for the next one
-              currentSourceUrl = result.image_url;
+              // Use the returned base64 for the next image generation (more reliable than URL)
+              currentSourceBase64 = result.image_base64;
+              currentSourceUrl = result.image_url; // Fallback
+              
               // Track the converted prompt for context in next steps
               if (result.converted_prompt) {
                 previousPrompts.push(result.converted_prompt);
