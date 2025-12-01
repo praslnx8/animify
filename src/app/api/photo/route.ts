@@ -88,7 +88,7 @@ Output ONLY the optimized prompt for step ${story_step}, nothing else.`;
             image_settings: {
                 model_name: "persona",
                 style: "realistic",
-                gender: "women",
+                gender: "woman",
                 skin_color: "white",
                 allow_nsfw: true,
                 usage_mode: "off",
