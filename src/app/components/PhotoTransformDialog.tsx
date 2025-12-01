@@ -35,16 +35,16 @@ interface PhotoTransformDialogProps {
   updateMediaItem: (mediaItem: MediaItem) => void;
 }
 
-const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
+  const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
   const [prompt, setPrompt] = useState(mediaItem.prompt || "");
   const [tabValue, setTabValue] = useState(0);
   const [numberOfTransformations, setNumberOfTransformations] = useState(1);
   const [storyMode, setStoryMode] = useState(false);
-  const [modelName, setModelName] = useState(mediaItem.model_name || "base");
+  const [modelName, setModelName] = useState(mediaItem.model_name || "persona");
   const [style, setStyle] = useState(mediaItem.style || "realistic");
   const [gender, setGender] = useState(mediaItem.gender || "woman");
   const [bodyType, setBodyType] = useState(mediaItem.body_type || "lean");
-  const [skinColor, setSkinColor] = useState(mediaItem.skin_color || "tanned");
+  const [skinColor, setSkinColor] = useState(mediaItem.skin_color || "white");
   const [autoDetectHairColor, setAutoDetectHairColor] = useState(mediaItem.auto_detect_hair_color || false);
   const [nsfwPolicy, setNsfwPolicy] = useState(mediaItem.nsfw_policy || "allow");
   const [convertPrompt, setConvertPrompt] = useState(mediaItem.convert_prompt !== false);
