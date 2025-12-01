@@ -20,4 +20,8 @@ export interface MediaItem {
     auto_detect_hair_color?: boolean;
     nsfw_policy?: string;
     convert_prompt?: boolean;
+
+    // Story mode params
+    story_sequence?: number; // Current step in the story (1-based)
+    story_total?: number; // Total number of steps in the story
 }

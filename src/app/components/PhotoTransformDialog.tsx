@@ -39,6 +39,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
   const [prompt, setPrompt] = useState(mediaItem.prompt || "");
   const [tabValue, setTabValue] = useState(0);
   const [numberOfTransformations, setNumberOfTransformations] = useState(1);
+  const [storyMode, setStoryMode] = useState(false);
   const [modelName, setModelName] = useState(mediaItem.model_name || "base");
   const [style, setStyle] = useState(mediaItem.style || "realistic");
   const [gender, setGender] = useState(mediaItem.gender || "woman");
@@ -56,54 +57,150 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Create multiple transformations based on numberOfTransformations
-    for (let i = 0; i < numberOfTransformations; i++) {
-      const newMediaItem: MediaItem = {
-        id: `${Date.now()}-${i}`,
-        type: MediaType.Image,
-        loading: true,
-        parent: mediaItem,
-        prompt: prompt,
-        model_name: modelName,
-        style,
-        gender,
-        body_type: bodyType,
-        skin_color: skinColor,
-        auto_detect_hair_color: autoDetectHairColor,
-        nsfw_policy: nsfwPolicy,
-        convert_prompt: convertPrompt,
-        createdAt: Date.now() + i,
-      };
-      addMediaItem(newMediaItem);
+    if (storyMode) {
+      // Story Mode: Generate images sequentially, each building on the previous
+      // First, create all placeholder media items
+      const storyMediaItems: MediaItem[] = [];
+      for (let i = 0; i < numberOfTransformations; i++) {
+        const storyMediaItem: MediaItem = {
+          id: `${Date.now()}-story-${i}`,
+          type: MediaType.Image,
+          loading: true,
+          parent: i === 0 ? mediaItem : undefined, // Will be updated for subsequent items
+          prompt: `[Step ${i + 1}/${numberOfTransformations}] ${prompt}`,
+          model_name: modelName,
+          style,
+          gender,
+          body_type: bodyType,
+          skin_color: skinColor,
+          auto_detect_hair_color: autoDetectHairColor,
+          nsfw_policy: nsfwPolicy,
+          convert_prompt: convertPrompt,
+          createdAt: Date.now() + i,
+          story_sequence: i + 1,
+          story_total: numberOfTransformations,
+        };
+        storyMediaItems.push(storyMediaItem);
+        addMediaItem(storyMediaItem);
+      }
 
-      // Generate photo asynchronously (don't await to create all at once)
+      // Close dialog immediately
+      onClose();
+
+      // Generate images sequentially in the background
       (async () => {
-        try {
-          const result = await generatePhoto({
-            image_url: mediaItem.url || "",
-            prompt,
-            model_name: modelName,
-            style,
-            gender,
-            body_type: bodyType,
-            skin_color: skinColor,
-            auto_detect_hair_color: autoDetectHairColor,
-            nsfw_policy: nsfwPolicy,
-            convert_prompt: convertPrompt,
-          });
-          if (result.image_url) {
-            updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });
-          } else {
-            updateMediaItem({ ...newMediaItem, loading: false, error: result.error || "Failed to generate image" });
+        let currentSourceUrl = mediaItem.url || "";
+        let promptHistory = "";
+
+        for (let i = 0; i < numberOfTransformations; i++) {
+          const currentItem = storyMediaItems[i];
+          
+          // Build the prompt with history for continuity
+          const storyPrompt = promptHistory 
+            ? `Continue the story. Previous: ${promptHistory}. Now: Step ${i + 1} of ${numberOfTransformations} - ${prompt}`
+            : `Start of story. Step ${i + 1} of ${numberOfTransformations} - ${prompt}`;
+
+          try {
+            const result = await generatePhoto({
+              image_url: currentSourceUrl,
+              prompt: storyPrompt,
+              model_name: modelName,
+              style,
+              gender,
+              body_type: bodyType,
+              skin_color: skinColor,
+              auto_detect_hair_color: autoDetectHairColor,
+              nsfw_policy: nsfwPolicy,
+              convert_prompt: convertPrompt,
+            });
+
+            if (result.image_url) {
+              // Update current item with the result
+              const updatedItem = { 
+                ...currentItem, 
+                url: result.image_url, 
+                loading: false,
+                parent: i === 0 ? mediaItem : storyMediaItems[i - 1],
+              };
+              updateMediaItem(updatedItem);
+              storyMediaItems[i] = updatedItem;
+
+              // Use this image as source for the next one
+              currentSourceUrl = result.image_url;
+              // Add to prompt history for context
+              promptHistory = promptHistory 
+                ? `${promptHistory} -> Step ${i + 1}` 
+                : `Step ${i + 1}`;
+            } else {
+              updateMediaItem({ 
+                ...currentItem, 
+                loading: false, 
+                error: result.error || "Failed to generate image" 
+              });
+              // Stop the sequence on error
+              break;
+            }
+          } catch (err: any) {
+            updateMediaItem({ 
+              ...currentItem, 
+              loading: false, 
+              error: err.message || "Network error" 
+            });
+            // Stop the sequence on error
+            break;
           }
-        } catch (err: any) {
-          updateMediaItem({ ...newMediaItem, loading: false, error: err.message || "Network error" });
         }
       })();
+    } else {
+      // Normal Mode: Create multiple transformations in parallel
+      for (let i = 0; i < numberOfTransformations; i++) {
+        const newMediaItem: MediaItem = {
+          id: `${Date.now()}-${i}`,
+          type: MediaType.Image,
+          loading: true,
+          parent: mediaItem,
+          prompt: prompt,
+          model_name: modelName,
+          style,
+          gender,
+          body_type: bodyType,
+          skin_color: skinColor,
+          auto_detect_hair_color: autoDetectHairColor,
+          nsfw_policy: nsfwPolicy,
+          convert_prompt: convertPrompt,
+          createdAt: Date.now() + i,
+        };
+        addMediaItem(newMediaItem);
+
+        // Generate photo asynchronously (don't await to create all at once)
+        (async () => {
+          try {
+            const result = await generatePhoto({
+              image_url: mediaItem.url || "",
+              prompt,
+              model_name: modelName,
+              style,
+              gender,
+              body_type: bodyType,
+              skin_color: skinColor,
+              auto_detect_hair_color: autoDetectHairColor,
+              nsfw_policy: nsfwPolicy,
+              convert_prompt: convertPrompt,
+            });
+            if (result.image_url) {
+              updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });
+            } else {
+              updateMediaItem({ ...newMediaItem, loading: false, error: result.error || "Failed to generate image" });
+            }
+          } catch (err: any) {
+            updateMediaItem({ ...newMediaItem, loading: false, error: err.message || "Network error" });
+          }
+        })();
+      }
+      
+      // Close dialog after initiating all transformations
+      onClose();
     }
-    
-    // Close dialog after initiating all transformations
-    onClose();
   };
 
   return (
@@ -162,14 +259,43 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
             {tabValue === 0 && (
               <Stack spacing={2}>
                 <TextField
-                  label="Number of Transformations"
+                  label={storyMode ? "Number of Story Steps" : "Number of Transformations"}
                   type="number"
                   value={numberOfTransformations}
                   onChange={e => setNumberOfTransformations(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
                   fullWidth
                   size="small"
                   inputProps={{ min: 1, max: 10 }}
-                  helperText="Generate 1-10 images (each will have slight variations)"
+                  helperText={storyMode 
+                    ? "Number of sequential images to tell the story (1-10)" 
+                    : "Generate 1-10 images (each will have slight variations)"
+                  }
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={storyMode}
+                      onChange={e => {
+                        setStoryMode(e.target.checked);
+                        if (e.target.checked && numberOfTransformations < 2) {
+                          setNumberOfTransformations(3); // Default to 3 steps for story mode
+                        }
+                      }}
+                      size="small"
+                      color="secondary"
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+                        Story Mode
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                        Generate sequential images that build on each other
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                 />
                 <TextField
                   label="Transformation Description"
@@ -203,14 +329,43 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
             {tabValue === 1 && (
               <Stack spacing={2}>
                 <TextField
-                  label="Number of Transformations"
+                  label={storyMode ? "Number of Story Steps" : "Number of Transformations"}
                   type="number"
                   value={numberOfTransformations}
                   onChange={e => setNumberOfTransformations(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
                   fullWidth
                   size="small"
                   inputProps={{ min: 1, max: 10 }}
-                  helperText="Generate 1-10 images (each will have slight variations)"
+                  helperText={storyMode 
+                    ? "Number of sequential images to tell the story (1-10)" 
+                    : "Generate 1-10 images (each will have slight variations)"
+                  }
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={storyMode}
+                      onChange={e => {
+                        setStoryMode(e.target.checked);
+                        if (e.target.checked && numberOfTransformations < 2) {
+                          setNumberOfTransformations(3);
+                        }
+                      }}
+                      size="small"
+                      color="secondary"
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+                        Story Mode
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                        Generate sequential images that build on each other
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                 />
                 {/* Saved Transforms List */}
                 <Typography variant="subtitle2" sx={{ fontSize: '0.9rem' }}>
@@ -280,14 +435,43 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
             {tabValue === 2 && (
               <Stack spacing={2}>
                 <TextField
-                  label="Number of Transformations"
+                  label={storyMode ? "Number of Story Steps" : "Number of Transformations"}
                   type="number"
                   value={numberOfTransformations}
                   onChange={e => setNumberOfTransformations(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
                   fullWidth
                   size="small"
                   inputProps={{ min: 1, max: 10 }}
-                  helperText="Generate 1-10 images (each will have slight variations)"
+                  helperText={storyMode 
+                    ? "Number of sequential images to tell the story (1-10)" 
+                    : "Generate 1-10 images (each will have slight variations)"
+                  }
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={storyMode}
+                      onChange={e => {
+                        setStoryMode(e.target.checked);
+                        if (e.target.checked && numberOfTransformations < 2) {
+                          setNumberOfTransformations(3);
+                        }
+                      }}
+                      size="small"
+                      color="secondary"
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+                        Story Mode
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                        Generate sequential images that build on each other
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                 />
                 
                 <Typography variant="subtitle2" sx={{ fontSize: '0.9rem' }}>
@@ -444,7 +628,10 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
               fontSize: '1rem'
             }}
           >
-            {numberOfTransformations > 1 ? `Transform ${numberOfTransformations} Photos` : 'Transform Photo'}
+            {storyMode 
+              ? `Generate ${numberOfTransformations}-Step Story` 
+              : (numberOfTransformations > 1 ? `Transform ${numberOfTransformations} Photos` : 'Transform Photo')
+            }
           </Button>
         </DialogActions>
       </form>
