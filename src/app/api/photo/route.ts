@@ -66,7 +66,7 @@ Output ONLY the optimized prompt for step ${story_step}, nothing else.`;
                     ? "I am a visual story prompt creator that breaks down actions into sequential photo prompts without changing face details"
                     : "I am a photo prompt optimizer that converts user descriptions into detailed, effective prompts for photo generation without changing face details",
                 appearance: "bot",
-                pronoun: "he/him",
+                pronoun: "she/her",
                 example_messages: [
                     "A professional portrait of a person wearing elegant formal attire, soft studio lighting, shallow depth of field, neutral background"
                 ],
@@ -77,10 +77,10 @@ Output ONLY the optimized prompt for step ${story_step}, nothing else.`;
                 name: "User",
                 description: "User who wants to get an optimized prompt for photo generation",
                 appearance: "user",
-                pronoun: "they/them"
+                pronoun: "she/her"
             },
             chat_settings: {
-                model_name: "roleplay",
+                model_name: "instruct",
                 allow_nsfw: true,
                 tasks: [task],
                 enable_memory: false
