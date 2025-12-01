@@ -37,6 +37,7 @@ IMPORTANT GUIDELINES:
 - Focus on the specific moment in the sequence
 - Describe pose, hand positions, facial expression for this exact moment
 - Keep the same lighting, background, and style throughout
+- Keep the face style same and do not modify face details from original image
 
 For example, if the action is "picking up a cup and drinking":
 - Step 1/3: Hand reaching toward the cup, eyes looking at cup
@@ -47,7 +48,7 @@ Output ONLY the optimized prompt for step ${story_step}, nothing else.`;
 
             contextMessage = `Create step ${story_step} of ${story_total} for this action: ${userPrompt}`;
         } else {
-            task = "Your role is to convert the given user description into an efficient, detailed prompt optimized for photo generation. Focus on visual details, clothing, pose, lighting, composition, and background. Keep the prompt concise but descriptive.";
+            task = "Your role is to convert the given user description into an efficient, detailed prompt optimized for photo generation. Focus on visual details, clothing, pose, lighting, composition, and background, without changing facial details. Keep the prompt concise but descriptive.";
             contextMessage = userPrompt;
         }
 
@@ -62,8 +63,8 @@ Output ONLY the optimized prompt for step ${story_step}, nothing else.`;
             bot_profile: {
                 id: "photo_prompt_bot",
                 description: storyParams?.story_mode 
-                    ? "I am a visual story prompt creator that breaks down actions into sequential photo prompts"
-                    : "I am a photo prompt optimizer that converts user descriptions into detailed, effective prompts for photo generation",
+                    ? "I am a visual story prompt creator that breaks down actions into sequential photo prompts without changing face details"
+                    : "I am a photo prompt optimizer that converts user descriptions into detailed, effective prompts for photo generation without changing face details",
                 appearance: "bot",
                 pronoun: "he/him",
                 example_messages: [
@@ -85,10 +86,10 @@ Output ONLY the optimized prompt for step ${story_step}, nothing else.`;
                 enable_memory: false
             },
             image_settings: {
-                model_name: "base",
+                model_name: "persona",
                 style: "realistic",
-                gender: "man",
-                skin_color: "pale",
+                gender: "women",
+                skin_color: "white",
                 allow_nsfw: true,
                 usage_mode: "off",
                 return_bs64: false
