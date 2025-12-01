@@ -77,9 +77,7 @@ const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, 
           auto_detect_hair_color: autoDetectHairColor,
           nsfw_policy: nsfwPolicy,
           convert_prompt: convertPrompt,
-          // Use reverse offset so step 1 appears first (highest timestamp if sorted descending)
-          // Or if sorted ascending, step 1 will have lowest timestamp
-          createdAt: baseTimestamp + (numberOfTransformations - i),
+          createdAt: baseTimestamp + i,
           story_sequence: i + 1,
           story_total: numberOfTransformations,
         };

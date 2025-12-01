@@ -186,7 +186,7 @@ export async function POST(req: NextRequest) {
 
         console.log('Generating photo with params:', {
             ...params,
-            identity_image_b64: identity_image_b64?.substring(0, 50)
+            identity_image_b64: identity_image_b64 ? `${identity_image_b64.substring(0, 50)}...${identity_image_b64.substring(identity_image_b64.length - 20)}` : undefined
         });
 
         const res = await fetch("https://api.exh.ai/image/v1/generate_gallery_image", {
