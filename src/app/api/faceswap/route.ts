@@ -46,7 +46,6 @@ export async function POST(request: NextRequest) {
     );
 
     console.log("Response status:", response.status);
-    console.log("Response headers:", Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       const errorData = await response.text();
@@ -64,10 +63,6 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
     console.log("Success response received");
-    console.log("Response data keys:", Object.keys(data));
-    if (data.image_b64) {
-      console.log("Result image length:", data.image_b64.length);
-    }
     console.log("Face swap request completed successfully");
     
     return NextResponse.json(data);

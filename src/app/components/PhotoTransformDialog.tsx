@@ -98,9 +98,6 @@ interface PhotoTransformDialogProps {
 
         for (let i = 0; i < numberOfTransformations; i++) {
           const currentItem = storyMediaItems[i];
-
-          console.log(`Story Step ${i + 1}: Using base64=${!!currentSourceBase64}, url=${currentSourceUrl?.substring(0, 50)}`);
-
           try {
             // For step 1, use URL. For subsequent steps, use base64 from previous result
             const requestParams = {
@@ -140,9 +137,7 @@ interface PhotoTransformDialogProps {
               // This must happen AFTER we use the current values
               currentSourceBase64 = result.image_base64;
               currentSourceUrl = result.image_url;
-              
-              console.log(`Story Step ${i + 1} complete: Got base64=${!!result.image_base64}, length=${result.image_base64?.length || 0}`);
-              
+                            
               // Track the converted prompt for context in next steps
               if (result.converted_prompt) {
                 previousPrompts.push(result.converted_prompt);
