@@ -9,11 +9,13 @@ import {
   AutoStories as AutoStoriesIcon,
   Refresh as RefreshIcon,
   ErrorOutline as ErrorIcon,
-  ExpandMore as ExpandMoreIcon,
+  MoreHoriz as MoreHorizIcon,
+  Close as CloseIcon,
+  FormatQuote as FormatQuoteIcon,
 } from '@mui/icons-material';
 import {
   Box, Card, CircularProgress, IconButton, Tooltip, Typography, Button, 
-  Collapse, Chip, Fab, Alert, Divider
+  Collapse, Chip, Fab, Alert, Divider, Fade, Zoom, Menu, MenuItem, ListItemIcon, ListItemText
 } from '@mui/material';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
@@ -37,8 +39,8 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
   const [transformOpen, setTransformOpen] = useState(false);
   const [animateOpen, setAnimateOpen] = useState(false);
   const [animateStoryOpen, setAnimateStoryOpen] = useState(false);
-  const [showActions, setShowActions] = useState(false);
   const [retrying, setRetrying] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const timerRef = useRef<HTMLSpanElement>(null);
@@ -49,6 +51,7 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
 
   const isVideo = mediaItem.type === MediaType.Video;
   const hasError = mediaItem.error || videoError;
+  const menuOpen = Boolean(menuAnchor);
 
   // Reset video state when mediaItem changes
   useEffect(() => {
@@ -101,12 +104,11 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
     if (!mediaItem.parent || !mediaItem.prompt) return;
     
     setRetrying(true);
+    setMenuAnchor(null);
     try {
       if (mediaItem.type === MediaType.Video) {
-        // For videos, open the animate dialog with the prompt
         setAnimateOpen(true);
       } else {
-        // For images, retry silently with same parameters
         const commonProps = { 
           parentMediaItem: mediaItem.parent, 
           prompt: mediaItem.prompt, 
@@ -134,13 +136,33 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
     [mediaItem.url, videoKey]
   );
 
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchor(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+  };
+
   const renderMedia = () => {
     if (mediaItem.loading) {
       return (
         <Box sx={mediaContainer}>
-          <CircularProgress size={60} thickness={4} sx={{ color: '#58a6ff' }} />
-          <Typography variant="body2" color="#8b949e" mt={2}>
-            Generating your content...
+          <Box sx={loadingPulseStyle}>
+            <CircularProgress 
+              size={56} 
+              thickness={3} 
+              sx={{ 
+                color: '#58a6ff',
+                filter: 'drop-shadow(0 0 8px rgba(88, 166, 255, 0.4))'
+              }} 
+            />
+          </Box>
+          <Typography variant="body2" sx={{ color: '#8b949e', mt: 2.5, fontWeight: 500 }}>
+            Creating magic...
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#484f58', mt: 0.5 }}>
+            This may take a moment
           </Typography>
         </Box>
       );
@@ -161,24 +183,29 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
         }}>
           {/* Thumbnail layer */}
           {showThumbnail && mediaItem.parent?.url && (
-            <>
-              <img src={mediaItem.parent.url} alt="Video thumbnail" style={imgStyle} />
-              <Fab 
-                color="primary" 
-                onClick={handlePlay} 
-                sx={fabCenter}
-                size="large"
-              >
-                <PlayArrowIcon sx={{ fontSize: 32 }} />
-              </Fab>
-            </>
+            <Fade in timeout={300}>
+              <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={mediaItem.parent.url} alt="Video thumbnail" style={imgStyle} />
+                <Zoom in timeout={400}>
+                  <Fab 
+                    onClick={handlePlay} 
+                    sx={fabPlayStyle}
+                    size="large"
+                  >
+                    <PlayArrowIcon sx={{ fontSize: 36, ml: 0.5 }} />
+                  </Fab>
+                </Zoom>
+              </Box>
+            </Fade>
           )}
 
           {/* Loading layer */}
           {videoStatus === VideoStatus.Loading && (
             <Box sx={loadingOverlay}>
-              <CircularProgress size={60} thickness={4} sx={{ color: '#58a6ff' }} />
-              <Typography variant="body2" color="white" mt={2}>
+              <Box sx={loadingPulseStyle}>
+                <CircularProgress size={56} thickness={3} sx={{ color: '#58a6ff' }} />
+              </Box>
+              <Typography variant="body2" sx={{ color: '#e6edf3', mt: 2.5, fontWeight: 500 }}>
                 Loading video...
               </Typography>
             </Box>
@@ -219,7 +246,9 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
 
     return (
       <Box sx={{ ...mediaContainer, bgcolor: '#000' }}>
-        <img src={mediaItem.url} alt="Media" style={imgStyle} />
+        <Fade in timeout={300}>
+          <img src={mediaItem.url} alt="Media" style={imgStyle} />
+        </Fade>
       </Box>
     );
   };
@@ -227,8 +256,8 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
   return (
     <>
       <Card sx={cardStyle}>
-        <Box sx={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          {/* Status indicators */}
+        <Box sx={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1 }}>
+          {/* Status indicators - glass morphism style */}
           {isVideo && mediaItem.createdAt && (
             <Chip 
               label={
@@ -238,88 +267,72 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
                 </Box>
               }
               size="small" 
-              sx={{ 
-                position: 'absolute', 
-                top: 8, 
-                left: 8, 
-                zIndex: 10, 
-                bgcolor: 'rgba(0,0,0,0.8)', 
-                color: '#fff',
-                fontWeight: 600,
-                fontSize: '0.75rem'
-              }} 
+              sx={timerChipStyle} 
             />
           )}
           
           {isVideo && videoStatus !== VideoStatus.Idle && videoStatus !== VideoStatus.Ended && (
             <Chip 
               label={videoStatus} 
-              color={videoStatus === VideoStatus.Error ? 'error' : videoStatus === VideoStatus.Playing ? 'success' : 'default'} 
               size="small" 
-              sx={{ 
-                position: 'absolute', 
-                top: 8, 
-                right: 8, 
-                zIndex: 10,
-                fontWeight: 600,
-                textTransform: 'capitalize'
-              }} 
+              sx={{
+                ...statusChipStyle,
+                bgcolor: videoStatus === VideoStatus.Error 
+                  ? 'rgba(248, 81, 73, 0.2)' 
+                  : videoStatus === VideoStatus.Playing 
+                    ? 'rgba(63, 185, 80, 0.2)' 
+                    : 'rgba(88, 166, 255, 0.2)',
+                color: videoStatus === VideoStatus.Error 
+                  ? '#f85149' 
+                  : videoStatus === VideoStatus.Playing 
+                    ? '#3fb950' 
+                    : '#58a6ff',
+              }}
             />
           )}
+
+          {/* More menu button */}
+          <IconButton
+            onClick={handleMenuOpen}
+            sx={moreMenuButtonStyle}
+            size="small"
+          >
+            <MoreHorizIcon fontSize="small" />
+          </IconButton>
 
           {/* Media display */}
           <Box sx={mediaBoxStyle}>{renderMedia()}</Box>
 
-          {/* Prompt display */}
+          {/* Prompt display - improved styling */}
           {mediaItem.prompt && (
-            <Box px={2} py={1.5} bgcolor="rgba(0,0,0,0.9)" sx={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-              <Typography 
-                variant="body2" 
-                sx={{
-                  color: '#e6edf3',
-                  fontSize: '0.813rem',
-                  lineHeight: 1.4,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  wordBreak: 'break-word'
-                }}
-                title={mediaItem.prompt}
-              >
-                {mediaItem.prompt}
-              </Typography>
+            <Box sx={promptContainerStyle}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                <FormatQuoteIcon sx={{ fontSize: 16, color: '#58a6ff', opacity: 0.6, mt: 0.25, transform: 'scaleX(-1)' }} />
+                <Typography 
+                  variant="body2" 
+                  sx={promptTextStyle}
+                  title={mediaItem.prompt}
+                >
+                  {mediaItem.prompt}
+                </Typography>
+              </Box>
             </Box>
           )}
 
-          {/* Error display */}
+          {/* Error display - improved styling */}
           {hasError && (
             <Alert 
               severity="error" 
-              icon={<ErrorIcon />}
-              sx={{ 
-                borderRadius: 0,
-                bgcolor: 'rgba(218, 54, 51, 0.1)',
-                border: '1px solid #da3633',
-                '& .MuiAlert-message': { fontSize: '0.813rem' }
-              }}
+              icon={<ErrorIcon sx={{ fontSize: 18 }} />}
+              sx={errorAlertStyle}
             >
               {mediaItem.error || videoError}
             </Alert>
           )}
         </Box>
 
-        {/* Actions section */}
-        <Box sx={{ 
-          borderTop: 1, 
-          borderColor: '#30363d', 
-          bgcolor: '#0d1117',
-          flexShrink: 0,
-          overflow: 'auto',
-          maxHeight: '40vh',
-          paddingBottom: 'max(8px, env(safe-area-inset-bottom))'
-        }}>
-          {/* Primary actions */}
+        {/* Actions section - redesigned */}
+        <Box sx={actionsContainerStyle}>
           <Box sx={{ p: 1.5 }}>
             <Box display="flex" gap={1}>
               {mediaItem.type === MediaType.Image ? (
@@ -327,18 +340,18 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
                   <Button 
                     variant="contained" 
                     fullWidth 
-                    startIcon={<AutoFixHighIcon />} 
+                    startIcon={<AutoFixHighIcon sx={{ fontSize: 20 }} />} 
                     onClick={() => setTransformOpen(true)} 
-                    sx={btnGreen}
+                    sx={btnPrimary}
                   >
-                    Edit
+                    Transform
                   </Button>
                   <Button 
                     variant="contained" 
                     fullWidth 
-                    startIcon={<AnimationIcon />} 
+                    startIcon={<AnimationIcon sx={{ fontSize: 20 }} />} 
                     onClick={() => setAnimateOpen(true)} 
-                    sx={btnPurple}
+                    sx={btnSecondary}
                   >
                     Animate
                   </Button>
@@ -349,21 +362,21 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
                     <Button 
                       variant="outlined" 
                       fullWidth 
-                      startIcon={retrying ? <CircularProgress size={16} /> : <RefreshIcon />} 
+                      startIcon={retrying ? <CircularProgress size={18} sx={{ color: 'inherit' }} /> : <RefreshIcon sx={{ fontSize: 20 }} />} 
                       onClick={handleRetry}
                       disabled={retrying}
-                      sx={btnOutlinedBlue}
+                      sx={btnOutlined}
                     >
-                      {retrying ? 'Retrying...' : 'Retry'}
+                      {retrying ? 'Retrying...' : 'Regenerate'}
                     </Button>
                   )}
-                  <Tooltip title="Download video">
+                  <Tooltip title="Download video" arrow>
                     <Button 
-                      variant="outlined" 
+                      variant="contained" 
                       fullWidth={!mediaItem.parent}
-                      startIcon={<DownloadIcon />} 
+                      startIcon={<DownloadIcon sx={{ fontSize: 20 }} />} 
                       onClick={handleDownload}
-                      sx={btnOutlinedGreen}
+                      sx={btnDownload}
                     >
                       Download
                     </Button>
@@ -372,97 +385,40 @@ const MediaItemComponent: React.FC<MediaItemProps> = ({ mediaItem, addMediaItem,
               )}
             </Box>
           </Box>
-
-          {/* Secondary actions - collapsible */}
-          {mediaItem.type === MediaType.Image && (
-            <>
-              <Divider sx={{ borderColor: '#30363d' }} />
-              <Box>
-                <Button
-                  fullWidth
-                  onClick={() => setShowActions(!showActions)}
-                  endIcon={
-                    <ExpandMoreIcon 
-                      sx={{ 
-                        transform: showActions ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.3s'
-                      }} 
-                    />
-                  }
-                  sx={{ 
-                    color: '#8b949e', 
-                    fontSize: '0.813rem',
-                    py: 1,
-                    '&:hover': { bgcolor: 'rgba(88, 166, 255, 0.1)' }
-                  }}
-                >
-                  More Actions
-                </Button>
-                <Collapse in={showActions}>
-                  <Box sx={{ p: 1.5, pt: 0.5 }}>
-                    <Box display="flex" flexDirection="column" gap={1}>
-                      <Button 
-                        variant="outlined" 
-                        fullWidth 
-                        startIcon={<AutoStoriesIcon />} 
-                        onClick={() => setAnimateStoryOpen(true)} 
-                        sx={btnOutlinedBlue}
-                        size="small"
-                      >
-                        Create Story
-                      </Button>
-                      {mediaItem.parent && mediaItem.prompt && (
-                        <Button 
-                          variant="outlined" 
-                          fullWidth 
-                          startIcon={retrying ? <CircularProgress size={16} /> : <RefreshIcon />} 
-                          onClick={handleRetry}
-                          disabled={retrying}
-                          sx={btnOutlinedGreen}
-                          size="small"
-                        >
-                          {retrying ? 'Retrying...' : 'Retry Generation'}
-                        </Button>
-                      )}
-                      <Button 
-                        variant="outlined" 
-                        fullWidth 
-                        startIcon={<DeleteIcon />} 
-                        onClick={() => onDelete(mediaItem)}
-                        sx={btnOutlinedRed}
-                        color="error"
-                        size="small"
-                      >
-                        Delete
-                      </Button>
-                    </Box>
-                  </Box>
-                </Collapse>
-              </Box>
-            </>
-          )}
-
-          {/* Delete button for videos */}
-          {mediaItem.type === MediaType.Video && (
-            <>
-              <Divider sx={{ borderColor: '#30363d' }} />
-              <Box sx={{ p: 1.5, pt: 1 }}>
-                <Button 
-                  variant="outlined" 
-                  fullWidth 
-                  startIcon={<DeleteIcon />} 
-                  onClick={() => onDelete(mediaItem)}
-                  sx={btnOutlinedRed}
-                  color="error"
-                  size="small"
-                >
-                  Delete
-                </Button>
-              </Box>
-            </>
-          )}
         </Box>
       </Card>
+
+      {/* Dropdown Menu for secondary actions */}
+      <Menu
+        anchorEl={menuAnchor}
+        open={menuOpen}
+        onClose={handleMenuClose}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        PaperProps={{
+          sx: menuPaperStyle
+        }}
+      >
+        {mediaItem.type === MediaType.Image && (
+          <MenuItem onClick={() => { setAnimateStoryOpen(true); handleMenuClose(); }} sx={menuItemStyle}>
+            <ListItemIcon><AutoStoriesIcon sx={{ fontSize: 18, color: '#58a6ff' }} /></ListItemIcon>
+            <ListItemText primary="Create Story" primaryTypographyProps={{ fontSize: '0.875rem' }} />
+          </MenuItem>
+        )}
+        {mediaItem.parent && mediaItem.prompt && mediaItem.type === MediaType.Image && (
+          <MenuItem onClick={handleRetry} disabled={retrying} sx={menuItemStyle}>
+            <ListItemIcon>
+              {retrying ? <CircularProgress size={18} sx={{ color: '#3fb950' }} /> : <RefreshIcon sx={{ fontSize: 18, color: '#3fb950' }} />}
+            </ListItemIcon>
+            <ListItemText primary={retrying ? 'Retrying...' : 'Retry Generation'} primaryTypographyProps={{ fontSize: '0.875rem' }} />
+          </MenuItem>
+        )}
+        <Divider sx={{ borderColor: 'rgba(48, 54, 61, 0.8)', my: 0.5 }} />
+        <MenuItem onClick={() => { onDelete(mediaItem); handleMenuClose(); }} sx={{ ...menuItemStyle, color: '#f85149' }}>
+          <ListItemIcon><DeleteIcon sx={{ fontSize: 18, color: '#f85149' }} /></ListItemIcon>
+          <ListItemText primary="Delete" primaryTypographyProps={{ fontSize: '0.875rem' }} />
+        </MenuItem>
+      </Menu>
 
       {/* Dialogs */}
       <PhotoTransformDialog 
@@ -498,24 +454,56 @@ const mediaContainer = {
   justifyContent: 'center', 
   alignItems: 'center', 
   height: '100%', 
-  gap: 2, 
+  gap: 1, 
   maxHeight: '100%', 
   overflow: 'hidden' 
 };
 
-const fabCenter = { 
+const loadingPulseStyle = {
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(88, 166, 255, 0.15) 0%, transparent 70%)',
+    animation: 'pulse 2s ease-in-out infinite',
+  },
+  '@keyframes pulse': {
+    '0%, 100%': { transform: 'scale(1)', opacity: 1 },
+    '50%': { transform: 'scale(1.2)', opacity: 0.5 },
+  }
+};
+
+const fabPlayStyle = { 
   position: 'absolute', 
   top: '50%', 
   left: '50%', 
   transform: 'translate(-50%, -50%)', 
   zIndex: 3,
-  boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+  width: 72,
+  height: 72,
+  background: 'linear-gradient(135deg, rgba(88, 166, 255, 0.9) 0%, rgba(163, 113, 247, 0.9) 100%)',
+  backdropFilter: 'blur(8px)',
+  border: '2px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: '0 8px 32px rgba(88, 166, 255, 0.4)',
+  color: '#fff',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translate(-50%, -50%) scale(1.08)',
+    boxShadow: '0 12px 40px rgba(88, 166, 255, 0.5)',
+  }
 };
 
 const imgStyle: React.CSSProperties = { 
   maxWidth: '100%', 
   maxHeight: '100%', 
-  objectFit: 'contain' 
+  objectFit: 'contain',
+  borderRadius: 4
 };
 
 const loadingOverlay = { 
@@ -528,7 +516,8 @@ const loadingOverlay = {
   flexDirection: 'column', 
   alignItems: 'center', 
   justifyContent: 'center', 
-  backgroundColor: 'rgba(0,0,0,0.8)', 
+  backgroundColor: 'rgba(0, 0, 0, 0.85)',
+  backdropFilter: 'blur(4px)',
   zIndex: 5 
 };
 
@@ -537,12 +526,14 @@ const cardStyle = {
   maxWidth: '100%',
   height: '100%',
   maxHeight: '100%',
-  bgcolor: '#161b22', 
+  bgcolor: 'rgba(22, 27, 34, 0.95)', 
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden', 
-  border: '1px solid #30363d',
-  borderRadius: 2
+  border: '1px solid rgba(48, 54, 61, 0.6)',
+  borderRadius: 3,
+  backdropFilter: 'blur(8px)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
 };
 
 const mediaBoxStyle = { 
@@ -552,77 +543,191 @@ const mediaBoxStyle = {
   alignItems: 'center', 
   overflow: 'hidden', 
   minHeight: 0,
-  position: 'relative'
+  position: 'relative',
+  bgcolor: '#0d1117'
 };
 
-const btnGreen = { 
-  minHeight: 40, 
-  bgcolor: '#238636', 
+const timerChipStyle = {
+  position: 'absolute', 
+  top: 12, 
+  left: 12, 
+  zIndex: 10, 
+  bgcolor: 'rgba(13, 17, 23, 0.85)', 
+  backdropFilter: 'blur(8px)',
+  border: '1px solid rgba(48, 54, 61, 0.5)',
+  color: '#e6edf3',
+  fontWeight: 600,
+  fontSize: '0.75rem',
+  height: 28
+};
+
+const statusChipStyle = {
+  position: 'absolute', 
+  top: 12, 
+  right: 48, 
+  zIndex: 10,
+  fontWeight: 600,
+  fontSize: '0.7rem',
+  textTransform: 'capitalize',
+  backdropFilter: 'blur(8px)',
+  border: '1px solid rgba(48, 54, 61, 0.5)',
+  height: 24
+};
+
+const moreMenuButtonStyle = {
+  position: 'absolute',
+  top: 8,
+  right: 8,
+  zIndex: 10,
+  bgcolor: 'rgba(13, 17, 23, 0.85)',
+  backdropFilter: 'blur(8px)',
+  border: '1px solid rgba(48, 54, 61, 0.5)',
+  color: '#8b949e',
+  transition: 'all 0.2s ease',
+  '&:hover': {
+    bgcolor: 'rgba(33, 38, 45, 0.95)',
+    color: '#e6edf3'
+  }
+};
+
+const promptContainerStyle = {
+  px: 2,
+  py: 1.5,
+  bgcolor: 'rgba(13, 17, 23, 0.95)',
+  borderTop: '1px solid rgba(48, 54, 61, 0.5)',
+  backdropFilter: 'blur(4px)'
+};
+
+const promptTextStyle = {
+  color: '#c9d1d9',
+  fontSize: '0.813rem',
+  lineHeight: 1.5,
+  display: '-webkit-box',
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+  wordBreak: 'break-word',
+  fontStyle: 'italic'
+};
+
+const errorAlertStyle = {
+  borderRadius: 0,
+  bgcolor: 'rgba(248, 81, 73, 0.1)',
+  borderTop: '1px solid rgba(248, 81, 73, 0.3)',
+  color: '#f85149',
+  py: 1,
+  '& .MuiAlert-icon': { color: '#f85149' },
+  '& .MuiAlert-message': { fontSize: '0.813rem' }
+};
+
+const actionsContainerStyle = {
+  borderTop: '1px solid rgba(48, 54, 61, 0.5)',
+  bgcolor: 'rgba(13, 17, 23, 0.95)',
+  backdropFilter: 'blur(8px)',
+  flexShrink: 0,
+  paddingBottom: 'max(8px, env(safe-area-inset-bottom))'
+};
+
+const btnPrimary = { 
+  minHeight: 44, 
+  background: 'linear-gradient(135deg, #238636 0%, #2ea043 100%)',
   color: 'white', 
   fontWeight: 600,
   fontSize: '0.875rem',
-  py: 1,
-  '&:hover': { bgcolor: '#2ea043' },
-  '&:disabled': { bgcolor: '#238636', opacity: 0.5 }
+  py: 1.25,
+  borderRadius: 2,
+  textTransform: 'none',
+  boxShadow: '0 4px 12px rgba(35, 134, 54, 0.3)',
+  transition: 'all 0.2s ease',
+  '&:hover': { 
+    background: 'linear-gradient(135deg, #2ea043 0%, #3fb950 100%)',
+    boxShadow: '0 6px 16px rgba(35, 134, 54, 0.4)',
+    transform: 'translateY(-1px)'
+  },
+  '&:disabled': { 
+    background: 'rgba(35, 134, 54, 0.5)',
+    color: 'rgba(255, 255, 255, 0.5)'
+  }
 };
 
-const btnPurple = { 
-  minHeight: 40, 
-  bgcolor: '#8957e5', 
+const btnSecondary = { 
+  minHeight: 44, 
+  background: 'linear-gradient(135deg, #8957e5 0%, #a371f7 100%)',
   color: 'white', 
   fontWeight: 600,
   fontSize: '0.875rem',
-  py: 1,
-  '&:hover': { bgcolor: '#a475f9' },
-  '&:disabled': { bgcolor: '#8957e5', opacity: 0.5 }
+  py: 1.25,
+  borderRadius: 2,
+  textTransform: 'none',
+  boxShadow: '0 4px 12px rgba(137, 87, 229, 0.3)',
+  transition: 'all 0.2s ease',
+  '&:hover': { 
+    background: 'linear-gradient(135deg, #a371f7 0%, #b392f9 100%)',
+    boxShadow: '0 6px 16px rgba(137, 87, 229, 0.4)',
+    transform: 'translateY(-1px)'
+  },
+  '&:disabled': { 
+    background: 'rgba(137, 87, 229, 0.5)',
+    color: 'rgba(255, 255, 255, 0.5)'
+  }
 };
 
-const btnOutlinedBlue = { 
-  minHeight: 40, 
-  borderColor: '#30363d', 
+const btnOutlined = { 
+  minHeight: 44, 
+  borderColor: 'rgba(88, 166, 255, 0.4)', 
   color: '#58a6ff', 
   fontWeight: 600,
   fontSize: '0.875rem',
-  py: 1,
+  py: 1.25,
+  borderRadius: 2,
+  textTransform: 'none',
+  transition: 'all 0.2s ease',
   '&:hover': { 
     borderColor: '#58a6ff', 
-    bgcolor: 'rgba(88, 166, 255, 0.1)' 
+    bgcolor: 'rgba(88, 166, 255, 0.1)',
+    transform: 'translateY(-1px)'
   },
   '&:disabled': { 
-    borderColor: '#30363d', 
-    color: '#58a6ff',
-    opacity: 0.5 
+    borderColor: 'rgba(88, 166, 255, 0.2)', 
+    color: 'rgba(88, 166, 255, 0.5)'
   }
 };
 
-const btnOutlinedGreen = { 
-  minHeight: 40, 
-  borderColor: '#30363d', 
-  color: '#3fb950', 
+const btnDownload = { 
+  minHeight: 44, 
+  background: 'linear-gradient(135deg, #238636 0%, #2ea043 100%)',
+  color: 'white', 
   fontWeight: 600,
   fontSize: '0.875rem',
-  py: 1,
+  py: 1.25,
+  borderRadius: 2,
+  textTransform: 'none',
+  boxShadow: '0 4px 12px rgba(35, 134, 54, 0.3)',
+  transition: 'all 0.2s ease',
   '&:hover': { 
-    borderColor: '#3fb950', 
-    bgcolor: 'rgba(63, 185, 80, 0.1)' 
-  },
-  '&:disabled': { 
-    borderColor: '#30363d', 
-    color: '#3fb950',
-    opacity: 0.5 
+    background: 'linear-gradient(135deg, #2ea043 0%, #3fb950 100%)',
+    boxShadow: '0 6px 16px rgba(35, 134, 54, 0.4)',
+    transform: 'translateY(-1px)'
   }
 };
 
-const btnOutlinedRed = { 
-  minHeight: 36, 
-  borderColor: '#30363d', 
-  color: '#f85149', 
-  fontWeight: 600,
-  fontSize: '0.813rem',
-  py: 0.75,
-  '&:hover': { 
-    borderColor: '#f85149', 
-    bgcolor: 'rgba(248, 81, 73, 0.1)' 
+const menuPaperStyle = {
+  bgcolor: 'rgba(22, 27, 34, 0.98)',
+  backdropFilter: 'blur(12px)',
+  border: '1px solid rgba(48, 54, 61, 0.6)',
+  borderRadius: 2,
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+  minWidth: 180,
+  mt: 1
+};
+
+const menuItemStyle = {
+  py: 1.25,
+  px: 2,
+  color: '#e6edf3',
+  transition: 'all 0.15s ease',
+  '&:hover': {
+    bgcolor: 'rgba(88, 166, 255, 0.1)'
   }
 };
 

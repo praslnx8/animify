@@ -28,7 +28,6 @@ export async function POST(request: NextRequest) {
     };
 
     console.log("Face swap request started");
-    console.log("API URL: https://api.exh.ai/image/v1/generate_faceswap_image");
   
 
     // Call the external API
@@ -69,7 +68,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Face swap error details:", {
       message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
       timestamp: new Date().toISOString()
     });
     return NextResponse.json(
