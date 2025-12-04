@@ -15,6 +15,8 @@ export interface GeneratePhotoParams {
   story_step?: number;
   story_total?: number;
   previous_prompts?: string[];
+  // Face swap parameter
+  face_swap?: boolean;
 }
 
 export interface GeneratePhotoResult {

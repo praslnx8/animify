@@ -145,7 +145,9 @@ export async function POST(req: NextRequest) {
             story_mode = false,
             story_step = 1,
             story_total = 1,
-            previous_prompts = []
+            previous_prompts = [],
+            // Face swap parameter
+            face_swap = false
         } = body;
 
         if ((!image_url && !image_base64) || !prompt) {
@@ -206,13 +208,44 @@ export async function POST(req: NextRequest) {
 
         const data = await res.json();
         if (res.ok && data.image_b64) {
-            const imagePath = await saveBase64ToFile(data.image_b64);
+            let finalImageB64 = data.image_b64;
+            
+            // If face_swap is enabled, swap the face from original image onto the generated result
+            if (face_swap) {
+                console.log('Face swap enabled, performing face swap...');
+                try {
+                    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+                    const faceSwapResponse = await fetch(`${baseUrl}/api/faceswap`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            source_image_b64: identity_image_b64, // Original face
+                            target_image_b64: data.image_b64, // Generated image to swap face onto
+                        }),
+                    });
+                    
+                    const faceSwapData = await faceSwapResponse.json();
+                    if (faceSwapResponse.ok && faceSwapData.image_b64) {
+                        console.log('Face swap successful');
+                        finalImageB64 = faceSwapData.image_b64;
+                    } else {
+                        console.warn('Face swap failed, using original generated image:', faceSwapData.error);
+                    }
+                } catch (faceSwapErr) {
+                    console.error('Face swap error:', faceSwapErr);
+                    // Continue with the original generated image
+                }
+            }
+            
+            const imagePath = await saveBase64ToFile(finalImageB64);
 
             const imageUrl = buildPublicUrl(req, imagePath);
 
             return NextResponse.json({ 
                 image_url: imageUrl,
-                image_base64: data.image_b64, // Return base64 for story mode chaining
+                image_base64: finalImageB64, // Return base64 for story mode chaining
                 converted_prompt: optimizedPrompt // Return the converted prompt for story continuity
             });
         } else {

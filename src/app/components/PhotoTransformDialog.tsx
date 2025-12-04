@@ -48,6 +48,7 @@ interface PhotoTransformDialogProps {
   const [autoDetectHairColor, setAutoDetectHairColor] = useState(mediaItem.auto_detect_hair_color || false);
   const [nsfwPolicy, setNsfwPolicy] = useState(mediaItem.nsfw_policy || "allow");
   const [convertPrompt, setConvertPrompt] = useState(mediaItem.convert_prompt !== false);
+  const [faceSwap, setFaceSwap] = useState(mediaItem.face_swap || false);
 
   const loadSavedTransform = (savedTransform: string) => {
     setPrompt(savedTransform);
@@ -77,6 +78,7 @@ interface PhotoTransformDialogProps {
           auto_detect_hair_color: autoDetectHairColor,
           nsfw_policy: nsfwPolicy,
           convert_prompt: convertPrompt,
+          face_swap: faceSwap,
           createdAt: baseTimestamp + i,
           story_sequence: i + 1,
           story_total: numberOfTransformations,
@@ -113,6 +115,7 @@ interface PhotoTransformDialogProps {
               auto_detect_hair_color: autoDetectHairColor,
               nsfw_policy: nsfwPolicy,
               convert_prompt: convertPrompt,
+              face_swap: faceSwap,
               story_mode: true,
               story_step: i + 1,
               story_total: numberOfTransformations,
@@ -179,6 +182,7 @@ interface PhotoTransformDialogProps {
           auto_detect_hair_color: autoDetectHairColor,
           nsfw_policy: nsfwPolicy,
           convert_prompt: convertPrompt,
+          face_swap: faceSwap,
           createdAt: Date.now() + i,
         };
         addMediaItem(newMediaItem);
@@ -197,6 +201,7 @@ interface PhotoTransformDialogProps {
               auto_detect_hair_color: autoDetectHairColor,
               nsfw_policy: nsfwPolicy,
               convert_prompt: convertPrompt,
+              face_swap: faceSwap,
             });
             if (result.image_url) {
               updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });
@@ -331,6 +336,27 @@ interface PhotoTransformDialogProps {
                     />
                   }
                   label="Optimize prompt with AI"
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={faceSwap}
+                      onChange={e => setFaceSwap(e.target.checked)}
+                      size="small"
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+                        Face Swap
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                        Swap original face onto generated image
+                      </Typography>
+                    </Box>
+                  }
                   sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                 />
               </Stack>
@@ -603,6 +629,28 @@ interface PhotoTransformDialogProps {
                   label="Optimize prompt with AI"
                   sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                 />
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={faceSwap}
+                      onChange={e => setFaceSwap(e.target.checked)}
+                      size="small"
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+                        Face Swap
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                        Swap original face onto generated image
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
+                />
               </Stack>
             )}
           </Stack>
@@ -664,6 +712,7 @@ export async function silentPhotoTransform({
   autoDetectHairColor = false,
   nsfwPolicy = 'allow',
   convertPrompt = true,
+  faceSwap = false,
 }: {
   parentMediaItem: MediaItem;
   prompt: string;
@@ -677,6 +726,7 @@ export async function silentPhotoTransform({
   autoDetectHairColor?: boolean;
   nsfwPolicy?: string;
   convertPrompt?: boolean;
+  faceSwap?: boolean;
 }) {
   const newMediaItem: MediaItem = {
     id: Date.now().toString(),
@@ -692,6 +742,7 @@ export async function silentPhotoTransform({
     auto_detect_hair_color: autoDetectHairColor,
     nsfw_policy: nsfwPolicy,
     convert_prompt: convertPrompt,
+    face_swap: faceSwap,
   };
   addMediaItem(newMediaItem);
   try {
@@ -706,6 +757,7 @@ export async function silentPhotoTransform({
       auto_detect_hair_color: autoDetectHairColor,
       nsfw_policy: nsfwPolicy,
       convert_prompt: convertPrompt,
+      face_swap: faceSwap,
     });
     if (result.image_url) {
       updateMediaItem({ ...newMediaItem, url: result.image_url, loading: false });
