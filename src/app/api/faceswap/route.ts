@@ -29,8 +29,7 @@ export async function POST(request: NextRequest) {
 
     console.log("Face swap request started");
     console.log("API URL: https://api.exh.ai/image/v1/generate_faceswap_image");
-    console.log("Request body keys:", Object.keys(requestBody));
-    
+  
 
     // Call the external API
     const response = await fetch(
