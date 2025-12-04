@@ -1,25 +1,39 @@
 /**
- * Fetches an image from a URL and converts it to base64
- * @param url The URL of the image to convert
+ * Fetches an image from a URL and converts it to base64, or returns the base64 string if already provided
+ * @param urlOrBase64 The URL of the image to convert, or a base64 string (with or without data: prefix)
  * @returns Promise resolving to base64 string without the data:image prefix
  */
-export async function urlToBase64(url: string): Promise<string> {
+export async function urlToBase64(urlOrBase64: string): Promise<string> {
   try {
-    // Handle URLs that are already base64
-    if (url.startsWith('data:image')) {
-      return url.split(',')[1];
+    // Handle data URLs (e.g., data:image/png;base64,...)
+    if (urlOrBase64.startsWith('data:')) {
+      return urlOrBase64.split(',')[1];
     }
     
-    // Fetch the image
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+    // Check if it's a valid URL (http/https)
+    if (urlOrBase64.startsWith('http://') || urlOrBase64.startsWith('https://')) {
+      // Fetch the image
+      const response = await fetch(urlOrBase64);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      }
+      
+      // Convert to array buffer then to base64
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      return buffer.toString('base64');
     }
     
-    // Convert to array buffer then to base64
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    return buffer.toString('base64');
+    // If it's not a URL and not a data URL, assume it's already a raw base64 string
+    // Validate that it looks like base64 (only valid base64 characters)
+    const base64Regex = /^[A-Za-z0-9+/=]+$/;
+    if (base64Regex.test(urlOrBase64.replace(/\s/g, ''))) {
+      // Return as-is, removing any whitespace
+      return urlOrBase64.replace(/\s/g, '');
+    }
+    
+    // If we reach here, the input format is unrecognized
+    throw new Error('Invalid input: must be a URL (http/https), data URL, or raw base64 string');
   } catch (error) {
     console.error('Error converting URL to base64:', error);
     throw error;
