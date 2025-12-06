@@ -2,6 +2,7 @@
 
 import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
 import { ChatConfigProvider } from "./contexts/ChatConfigContext";
+import { TransformConfigProvider } from "./contexts/TransformConfigContext";
 
 const theme = createTheme({
   palette: {
@@ -63,7 +64,9 @@ export default function RootLayout({
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <ChatConfigProvider>
-            {children}
+            <TransformConfigProvider>
+              {children}
+            </TransformConfigProvider>
           </ChatConfigProvider>
         </ThemeProvider>
       </body>

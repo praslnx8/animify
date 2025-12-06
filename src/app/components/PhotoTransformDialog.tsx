@@ -24,6 +24,7 @@ import {
 import React, { useState } from "react";
 import { generatePhoto } from "../api/generatePhoto";
 import transformConfig from '../config/transform_config.json';
+import { useTransformConfig } from "../contexts/TransformConfigContext";
 import { MediaItem } from "../models/MediaItem";
 import { MediaType } from "../models/MediaType";
 
@@ -36,19 +37,20 @@ interface PhotoTransformDialogProps {
 }
 
   const PhotoTransformDialog: React.FC<PhotoTransformDialogProps> = ({ mediaItem, open, onClose, addMediaItem, updateMediaItem }) => {
+  const { defaults, updateDefaults, saveDefaults } = useTransformConfig();
   const [prompt, setPrompt] = useState(mediaItem.prompt || "");
   const [tabValue, setTabValue] = useState(0);
   const [numberOfTransformations, setNumberOfTransformations] = useState(1);
   const [storyMode, setStoryMode] = useState(false);
-  const [modelName, setModelName] = useState(mediaItem.model_name || "persona");
-  const [style, setStyle] = useState(mediaItem.style || "realistic");
-  const [gender, setGender] = useState(mediaItem.gender || "woman");
-  const [bodyType, setBodyType] = useState(mediaItem.body_type || "lean");
-  const [skinColor, setSkinColor] = useState(mediaItem.skin_color || "white");
-  const [autoDetectHairColor, setAutoDetectHairColor] = useState(mediaItem.auto_detect_hair_color || false);
-  const [nsfwPolicy, setNsfwPolicy] = useState(mediaItem.nsfw_policy || "allow");
-  const [convertPrompt, setConvertPrompt] = useState(mediaItem.convert_prompt !== false);
-  const [faceSwap, setFaceSwap] = useState(mediaItem.face_swap || false);
+  const [modelName, setModelName] = useState(mediaItem.model_name || defaults?.model_name || "persona");
+  const [style, setStyle] = useState(mediaItem.style || defaults?.style || "realistic");
+  const [gender, setGender] = useState(mediaItem.gender || defaults?.gender || "woman");
+  const [bodyType, setBodyType] = useState(mediaItem.body_type || defaults?.body_type || "lean");
+  const [skinColor, setSkinColor] = useState(mediaItem.skin_color || defaults?.skin_color || "white");
+  const [autoDetectHairColor, setAutoDetectHairColor] = useState(mediaItem.auto_detect_hair_color ?? defaults?.auto_detect_hair_color ?? false);
+  const [nsfwPolicy, setNsfwPolicy] = useState(mediaItem.nsfw_policy || defaults?.nsfw_policy || "allow");
+  const [convertPrompt, setConvertPrompt] = useState(mediaItem.convert_prompt ?? defaults?.convert_prompt ?? true);
+  const [faceSwap, setFaceSwap] = useState(mediaItem.face_swap ?? defaults?.face_swap ?? false);
 
   const loadSavedTransform = (savedTransform: string) => {
     setPrompt(savedTransform);
@@ -326,7 +328,12 @@ interface PhotoTransformDialogProps {
                   control={
                     <Switch
                       checked={convertPrompt}
-                      onChange={e => setConvertPrompt(e.target.checked)}
+                      onChange={e => {
+                        const newValue = e.target.checked;
+                        setConvertPrompt(newValue);
+                        updateDefaults({ convert_prompt: newValue });
+                        saveDefaults();
+                      }}
                       size="small"
                     />
                   }
@@ -337,7 +344,12 @@ interface PhotoTransformDialogProps {
                   control={
                     <Switch
                       checked={faceSwap}
-                      onChange={e => setFaceSwap(e.target.checked)}
+                      onChange={e => {
+                        const newValue = e.target.checked;
+                        setFaceSwap(newValue);
+                        updateDefaults({ face_swap: newValue });
+                        saveDefaults();
+                      }}
                       size="small"
                       color="primary"
                     />
@@ -617,7 +629,12 @@ interface PhotoTransformDialogProps {
                   control={
                     <Switch
                       checked={convertPrompt}
-                      onChange={e => setConvertPrompt(e.target.checked)}
+                      onChange={e => {
+                        const newValue = e.target.checked;
+                        setConvertPrompt(newValue);
+                        updateDefaults({ convert_prompt: newValue });
+                        saveDefaults();
+                      }}
                       size="small"
                     />
                   }
@@ -629,7 +646,12 @@ interface PhotoTransformDialogProps {
                   control={
                     <Switch
                       checked={faceSwap}
-                      onChange={e => setFaceSwap(e.target.checked)}
+                      onChange={e => {
+                        const newValue = e.target.checked;
+                        setFaceSwap(newValue);
+                        updateDefaults({ face_swap: newValue });
+                        saveDefaults();
+                      }}
                       size="small"
                       color="primary"
                     />

@@ -1,4 +1,15 @@
 {
+  "defaults": {
+    "convert_prompt": true,
+    "face_swap": false,
+    "model_name": "persona",
+    "style": "realistic",
+    "gender": "woman",
+    "body_type": "lean",
+    "skin_color": "white",
+    "auto_detect_hair_color": false,
+    "nsfw_policy": "allow"
+  },
   "transformations": [
     "A serene landscape with mountains in the background and a river flowing through the foreground."
   ],

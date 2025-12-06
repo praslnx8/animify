@@ -45,6 +45,7 @@ import { useRouter } from 'next/navigation';
 import { ChatConfig, BotProfile, ChatSettings, ImageSettings } from '../models/ChatConfig';
 import { ChatConfigManager } from '../utils/ChatConfigManager';
 import { useChatConfig } from '../contexts/ChatConfigContext';
+import { useTransformConfig } from '../contexts/TransformConfigContext';
 import { Sender } from '../models/Sender';
 import { uploadBase64Image } from "../api/uploadBase64Image";
 
@@ -53,6 +54,7 @@ export default function ConfigPage() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const { config, updateConfig, resetConfig, saveConfig, loading } = useChatConfig();
+    const { defaults: transformDefaults, updateDefaults: updateTransformDefaults, resetDefaults: resetTransformDefaults, saveDefaults: saveTransformDefaults, loading: transformLoading } = useTransformConfig();
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
     useEffect(() => {
@@ -67,6 +69,16 @@ export default function ConfigPage() {
     const handleResetConfig = () => {
         resetConfig();
         setSnackbar({ open: true, message: 'Configuration reset to defaults!', severity: 'success' });
+    };
+
+    const handleSaveTransformConfig = () => {
+        saveTransformDefaults();
+        setSnackbar({ open: true, message: 'Transform settings saved successfully!', severity: 'success' });
+    };
+
+    const handleResetTransformConfig = () => {
+        resetTransformDefaults();
+        setSnackbar({ open: true, message: 'Transform settings reset to defaults!', severity: 'success' });
     };
 
     const updateBotProfile = (senderKey: string, field: keyof BotProfile, value: any) => {
@@ -281,6 +293,82 @@ export default function ConfigPage() {
             </AppBar>
             
             <Container maxWidth="md" sx={{ py: 2, pb: 10, flex: 1, overflowY: 'auto' }}>
+            {/* Photo Transform Settings Section */}
+            <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+                <Box display="flex" alignItems="center" gap={2} mb={2}>
+                    <SettingsIcon color="secondary" />
+                    <Typography variant="h4" component="h1">
+                        Photo Transform Settings
+                    </Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Configure default settings for photo transformations. These settings persist across your session.
+                </Typography>
+
+                {transformDefaults && (
+                    <Box display="flex" flexDirection="column" gap={2} mb={3}>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={transformDefaults.convert_prompt}
+                                    onChange={(e) => {
+                                        updateTransformDefaults({ convert_prompt: e.target.checked });
+                                        saveTransformDefaults();
+                                    }}
+                                />
+                            }
+                            label={
+                                <Box>
+                                    <Typography variant="body1">Optimize Prompt with AI</Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Automatically enhance transformation prompts using AI for better results
+                                    </Typography>
+                                </Box>
+                            }
+                        />
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={transformDefaults.face_swap}
+                                    onChange={(e) => {
+                                        updateTransformDefaults({ face_swap: e.target.checked });
+                                        saveTransformDefaults();
+                                    }}
+                                />
+                            }
+                            label={
+                                <Box>
+                                    <Typography variant="body1">Face Swap</Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Swap original face onto generated images by default
+                                    </Typography>
+                                </Box>
+                            }
+                        />
+                    </Box>
+                )}
+                
+                <Box display="flex" gap={2} flexWrap="wrap">
+                    <Button
+                        variant="contained"
+                        startIcon={<SaveIcon />}
+                        onClick={handleSaveTransformConfig}
+                        color="secondary"
+                    >
+                        Save Transform Settings
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        startIcon={<RestoreIcon />}
+                        onClick={handleResetTransformConfig}
+                        color="warning"
+                    >
+                        Reset to Defaults
+                    </Button>
+                </Box>
+            </Paper>
+
+            {/* Chat Configuration Section */}
             <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
                 <Box display="flex" alignItems="center" gap={2} mb={2}>
                     <SettingsIcon color="primary" />
