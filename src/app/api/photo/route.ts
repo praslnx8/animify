@@ -167,17 +167,15 @@ export async function POST(req: NextRequest) {
             previous_prompts
         } : undefined;
 
-        // Convert the user prompt to an optimized photo prompt using chatbot (if enabled)
-        const optimizedPrompt = convert_prompt 
-            ? await convertPromptUsingChatbot(prompt, storyParams) 
-            : prompt;
+        // Parallelize prompt conversion and base64 conversion
+        const [optimizedPrompt, identity_image_b64] = await Promise.all([
+            convert_prompt ? convertPromptUsingChatbot(prompt, storyParams) : Promise.resolve(prompt),
+            image_base64 ? Promise.resolve(image_base64) : urlToBase64(image_url)
+        ]);
 
         console.log('Story mode:', story_mode, 'Step:', story_step, '/', story_total);
         console.log('Original prompt:', prompt);
         console.log('Optimized prompt:', optimizedPrompt);
-
-        // Use provided base64 or convert from URL
-        const identity_image_b64 = image_base64 || await urlToBase64(image_url);
 
         const params = {
             identity_image_b64,

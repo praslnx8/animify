@@ -59,6 +59,8 @@ export default function ChatPage() {
     const [videoError, setVideoError] = React.useState<string | null>(null);
     const [videoPreviewOpen, setVideoPreviewOpen] = React.useState(false);
     const [previewVideoUrl, setPreviewVideoUrl] = React.useState<string | null>(null);
+    const [imagePreviewOpen, setImagePreviewOpen] = React.useState(false);
+    const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(null);
     const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
     // Auto-conversation state
@@ -175,6 +177,16 @@ export default function ChatPage() {
     const handleCloseVideoPreview = () => {
         setVideoPreviewOpen(false);
         setPreviewVideoUrl(null);
+    };
+
+    const handleImagePreview = (imageUrl: string) => {
+        setPreviewImageUrl(imageUrl);
+        setImagePreviewOpen(true);
+    };
+
+    const handleCloseImagePreview = () => {
+        setImagePreviewOpen(false);
+        setPreviewImageUrl(null);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -345,19 +357,21 @@ export default function ChatPage() {
                                         key={index}
                                         sx={{
                                             display: 'flex',
-                                            justifyContent: isUser ? 'flex-end' : 'flex-start',
+                                            flexDirection: 'column',
+                                            width: '100%',
                                         }}
                                     >
+                                        {/* Header with avatar and timestamp */}
                                         <Stack
-                                            direction={isUser ? 'row-reverse' : 'row'}
+                                            direction="row"
                                             spacing={1.5}
-                                            alignItems="flex-start"
-                                            sx={{ maxWidth: '85%' }}
+                                            alignItems="center"
+                                            sx={{ mb: 1.5, px: 0.5 }}
                                         >
                                             <Avatar
                                                 sx={{
-                                                    width: 36,
-                                                    height: 36,
+                                                    width: 32,
+                                                    height: 32,
                                                     bgcolor: isUser
                                                         ? 'primary.main'
                                                         : alpha(theme.palette.secondary.main, 0.2),
@@ -366,114 +380,169 @@ export default function ChatPage() {
                                             >
                                                 {isUser ? <PersonIcon fontSize="small" /> : <BotIcon fontSize="small" />}
                                             </Avatar>
-                                            <Box>
+                                            <Typography variant="body2" fontWeight={600}>
+                                                {isUser ? 'You' : 'AI Assistant'}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {formatTime(message.timestamp)}
+                                            </Typography>
+                                        </Stack>
+
+                                        {/* Image Display - Full Width and Prominent */}
+                                        {message.image && (
+                                            <Box sx={{ mb: 2 }}>
                                                 <Card
                                                     elevation={0}
                                                     sx={{
-                                                        p: 2,
-                                                        bgcolor: isUser
-                                                            ? 'primary.main'
-                                                            : alpha(theme.palette.grey[500], 0.1),
-                                                        color: isUser ? 'primary.contrastText' : 'text.primary',
+                                                        bgcolor: alpha(theme.palette.grey[500], 0.05),
                                                         borderRadius: 3,
-                                                        borderTopLeftRadius: isUser ? 12 : 4,
-                                                        borderTopRightRadius: isUser ? 4 : 12,
+                                                        overflow: 'hidden',
+                                                        border: 1,
+                                                        borderColor: 'divider',
                                                     }}
                                                 >
-                                                    <Typography
-                                                        variant="body1"
-                                                        sx={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}
+                                                    <Box
+                                                        onClick={() =>
+                                                            handleImagePreview(`data:image/jpeg;base64,${message.image}`)
+                                                        }
+                                                        sx={{
+                                                            cursor: 'pointer',
+                                                            position: 'relative',
+                                                            '&:hover': {
+                                                                '& .image-overlay': {
+                                                                    opacity: 1,
+                                                                },
+                                                            },
+                                                        }}
                                                     >
-                                                        {message.text}
-                                                    </Typography>
-
-                                                    {message.image && (
-                                                        <Box sx={{ mt: 2 }}>
-                                                            <CardMedia
-                                                                component="img"
-                                                                image={`data:image/jpeg;base64,${message.image}`}
-                                                                alt="Generated image"
+                                                        <CardMedia
+                                                            component="img"
+                                                            image={`data:image/jpeg;base64,${message.image}`}
+                                                            alt="Generated image"
+                                                            sx={{
+                                                                width: '100%',
+                                                                maxHeight: 600,
+                                                                objectFit: 'contain',
+                                                                bgcolor: 'black',
+                                                            }}
+                                                        />
+                                                        <Box
+                                                            className="image-overlay"
+                                                            sx={{
+                                                                position: 'absolute',
+                                                                top: 0,
+                                                                left: 0,
+                                                                right: 0,
+                                                                bottom: 0,
+                                                                bgcolor: 'rgba(0,0,0,0.4)',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                opacity: 0,
+                                                                transition: 'opacity 0.2s',
+                                                            }}
+                                                        >
+                                                            <Chip
+                                                                label="Click to view full size"
+                                                                icon={<PreviewIcon />}
                                                                 sx={{
-                                                                    borderRadius: 2,
-                                                                    maxHeight: 300,
-                                                                    objectFit: 'contain',
+                                                                    bgcolor: 'rgba(255,255,255,0.95)',
+                                                                    fontWeight: 600,
                                                                 }}
                                                             />
-                                                            <Button
-                                                                variant="contained"
-                                                                size="small"
-                                                                startIcon={<AnimateIcon />}
-                                                                onClick={() => handleOpenAnimateDialog(message)}
-                                                                sx={{
-                                                                    mt: 1.5,
-                                                                    bgcolor: isUser
-                                                                        ? 'rgba(255,255,255,0.2)'
-                                                                        : 'primary.main',
-                                                                    '&:hover': {
-                                                                        bgcolor: isUser
-                                                                            ? 'rgba(255,255,255,0.3)'
-                                                                            : 'primary.dark',
-                                                                    },
-                                                                }}
-                                                            >
-                                                                Animate
-                                                            </Button>
                                                         </Box>
-                                                    )}
-
-                                                    {message.videoUrl && (
-                                                        <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
-                                                            {videoError && videoError !== 'loading' && (
-                                                                <Typography variant="caption" color="error">
-                                                                    {videoError}
-                                                                </Typography>
-                                                            )}
-                                                            <Button
-                                                                variant="outlined"
-                                                                size="small"
-                                                                startIcon={<CopyIcon />}
-                                                                onClick={() =>
-                                                                    navigator.clipboard.writeText(message.videoUrl || '')
-                                                                }
-                                                                sx={{
-                                                                    borderColor: isUser
-                                                                        ? 'rgba(255,255,255,0.5)'
-                                                                        : undefined,
-                                                                    color: isUser ? 'inherit' : undefined,
-                                                                }}
-                                                            >
-                                                                Copy URL
-                                                            </Button>
-                                                            <Button
-                                                                variant="contained"
-                                                                size="small"
-                                                                startIcon={<PreviewIcon />}
-                                                                onClick={() => handleVideoPreview(message.videoUrl || '')}
-                                                                sx={{
-                                                                    bgcolor: isUser
-                                                                        ? 'rgba(255,255,255,0.2)'
-                                                                        : 'secondary.main',
-                                                                }}
-                                                            >
-                                                                Preview
-                                                            </Button>
-                                                        </Stack>
-                                                    )}
+                                                    </Box>
+                                                    <Box sx={{ p: 2 }}>
+                                                        <Button
+                                                            variant="contained"
+                                                            fullWidth
+                                                            startIcon={<AnimateIcon />}
+                                                            onClick={() => handleOpenAnimateDialog(message)}
+                                                            sx={{ mb: 1 }}
+                                                        >
+                                                            Animate This Image
+                                                        </Button>
+                                                    </Box>
                                                 </Card>
-                                                <Typography
-                                                    variant="caption"
-                                                    color="text.secondary"
-                                                    sx={{
-                                                        display: 'block',
-                                                        mt: 0.5,
-                                                        px: 1,
-                                                        textAlign: isUser ? 'right' : 'left',
-                                                    }}
-                                                >
-                                                    {formatTime(message.timestamp)}
-                                                </Typography>
                                             </Box>
-                                        </Stack>
+                                        )}
+
+                                        {/* Text Message */}
+                                        {message.text && (
+                                            <Card
+                                                elevation={0}
+                                                sx={{
+                                                    p: 2,
+                                                    bgcolor: isUser
+                                                        ? alpha(theme.palette.primary.main, 0.08)
+                                                        : alpha(theme.palette.grey[500], 0.05),
+                                                    borderRadius: 2,
+                                                    border: 1,
+                                                    borderColor: isUser
+                                                        ? alpha(theme.palette.primary.main, 0.2)
+                                                        : 'divider',
+                                                    mb: message.videoUrl ? 2 : 0,
+                                                }}
+                                            >
+                                                <Typography
+                                                    variant="body1"
+                                                    sx={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}
+                                                >
+                                                    {message.text}
+                                                </Typography>
+                                            </Card>
+                                        )}
+
+                                        {/* Video Actions */}
+                                        {message.videoUrl && (
+                                            <Card
+                                                elevation={0}
+                                                sx={{
+                                                    p: 2,
+                                                    bgcolor: alpha(theme.palette.success.main, 0.08),
+                                                    borderRadius: 2,
+                                                    border: 1,
+                                                    borderColor: alpha(theme.palette.success.main, 0.3),
+                                                }}
+                                            >
+                                                <Stack spacing={1.5}>
+                                                    <Stack direction="row" alignItems="center" spacing={1}>
+                                                        <AnimateIcon color="success" fontSize="small" />
+                                                        <Typography variant="body2" fontWeight={600} color="success.main">
+                                                            Animation Ready
+                                                        </Typography>
+                                                    </Stack>
+                                                    {videoError && videoError !== 'loading' && (
+                                                        <Typography variant="caption" color="error">
+                                                            {videoError}
+                                                        </Typography>
+                                                    )}
+                                                    <Stack direction="row" spacing={1}>
+                                                        <Button
+                                                            variant="outlined"
+                                                            size="small"
+                                                            startIcon={<CopyIcon />}
+                                                            onClick={() =>
+                                                                navigator.clipboard.writeText(message.videoUrl || '')
+                                                            }
+                                                            sx={{ flex: 1 }}
+                                                        >
+                                                            Copy URL
+                                                        </Button>
+                                                        <Button
+                                                            variant="contained"
+                                                            size="small"
+                                                            startIcon={<PreviewIcon />}
+                                                            onClick={() => handleVideoPreview(message.videoUrl || '')}
+                                                            color="success"
+                                                            sx={{ flex: 1 }}
+                                                        >
+                                                            Watch Video
+                                                        </Button>
+                                                    </Stack>
+                                                </Stack>
+                                            </Card>
+                                        )}
                                     </Box>
                                 );
                             })}
@@ -678,6 +747,65 @@ export default function ChatPage() {
                         </video>
                     )}
                 </DialogContent>
+            </Dialog>
+
+            {/* Image Preview Dialog (Lightbox) */}
+            <Dialog
+                open={imagePreviewOpen}
+                onClose={handleCloseImagePreview}
+                maxWidth="lg"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        bgcolor: 'transparent',
+                        boxShadow: 'none',
+                        overflow: 'hidden',
+                    },
+                }}
+                onClick={handleCloseImagePreview}
+            >
+                <Box
+                    sx={{
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '80vh',
+                        p: 2,
+                    }}
+                >
+                    <IconButton
+                        onClick={handleCloseImagePreview}
+                        sx={{
+                            position: 'absolute',
+                            top: 16,
+                            right: 16,
+                            bgcolor: 'rgba(0,0,0,0.7)',
+                            color: 'white',
+                            '&:hover': {
+                                bgcolor: 'rgba(0,0,0,0.85)',
+                            },
+                            zIndex: 1,
+                        }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                    {previewImageUrl && (
+                        <Box
+                            component="img"
+                            src={previewImageUrl}
+                            alt="Full size preview"
+                            onClick={(e) => e.stopPropagation()}
+                            sx={{
+                                maxWidth: '100%',
+                                maxHeight: '90vh',
+                                objectFit: 'contain',
+                                borderRadius: 2,
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                            }}
+                        />
+                    )}
+                </Box>
             </Dialog>
         </Box>
     );

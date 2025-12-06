@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Convert the user prompt to an optimized video prompt using chatbot (if enabled)
+        // Note: This could be parallelized with other prep work if needed
         const optimizedPrompt = convertPrompt ? await convertPromptUsingChatbot(prompt, botConfig) : prompt;
 
         const params: GenerateVideoParams = {

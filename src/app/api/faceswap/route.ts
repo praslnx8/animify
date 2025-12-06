@@ -21,10 +21,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Parallelize base64 conversions for better performance
+    const [sourceB64, targetB64] = await Promise.all([
+      urlToBase64(source_image_b64),
+      urlToBase64(target_image_b64)
+    ]);
+
     const requestBody = {
       nsfw_policy: "allow",
-      source_image_b64: await urlToBase64(source_image_b64),
-      target_image_b64: await urlToBase64(target_image_b64),
+      source_image_b64: sourceB64,
+      target_image_b64: targetB64,
     };
 
     console.log("Face swap request started");

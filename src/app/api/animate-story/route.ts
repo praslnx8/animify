@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         }
 
         try {
-            // Convert image URL to base64
+            // Convert image URL to base64 (already optimized as single operation)
             const image_b64 = await urlToBase64(imageUrl);
             
             // Prepare API request payload
