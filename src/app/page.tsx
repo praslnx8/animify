@@ -73,14 +73,18 @@ export default function HomePage() {
     setIsUploading(true);
     const tempId = Date.now().toString();
     const newItem: MediaItem = { id: tempId, type: MediaType.Image, loading: true };
-    setMediaItems(prev => [...prev, newItem]);
-    setCurrentIdx(mediaItems.length);
+    setMediaItems(prev => {
+      const updated = [...prev, newItem];
+      setCurrentIdx(updated.length - 1);
+      return updated;
+    });
 
     try {
       const base64 = await fileToBase64(file);
       const url = await uploadBase64Image(base64);
       updateMediaItem({ id: tempId, url, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Upload error:', err);
       updateMediaItem({ id: tempId, loading: false, error: 'Upload failed' });
     } finally {
       setIsUploading(false);
@@ -245,7 +249,13 @@ export default function HomePage() {
         )}
       </AppBar>
 
-      <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
+      <input 
+        ref={fileInputRef} 
+        type="file" 
+        accept="image/*" 
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
 
       {/* Main Content Area */}
       <Box
